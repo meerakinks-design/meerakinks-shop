@@ -15,6 +15,7 @@ import { ModalLink } from './ModalLink';
 import { ProductCard } from './ProductCard';
 import { ProductImage } from './ProductImage';
 import { ProductPurchase } from './ProductPurchase';
+import Spaghetti from './Spaghetti';
 import { effectivePrice } from '@/lib/shop/product-display';
 import { summarize } from '@/lib/shop/seo';
 
@@ -23,9 +24,9 @@ export function Hero({ showBestSellers }: { showBestSellers: boolean }) {
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="container">
-        <p className="eyebrow">{hero.eyebrow}</p>
-        <h1 id="hero-title">{hero.title}</h1>
-        <p className="lead">{hero.text}</p>
+        <Spaghetti as="p" className="eyebrow" trigger="mount">{hero.eyebrow}</Spaghetti>
+        <Spaghetti as="h1" id="hero-title" trigger="mount">{hero.title}</Spaghetti>
+        <Spaghetti as="p" className="lead" trigger="mount">{hero.text}</Spaghetti>
         <div className="hero-actions">
           <Link className="btn" href={PUBLIC_ROUTES.shop}>
             {hero.primaryCta}
@@ -61,9 +62,9 @@ export function Collections({ sections, hasOffers }: { sections: readonly Catego
   return (
     <section id="collections" className="section" aria-labelledby="collections-title">
       <div className="container">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="collections-title">{copy.title}</h2>
-        <p className="lead">{copy.text}</p>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="collections-title">{copy.title}</Spaghetti>
+        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
         <ul className="collection-cards">
           {sections.map((section) => (
             <li key={section.category.id} className="collection-card" style={{ background: section.background, color: section.textColor }}>
@@ -90,9 +91,9 @@ export function BestSellers({ products }: { products: readonly ShopProduct[] }) 
   return (
     <section id="best-sellers" className="section" aria-labelledby="best-sellers-title">
       <div className="container">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="best-sellers-title">{copy.title}</h2>
-        <p className="lead">{copy.text}</p>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="best-sellers-title">{copy.title}</Spaghetti>
+        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
         <ul className="row-scroll">
           {products.map((product, index) => (
             <li key={product.id}>
@@ -115,9 +116,9 @@ export function StoryTeaser({ storeName }: { storeName: string }) {
   return (
     <section className="section section-tinted" aria-labelledby="story-title">
       <div className="container page-narrow">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="story-title">{copy.title}</h2>
-        <p className="lead">{fill(copy.intro[0], { storeName })}</p>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="story-title">{copy.title}</Spaghetti>
+        <Spaghetti as="p" className="lead">{fill(copy.intro[0], { storeName })}</Spaghetti>
         <ModalLink hash={MODAL_HASHES.story} className="btn btn-quiet">
           {copy.openCta}
         </ModalLink>
@@ -135,10 +136,10 @@ export function Focus({ product }: { product: FocusProduct }) {
           <ProductImage image={product.image} sizes="(min-width: 900px) 40vw, 90vw" />
         </div>
         <div>
-          <p className="eyebrow">{copy.eyebrow}</p>
-          <h2 id="focus-title">{copy.title}</h2>
-          <h3>{product.name}</h3>
-          <p>{summarize(product.description, 240)}</p>
+          <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+          <Spaghetti as="h2" id="focus-title">{copy.title}</Spaghetti>
+          <Spaghetti as="h3">{product.name}</Spaghetti>
+          <Spaghetti as="p">{summarize(product.description, 240)}</Spaghetti>
           {product.characteristics.length > 0 && (
             <ul className="check-list">
               {product.characteristics.slice(0, 3).map((item) => (
@@ -163,14 +164,14 @@ export function Why() {
   return (
     <section id="pourquoi-nous" className="section section-tinted" aria-labelledby="why-title">
       <div className="container">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="why-title">{copy.title}</h2>
-        <p className="lead">{copy.intro}</p>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="why-title">{copy.title}</Spaghetti>
+        <Spaghetti as="p" className="lead">{copy.intro}</Spaghetti>
         <ul className="why-grid">
           {copy.items.map((item) => (
             <li key={item.title}>
-              <h3>{item.title}</h3>
-              <p>{item.text}</p>
+              <Spaghetti as="h3">{item.title}</Spaghetti>
+              <Spaghetti as="p">{item.text}</Spaghetti>
             </li>
           ))}
         </ul>
@@ -190,11 +191,11 @@ export function Reviews({ settings }: { settings: PublicSettings }) {
   return (
     <section id="avis" className="section" aria-labelledby="reviews-title">
       <div className="container">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="reviews-title">{copy.title}</h2>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="reviews-title">{copy.title}</Spaghetti>
         {reviews.length > 0 ? (
           <>
-            <p className="lead">{copy.text}</p>
+            <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
             <ul className="review-cards">
               {reviews.map((review) => (
                 <li key={`${review.displayName}-${review.consent.grantedOn}`}>
@@ -210,7 +211,7 @@ export function Reviews({ settings }: { settings: PublicSettings }) {
             </ul>
           </>
         ) : (
-          <p className="lead">{copy.emptyText}</p>
+          <Spaghetti as="p" className="lead">{copy.emptyText}</Spaghetti>
         )}
         {shareLink && (
           <p>
@@ -230,9 +231,9 @@ export function Instagram({ settings }: { settings: PublicSettings }) {
   return (
     <section id="instagram" className="section section-tinted" aria-labelledby="instagram-title">
       <div className="container">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="instagram-title">{copy.title}</h2>
-        <p className="lead">{copy.text}</p>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="instagram-title">{copy.title}</Spaghetti>
+        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
         <ul className="instagram-grid">
           {INSTAGRAM_POSTS.slice(0, MAX_INSTAGRAM_POSTS).map((post) => (
             <li key={post.href}>
@@ -262,9 +263,9 @@ export function Faq({ settings }: { settings: PublicSettings }) {
   return (
     <section id="faq" className="section" aria-labelledby="faq-title">
       <div className="container page-narrow">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="faq-title">{copy.title}</h2>
-        <p className="lead">{copy.text}</p>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="faq-title">{copy.title}</Spaghetti>
+        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
         <div className="faq-list">
           {items.map((item) => (
             <details key={item.question}>
@@ -306,9 +307,9 @@ export function Contact({ settings }: { settings: PublicSettings }) {
   return (
     <section id="contact" className="section section-tinted" aria-labelledby="contact-title">
       <div className="container page-narrow">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="contact-title">{copy.title}</h2>
-        <p className="lead">{copy.text}</p>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="contact-title">{copy.title}</Spaghetti>
+        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
         <div className="hero-actions">
           {whatsapp && (
             <a className="btn" href={whatsapp} target="_blank" rel="noopener noreferrer">
@@ -336,9 +337,9 @@ export function FinalCta() {
   return (
     <section className="section final-cta" aria-labelledby="final-title">
       <div className="container page-narrow">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h2 id="final-title">{copy.title}</h2>
-        <p className="lead">{copy.text}</p>
+        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+        <Spaghetti as="h2" id="final-title">{copy.title}</Spaghetti>
+        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
         <div className="hero-actions">
           <Link className="btn" href={PUBLIC_ROUTES.shop}>
             {copy.primaryCta}

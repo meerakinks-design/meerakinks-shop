@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { JsonLd } from '@/components/shop/JsonLd';
 import { CategorySections } from '@/components/shop/CategorySections';
 import { ShopGrid } from '@/components/shop/ShopGrid';
+import Spaghetti from '@/components/shop/Spaghetti';
 import { BestSellers, Collections, Contact, Faq, FinalCta, Focus, Hero, Instagram, Marquee, Reviews, StoryTeaser, Why } from '@/components/shop/LandingSections';
 import { LANDING } from '@/content/landing';
 import { hasPromotion } from '@/lib/shop/product-display';
@@ -39,7 +40,7 @@ export default async function HomePage() {
               <CategorySections sections={layout.sections} />
               {layout.others.length > 0 && (
                 <div className="container section">
-                  <h2>{LANDING.shop.othersTitle}</h2>
+                  <Spaghetti as="h2">{LANDING.shop.othersTitle}</Spaghetti>
                   <ShopGrid products={layout.others} />
                 </div>
               )}
@@ -47,8 +48,8 @@ export default async function HomePage() {
           ) : (
             <div className="container section">
               <div className="section-head">
-                <p className="eyebrow">{LANDING.shop.eyebrow}</p>
-                <h2>{LANDING.shop.title}</h2>
+                <Spaghetti as="p" className="eyebrow">{LANDING.shop.eyebrow}</Spaghetti>
+                <Spaghetti as="h2">{LANDING.shop.title}</Spaghetti>
               </div>
               <ShopGrid products={layout.products} />
             </div>

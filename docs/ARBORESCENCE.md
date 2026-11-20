@@ -1,4 +1,4 @@
-# Boutique e-commerce WhatsApp — Arborescence & décisions (v0.7)
+# Boutique e-commerce WhatsApp — Arborescence & décisions (v0.9)
 
 Niveau d'architecture : **A (CRUD métier)**. Workflow v6 : **niveau 2, application web**.
 Pas de couche « domain » : la logique métier vit dans `src/server/services/`, les routes restent fines.
@@ -29,6 +29,7 @@ Pas de couche « domain » : la logique métier vit dans `src/server/services/`,
 | 017 | **Boîte d'envoi** (`notifications.service.ts`) : réservation par mise à jour conditionnelle (identifiant, statut et `nextAttemptAt` lus), bail de 10 min, 6 tentatives (1, 5, 15, 60, 180 min), erreur définitive abandonnée tout de suite, tentative immédiate après la commande puis cron | Deux exécutions simultanées ne peuvent pas envoyer deux fois ; une interruption n'abandonne rien | Un email peut partir deux fois si le serveur s'arrête entre l'envoi et l'écriture du résultat (clé d'idempotence par tentative) |
 | 018 | **Resend par son API REST** (`fetch`, sans SDK), transport injectable | Un seul endpoint, testable sans réseau, une dépendance de moins | `User-Agent` obligatoire ; comportement vérifié sur la documentation, pas contre un vrai compte |
 | 019 | **Reçu PDF avec `pdf-lib`** (JavaScript pur, polices standard), généré à la demande, jamais stocké | Aucun fichier de police ni binaire à embarquer sur Vercel ; le reçu suit toujours les paiements | Latin occidental seulement : autres caractères remplacés par « ? » |
+| 021 | **Effet « spaghetti » en CSS pur, sans GSAP** (v0.9, D-29) : la courbe `elastic.out(0.75, 0.3)` de Rabbit Shop est recalculée (`lib/shop/spaghetti.ts`) et écrite en `linear()` ; le texte complet reste dans le HTML serveur | Aucune dépendance de plus, rien à charger, le texte est lisible sans JavaScript, un test empêche la courbe de dériver | Le découpage se fait au rendu : un titre de plus de ~60 lettres allonge un peu le HTML ; pas de `reverse` animé (le texte est réarmé en sortant par le bas) |
 | 020 | **Cron quotidien dans `vercel.json`** | Le plan Hobby refuse tout autre rythme (déploiement en échec) ; la tentative immédiate couvre le cas normal | En production (Pro), passer à `*/10 * * * *` |
 
 **Modules activés** (justifiés) : auth admin · Resend · Cloudinary · Vercel Cron · rate-limit en base.
@@ -120,6 +121,7 @@ boutique/
 │   │   ├── api-client.ts            # seul point d'appel de l'API côté navigateur
 │   │   ├── whatsapp.ts              # buildOrderMessage(), buildWaLink() — fonctions pures
 │   │   ├── money.ts                 # formatFcfa()
+│   │   ├── shop/spaghetti.ts        # courbe élastique de Rabbit, découpe en mots et lettres (v0.9)
 │   │   └── constants/order-status.ts  # libellés FR, couleurs, transitions autorisées
 │   │
 │   ├── features/cart/               # panier : store client, persisté en localStorage
@@ -128,11 +130,13 @@ boutique/
 │   │   ├── shop/                    # ProductCard, Gallery, CartDrawer, CheckoutForm, ZoneSelect…
 │   │   ├── admin/                   # ProductForm, ImageUploader, CategoriesManager ✅ · OrderTable, StatusSelect… (étape 6)
 │   │   └── layout/
+│   │   (shop/Spaghetti.tsx : effet « spaghetti » des titres et textes, v0.9)
 │   ├── content/                     # FAQ, livraison, à-propos : données typées, pas du JSX
 │   │   ├── faq.ts                   #   → lisibles par l'assistant IA plus tard
 │   │   └── livraison.ts             #   → le texte « validé » du questionnaire
 │   ├── styles/
 │   │   ├── tokens.css               # couleurs, typo, rayons : à brancher sur la charte graphique
+│   │   ├── spaghetti.css            # courbe élastique `linear()` et états de l'effet (v0.9)
 │   │   └── globals.css
 │   └── middleware.ts                # filtre rapide /admin (cookie présent) + en-têtes noindex ;
 │                                    # la vraie vérification reste dans server/auth/guards.ts

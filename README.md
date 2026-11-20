@@ -1,7 +1,8 @@
-# Boutique e-commerce WhatsApp — v0.7
+# Boutique e-commerce WhatsApp — v0.9
 
 Livré : back-office (produits, catégories, photos), vitrine (landing, boutique, catégories, fiche produit, panier en modal avec devis du serveur) **et, depuis la v0.6, la commande** : formulaire en modal, `POST /api/v1/orders`, enregistrement des commandes, page de confirmation et message WhatsApp.
 **Depuis la v0.7** : chaque commande déclenche l'envoi des emails (alerte à la vendeuse avec le **reçu PDF**, accusé au client) avec reprise automatique ; le reçu PDF est aussi servi au back-office.
+**Depuis la v0.9** : l'**effet « spaghetti »** (D-18, D-29) anime les titres et les textes de la landing, repris de l'animation des titres de Rabbit Shop (voir « Effet spaghetti » plus bas). Rien d'autre n'a changé : ni schéma, ni API.
 Les écrans de gestion des commandes (statuts, paiements, annulation) arrivent à l'étape suivante (voir `docs/ARBORESCENCE.md`).
 
 ## État de la livraison
@@ -12,10 +13,11 @@ Les écrans de gestion des commandes (statuts, paiements, annulation) arrivent �
 | `tsc --noEmit` (TypeScript strict) | ✅ |
 | Tests (`npm test`) : 463 tests, dont la requête SQL de limitation exécutée sur un vrai Postgres en mémoire, la signature Cloudinary vérifiée sur l'exemple officiel et, pour la commande, idempotence, survente, prix falsifié, zones et frais (base simulée) ; pour les emails, reprises, abandon, réservation anti-doublon, gabarits échappés, client Resend (réseau simulé) et contenu du PDF relu en texte | ✅ |
 | `next build` (commande activée) | ✅ |
-| **Migration SQL générée** | ❌ **à lancer chez toi** : mon environnement ne peut pas télécharger les moteurs Prisma |
+| **Migration SQL** | ✅ présente dans le dépôt (`prisma/migrations/20261120000000_init`) ; je ne l'ai pas rejouée contre une vraie base |
 | Testé contre une vraie base Neon et un vrai compte Cloudinary | ❌ non (logique couverte par des tests avec base et Cloudinary simulés ; la **commande** n'a jamais tourné contre un vrai PostgreSQL) : voir « À vérifier à la main » |
 | Emails testés contre un **vrai compte Resend** et un vrai lecteur de messagerie | ❌ non (client Resend testé avec un réseau simulé, d'après la documentation officielle) : voir « À vérifier à la main » 18 à 25 |
 | Mise en page du reçu PDF | ✅ un exemple rendu en image et relu à l'œil ; pas de contrôle sur un vrai téléphone |
+| **v0.9 — effet « spaghetti »** : 31 tests ajoutés (courbe, CSS, découpe, rendu serveur) et test de rendu de la vitrine adapté | ✅ passés, mais **avec un lanceur provisoire** (pas de `node_modules` ni de réseau dans mon environnement) ; **relance `npm test` et `npm run typecheck`** |
 | Déployé | ❌ non |
 
 ## Démarrage local
@@ -95,6 +97,18 @@ Le même appel répété renvoie la même référence (200 au lieu de 201).
 - **Reçu PDF** : généré à la demande à partir des données **figées** de la commande et des paiements enregistrés, jamais stocké. Avant tout paiement : « Paiement non reçu ». Les remboursements sont soustraits, les paiements annulés ignorés. Le pied de page porte « Reçu de commande — ne constitue pas une facture » (question 8 du cahier encore ouverte). La police standard ne connaît que le latin occidental : emoji et autres alphabets sont remplacés par « ? » au lieu de faire échouer le document. Pour l'ouvrir : connecte-toi au back-office puis ouvre `/api/v1/admin/orders/<référence CMD-… ou identifiant>/receipt`.
 - **Changement de statut** : le gabarit d'email existe, mais rien ne le déclenche avant l'écran des commandes (étape suivante).
 
+## Effet « spaghetti » (v0.9)
+
+- **Quoi** : les titres (h1, h2) arrivent **lettre par lettre**, les textes courants (surtitres, paragraphes d'introduction, sous-titres, descriptions) **mot par mot**, avec le rebond élastique des titres de Rabbit Shop.
+- **Reprise exacte du code de Rabbit** (`lib/useGsapLenis.ts`, boucle `.elastic-title`) : départ 60 px plus bas, échelle 0,5, transparent ; arrivée en 1,3 s ; 15 ms entre deux lettres ; courbe `elastic.out(0.75, 0.3)` ; déclenchement quand le titre atteint 85 % de la hauteur de l'écran.
+- **Sans GSAP** : la courbe de GSAP est recalculée (`src/lib/shop/spaghetti.ts`, `elasticOut`) puis écrite en CSS `linear()` (`src/styles/spaghetti.css`). Aucune dépendance ajoutée, aucun `package-lock.json` modifié. Un test relit le CSS et le compare à la courbe calculée : elle ne peut pas dériver.
+- **Le texte complet est dans le HTML** dès le rendu serveur : lisible sans JavaScript, par un robot et par un lecteur d'écran (le titre garde un `aria-label` complet, les lettres sont masquées). Un mot n'est jamais coupé en fin de ligne (chaque mot est un bloc insécable).
+- **Comment ça démarre** : Hero = dès l'affichage, sans aucun délai (Rabbit en met un de 0,9 s : non repris) ; ailleurs, un texte encore sous la ligne des 85 % de l'écran est masqué puis joué à son arrivée ; un texte déjà visible reste tel quel. Il se rejoue s'il repasse sous l'écran puis revient.
+- **Mouvement réduit** (réglage du système) et **impression** : aucun effet, le texte s'affiche tel quel. **Téléphone** : effet allégé (durée et décalage × 0,75). **Navigateur sans `linear()`** : un rebond simple de repli.
+- **Où** : `components/shop/Spaghetti.tsx` (composant) · `LandingSections.tsx` (Hero, Collections, Boutique, Best-sellers, Histoire, Focus, Pourquoi nous, Avis, Instagram, FAQ, Contact, appel final) · fiche produit (« À propos de ce produit »).
+- **Pas concernés** (exceptions de la landing §26) : prix et montants, libellés de boutons et de formulaires, messages d'erreur, pages légales, contenu du panier, réponses de la FAQ, avis réels, titres de catégories venus de la base, titres de navigation du pied de page.
+- **Pas encore** : le titre du pied de page et celui du mini-jeu (le mini-jeu n'existe pas encore, étape 13) ; l'**image qui flotte près de la lettre survolée** (option laissée de côté pour l'instant).
+
 ## Photos (Cloudinary)
 
 1. Crée un compte Cloudinary et renseigne dans `.env.local` : `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
@@ -168,6 +182,7 @@ Limite connue : une photo envoyée puis retirée **avant** d'enregistrer le prod
 
 ## Pas encore fait (à ne pas oublier)
 
+- **Effet « spaghetti » à l'œil** : rebond, vitesse et lisibilité sur ordinateur et téléphone, avec et sans « réduire les animations » ; titres longs et polices de la charte une fois reçues. Jamais vu dans un navigateur.
 - **Contrôle visuel dans un navigateur** (ordinateur et téléphone) : le rendu a été vérifié par des tests de rendu serveur et par `next build`, pas à l'œil.
 - **Emails et reçu PDF jamais testés contre un vrai Resend** ni dans de vraies messageries : points 18 à 25 ci-dessus. Le gabarit « changement de statut » attend l'écran des commandes. Un lien « Renvoyer » pour les emails abandonnés (`requeueEmail`) attend ce même écran.
 - **Commandes dans le back-office** (liste, statuts, paiements, annulation qui **restitue le stock**) : étape 10. D'ici là, une commande se lit en base.
@@ -179,6 +194,3 @@ Limite connue : une photo envoyée puis retirée **avant** d'enregistrer le prod
 - **Politique de conservation** des données clients et procédure de suppression sur demande.
 - **Sauvegardes Neon** : vérifier la fenêtre de restauration du plan choisi et faire un test de restauration.
 - Page de **changement de mot de passe** (appellera `revokeAllSessions`).
-#   m e e r a k i n k s - s h o p 
- 
- 

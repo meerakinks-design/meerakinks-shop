@@ -765,7 +765,7 @@ Ouverture : icône du header (`#panier`). Sur téléphone, **feuille collée au 
 
 **Titres** (Hero, Collections, Best-sellers, Notre histoire, Focus produit, Pourquoi choisir la boutique, Avis, Instagram, FAQ, Contact, CTA final, titre du footer, titre du mini-jeu, `À propos de ce produit`) :
 - texte découpé **en lettres** ; au défilement, chaque lettre part **décalée vers le bas, réduite et transparente** et arrive avec un **rebond élastique** ;
-- valeurs de référence (Rabbit Shop), **confirmées dans son code** : décalage 60 px, échelle 0,5 → 1, durée 1,3 s, 0,015 s entre deux lettres, courbe élastique (`elastic.out`), déclenchement quand le titre atteint 85 % de la hauteur de l'écran, retour en arrière en remontant ; en GSAP : `y: 60, opacity: 0, scale: 0.5` → `y: 0, opacity: 1, scale: 1`, `duration: 1.3`, `stagger: 0.015`, `ease: 'elastic.out(0.75, 0.3)'`, ScrollTrigger `start: 'top 85%'`, `toggleActions: 'play none none reverse'` ;
+- valeurs de référence (Rabbit Shop), **confirmées dans son code** : décalage 60 px, échelle 0,5 → 1, durée 1,3 s, 0,015 s entre deux lettres, courbe élastique (`elastic.out`), déclenchement quand le titre atteint 85 % de la hauteur de l'écran, retour en arrière en remontant ; code de Rabbit (GSAP) : `y: 60, opacity: 0, scale: 0.5` → `y: 0, opacity: 1, scale: 1`, `duration: 1.3`, `stagger: 0.015`, `ease: 'elastic.out(0.75, 0.3)'`, ScrollTrigger `start: 'top 85%'`, `toggleActions: 'play none none reverse'`. **Réalisé en v0.9 sans GSAP** : même courbe recalculée en CSS `linear()`, mêmes valeurs ;
 - les mots ne sont **jamais coupés** (chaque mot est un bloc insécable) ; sur mobile, le retour à la ligne se fait entre les mots.
 
 **Textes courants** (sous-titres, paragraphes, descriptions) — **confirmé par Aka le 19 novembre** :
@@ -777,11 +777,11 @@ Ouverture : icône du header (`#panier`). Sur téléphone, **feuille collée au 
 - le **texte complet est dans le HTML dès le chargement** (référencement, lecteurs d'écran, absence de JavaScript) ; la découpe ne change pas ce que lit un lecteur d'écran (nom accessible sur le titre, lettres masquées) ;
 - **mouvement réduit** (`prefers-reduced-motion`) : aucun effet, texte affiché tel quel ;
 - **aucun saut de mise en page** : la découpe attend le chargement des polices ;
-- **mobile** : effet allégé ; GSAP (SplitText) chargé à la demande, jamais avant que le premier titre approche ;
+- **mobile** : effet allégé (durée et décalage × 0,75) ; **aucune bibliothèque à charger** (CSS pur, v0.9) ;
 - l'effet ne doit **jamais** retarder le texte du Hero (priorité à l'affichage) : Rabbit anime son Hero avec un délai de 0,9 s, **ce délai n'est pas repris** ;
-- **[Ajout v1.3] Écarts voulus avec le code de Rabbit :** (1) découpage **en mots puis en lettres** (`words,chars`), car le découpage en lettres seules de Rabbit peut couper un mot en fin de ligne ; (2) **mouvement réduit respecté** (Rabbit ne le gère pas sur ces titres) ; (3) GSAP chargé **à la demande**.
+- **[Ajout v1.3] Écarts voulus avec le code de Rabbit :** (1) découpage **en mots puis en lettres** (`words,chars`), car le découpage en lettres seules de Rabbit peut couper un mot en fin de ligne ; (2) **mouvement réduit respecté** (Rabbit ne le gère pas sur ces titres) ; (3) **aucun GSAP** : CSS pur (v0.9).
 
-**Option ❓ :** au survol d'un titre (ordinateur seulement), une image de produit flotte près de la lettre la plus proche du curseur (effet « hover image » de Rabbit Shop). **[Modifié v1.3]** Rabbit l'active déjà sur ses titres avec le même code ; ici, ce seraient des photos de **produits publiés**. À décider après essai.
+**Option ❓ :** au survol d'un titre (ordinateur seulement), une image de produit flotte près de la lettre la plus proche du curseur (effet « hover image » de Rabbit Shop). **[Modifié v1.3]** Rabbit l'active déjà sur ses titres avec le même code ; ici, ce seraient des photos de **produits publiés**. **Reportée** (Aka, 20 nov. : « pas pour le moment »).
 
 ---
 
@@ -908,3 +908,4 @@ Les navigateurs intégrés d'Instagram et de Facebook n'envoient souvent aucun r
 - **Effet « spaghetti »** (§26, D-29) : valeurs confirmées dans le code de Rabbit Shop ; trois écarts voulus (mots insécables, mouvement réduit, pas de délai sur le Hero).
 - **Cookies** (§27) : Vercel Web Analytics ajouté à la liste de ce qui est mesuré (D-22).
 - Aucun texte de la version 1.2 n'a été supprimé en dehors des passages marqués **[Modifié v1.3]**.
+- **Mise à jour du 20 nov.** : l'effet « spaghetti » est **livré dans le code (v0.9)**, en CSS pur et sans GSAP ; l'option image au survol est **reportée** ; reste à le valider à l'œil dans un navigateur (§26).

@@ -11,6 +11,7 @@ import { CHECKOUT_ENABLED } from '@/lib/constants/features';
 import { hasContactChannels } from '@/lib/shop/contact';
 import { getPublicSettings, getPublicZones, hasCollections } from '@/server/services/catalog.queries';
 import '@/styles/shop.css';
+import '@/styles/spaghetti.css';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSettings();

@@ -8,6 +8,7 @@ import { ProductBadges } from '@/components/shop/ProductBadges';
 import { ProductGallery } from '@/components/shop/ProductGallery';
 import { ProductPurchase } from '@/components/shop/ProductPurchase';
 import { ShopGrid } from '@/components/shop/ShopGrid';
+import Spaghetti from '@/components/shop/Spaghetti';
 import { categoryPath, productPath } from '@/lib/constants/routes';
 import { formatFcfa } from '@/lib/money';
 import { effectivePrice, hasPromotion, isOutOfStock } from '@/lib/shop/product-display';
@@ -120,7 +121,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
       </div>
 
       <section aria-labelledby="histoire" className="product-story">
-        <h2 id="histoire">{PRODUCT_TEXT.story}</h2>
+        <Spaghetti as="h2" id="histoire">{PRODUCT_TEXT.story}</Spaghetti>
         <div className="product-description">
           {product.description.split(/\n{2,}/).map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>

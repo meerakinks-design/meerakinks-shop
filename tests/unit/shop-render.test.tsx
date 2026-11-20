@@ -32,6 +32,8 @@ const settings = (overrides: Partial<PublicSettings> = {}): PublicSettings => ({
   instagramUrl: null, tiktokUrl: null, facebookUrl: null, focusProductId: null, depositAmount: 2000, ...overrides,
 });
 const wrap = (node: React.ReactNode) => renderToString(<CartProvider>{node}</CartProvider>);
+/** Texte visible : balises retirées (l'effet « spaghetti » découpe les textes en éléments). */
+const plain = (html: string) => html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 
 describe('mode A — sections sticky par catégorie avec carrousel', () => {
   const layout = buildShopLayout(
@@ -172,7 +174,7 @@ describe('sections de la landing', () => {
   it('Avis : au lancement, seulement l’invitation (aucune carte, aucune étoile)', () => {
     const html = renderToStaticMarkup(<Reviews settings={settings({ whatsappNumber: '+2250700000000', whatsappLink: 'https://wa.me/2250700000000' })} />);
     expect(html).toContain('Vos expériences donnent vie');
-    expect(html).toContain('Vous avez déjà commandé chez nous');
+    expect(plain(html)).toContain('Vous avez déjà commandé chez nous'); // texte découpé mot par mot (effet « spaghetti »)
     expect(html).not.toContain('review-cards');
     expect(html).not.toContain('★');
     expect(html).toContain('https://wa.me/2250700000000?text=');
