@@ -1,0 +1,26 @@
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Fichiers d'environnement locaux : seul le modèle .env.example est versionné.
+.env
+.env.*
+!.env.example
+.vercel/
+*.log
+.DS_Store
+
+# Archives locales (ne pas les envoyer dans le dépôt lors d'un push).
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+*.tar.bz2
+*.tbz2
+*.tar.xz
+*.txz

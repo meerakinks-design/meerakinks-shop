@@ -1,0 +1,108 @@
+// Textes de la landing (document « landing_page_structure_et_writing_boutique », v1.1).
+// {storeName} vient des paramètres : aucun champ à compléter n'est écrit dans le code (garde-fou, test).
+
+export const LANDING = {
+  hero: {
+    eyebrow: 'VOTRE BEAUTÉ, VOTRE MOMENT',
+    title: 'Et si prendre soin de vous devenait votre plus beau rituel ?',
+    text: 'Découvrez une sélection de produits de beauté et d’accessoires choisis pour accompagner vos envies, vos habitudes et vos petits moments rien qu’à vous.',
+    primaryCta: 'Découvrir la boutique',
+    secondaryCta: 'Voir nos best-sellers',
+    reassurance: 'Quelques clics pour choisir. Une commande simple pour vous faire plaisir.',
+  },
+  marquee: ['BEAUTÉ', 'SOIN', 'ÉCLAT', 'CONFIANCE', 'STYLE', 'VOTRE RITUEL'],
+  collections: {
+    eyebrow: 'TROUVEZ VOTRE BONHEUR',
+    title: 'Vos essentiels, réunis au même endroit.',
+    text: 'Que vous cherchiez à prendre soin de vous, à compléter votre routine ou à ajouter une touche de style, explorez nos différentes collections et trouvez les produits qui vous correspondent.',
+    cta: 'Explorer la collection',
+    offersLabel: 'Offres',
+    offersText: 'Retrouvez les offres disponibles en boutique.',
+    offersCta: 'Voir les offres',
+  },
+  shop: {
+    eyebrow: 'LA BOUTIQUE',
+    title: 'Choisissez vos essentiels.',
+    othersTitle: 'Autres produits',
+    cta: 'Voir toute la boutique',
+  },
+  bestSellers: {
+    eyebrow: 'ILS MÉRITENT VOTRE ATTENTION',
+    title: 'Vos prochains coups de cœur sont peut-être ici.',
+    text: 'Découvrez une sélection de produits à ne pas manquer. Prenez le temps de parcourir leurs détails, de comparer et de choisir ceux qui vous font envie.',
+    cta: 'Voir toute la boutique',
+    added: 'Ajouté à votre panier',
+  },
+  story: {
+    eyebrow: 'DERRIÈRE LA BOUTIQUE',
+    title: 'Une boutique pensée pour vos envies et vos moments de soin.',
+    intro: [
+      '{storeName} est née d’une envie simple : vous proposer un espace où découvrir des produits de beauté et des accessoires qui trouvent naturellement leur place dans votre quotidien.',
+      'À travers notre sélection, nous souhaitons vous aider à découvrir vos essentiels, à composer votre routine et à vous faire plaisir en toute simplicité.',
+    ],
+    visionTitle: 'Notre vision',
+    vision: 'Faire de chaque visite une découverte et de chaque commande une expérience simple, claire et agréable.',
+    commitmentTitle: 'Notre engagement',
+    commitment: 'Vous présenter les produits avec des informations utiles, vous accompagner dans votre commande et rester disponibles pour répondre à vos questions.',
+    openCta: 'Lire notre histoire',
+    closeCta: 'Découvrir la boutique',
+  },
+  focus: {
+    eyebrow: 'LE PRODUIT À L’HONNEUR',
+    title: 'Un essentiel qui mérite sa place dans votre routine.',
+    primaryCta: 'Découvrir le produit',
+    secondaryCta: 'Ajouter au panier',
+  },
+  why: {
+    eyebrow: 'UNE EXPÉRIENCE SIMPLE',
+    title: 'Tout est pensé pour vous aider à commander sereinement.',
+    intro: 'Choisir un produit devrait être simple. Nous faisons en sorte que vous puissiez découvrir la sélection, retrouver les informations utiles et passer votre commande sans complication.',
+    items: [
+      { title: 'Une sélection à découvrir', text: 'Parcourez les collections et découvrez les produits disponibles dans la boutique.' },
+      { title: 'Des informations claires', text: 'Consultez les détails et les prix affichés avant d’ajouter vos articles au panier.' },
+      { title: 'Une commande simple', text: 'Composez votre panier et transmettez votre commande directement depuis le site.' },
+      {
+        title: 'Un accompagnement sur WhatsApp',
+        text: 'Après réception de votre commande, notre équipe vous contacte sur WhatsApp pour vérifier les informations, confirmer la disponibilité et vous communiquer les modalités de paiement et de livraison.',
+      },
+    ],
+  },
+  reviews: {
+    eyebrow: 'VOS RETOURS COMPTENT',
+    title: 'Vos expériences donnent vie à notre boutique.',
+    text: 'Chaque retour nous aide à mieux vous accompagner. Découvrez les expériences partagées par nos clientes.',
+    shareCta: 'Partager mon expérience',
+    shareMessage: 'Bonjour, je souhaite partager mon avis sur ma commande.',
+    emptyText: 'Vous avez déjà commandé chez nous ? Votre retour peut aider d’autres personnes à découvrir la boutique.',
+  },
+  instagram: {
+    eyebrow: 'RESTONS CONNECTÉS',
+    title: 'Un peu plus de beauté dans votre fil d’actualité.',
+    text: 'Retrouvez-nous sur Instagram pour découvrir nos produits, nos nouveautés, nos inspirations et les actualités de la boutique.',
+    cta: 'Suivre sur Instagram',
+    caption: 'Retrouvez toutes nos actualités sur Instagram.',
+  },
+  faq: {
+    eyebrow: 'BESOIN D’UNE PRÉCISION ?',
+    title: 'Tout ce qu’il faut savoir avant de commander.',
+    text: 'Vous avez une question sur votre commande, le paiement ou la livraison ? Retrouvez ici les informations essentielles.',
+    cta: 'Une autre question ? Écrivez-nous sur WhatsApp',
+  },
+  contact: {
+    eyebrow: 'NOUS SOMMES À VOTRE ÉCOUTE',
+    title: 'Une question ? Notre équipe est là pour vous répondre.',
+    text: 'Besoin d’un renseignement sur un produit, une commande ou une livraison ? Contactez-nous. Nous vous accompagnerons pour obtenir les informations dont vous avez besoin.',
+    cta: 'Nous écrire sur WhatsApp',
+    whatsappMessage: 'Bonjour, j’ai une question.',
+  },
+  finalCta: {
+    eyebrow: 'VOTRE PROCHAIN COUP DE CŒUR VOUS ATTEND',
+    title: 'Faites de la place à vos nouveaux essentiels.',
+    text: 'Explorez nos collections, découvrez les produits disponibles et composez votre panier en quelques instants. Votre prochaine découverte commence ici.',
+    primaryCta: 'Découvrir la boutique',
+    secondaryCta: 'Voir les nouveautés',
+  },
+  footer: {
+    intro: '{storeName} vous propose une sélection de produits de beauté et d’accessoires pour accompagner vos envies et vos routines au quotidien.',
+  },
+} as const;

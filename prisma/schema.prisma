@@ -1,0 +1,520 @@
+// ============================================================================
+// Boutique e-commerce — commandes confirmées via WhatsApp
+// Schéma Prisma v0.5 (MVP) — PostgreSQL (Neon) — aligné sur le cahier de cadrage v1.0
+//
+// Règles de conception (v6, niveau 2 « application web ») :
+//  - Argent en entiers (FCFA n'a pas de décimales) : jamais de Float.
+//  - Prix et totaux RECALCULÉS côté serveur depuis la base, jamais lus du navigateur.
+//  - Une commande est un instantané : noms et prix copiés dans OrderItem.
+//  - Les statuts sont des enums anglais ; les libellés français vivent dans le code
+//    (src/lib/constants/order-status.ts), pas en base.
+//
+// Livraison et paiement sont deux statuts SÉPARÉS : une commande peut être confirmée sans être payée.
+// Paiements : hors site pour l'instant (Wave). La vendeuse les saisit dans le back-office ;
+// chaque encaissement est une ligne `Payment`. Le futur webhook de paiement en ligne écrira
+// dans la même table (voir Payment.providerRef).
+// Reçu : une ligne `Receipt` par commande, avec les données FIGÉES à la création ; le PDF est
+// généré à la demande à partir de ces données et des paiements enregistrés.
+//
+// Hors schéma MVP (Scope Lock) : variantes produit, assistant IA, paiement en ligne.
+// Voir les blocs commentés en bas de fichier.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // Neon : URL poolée
+  directUrl = env("DIRECT_URL")   // Neon : URL directe, utilisée par `prisma migrate`
+  // Prisma 7+ : url/directUrl se déclarent dans prisma.config.ts — à adapter selon ta version.
+}
+
+// ----------------------------------------------------------------------------
+// ENUMS
+// ----------------------------------------------------------------------------
+
+enum AdminRole {
+  OWNER // la vendeuse : tout, y compris paramètres et comptes
+  STAFF // peut traiter commandes et produits, pas les paramètres
+}
+
+// Statut de LIVRAISON, mis à jour à la main par la vendeuse.
+enum DeliveryStatus {
+  PENDING   // En attente : commande reçue, à vérifier
+  CONFIRMED // Confirmée : validée par la vendeuse
+  PREPARING // En préparation
+  SHIPPED   // En livraison : colis remis au livreur ou expédié
+  DELIVERED // Livrée : commande remise au client
+  CANCELLED // Annulée (restitue le stock si suivi)
+}
+
+// Statut de PAIEMENT, séparé de la livraison. Calculé par le service à partir des lignes
+// Payment ; REFUNDED et CANCELLED sont posés à la main.
+enum PaymentStatus {
+  TO_CONFIRM     // À confirmer : montant ou frais pas encore fixés
+  DEPOSIT_DUE    // Acompte attendu (Abidjan)
+  DEPOSIT_PAID   // Acompte reçu
+  PARTIALLY_PAID // Paiement partiel
+  PAID           // Paiement intégral reçu
+  REFUNDED       // Remboursé
+  CANCELLED      // Annulé
+}
+
+// Ce qu'enregistre une ligne de l'historique des changements.
+enum StatusKind {
+  DELIVERY
+  PAYMENT
+}
+
+enum OrderSource {
+  WEBSITE // commande passée sur le site
+  MANUAL  // saisie par la vendeuse (client venu par WhatsApp, par exemple)
+}
+
+enum ProductStatus {
+  DRAFT     // Brouillon : invisible pour les clients
+  PUBLISHED // Publié
+  ARCHIVED  // Archivé : retiré du site, conservé pour l'historique des commandes
+}
+
+enum SlugEntity {
+  PRODUCT
+  CATEGORY
+}
+
+enum PaymentMethod {
+  WAVE  // l'acompte passe toujours par Wave
+  CASH  // solde remis à la livraison
+  OTHER
+}
+
+enum PaymentKind {
+  DEPOSIT // acompte (Abidjan)
+  BALANCE // solde à la livraison (Abidjan)
+  FULL    // paiement intégral (hors Abidjan)
+  REFUND  // remboursement : se SOUSTRAIT du total encaissé
+}
+
+enum ZoneType {
+  ABIDJAN       // communes d'Abidjan : acompte + solde à la livraison
+  INTERIOR      // intérieur du pays : paiement intégral par Wave avant expédition
+  INTERNATIONAL // étranger : paiement intégral par Wave avant expédition
+}
+
+enum EmailType {
+  NEW_ORDER_SELLER         // alerte à la vendeuse
+  ORDER_RECEIVED_CUSTOMER  // accusé de réception au client (si email fourni)
+  STATUS_CHANGED_CUSTOMER  // changement de statut (si activé et email fourni)
+}
+
+enum EmailStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED // abandon après le nombre maximal de tentatives
+}
+
+// ----------------------------------------------------------------------------
+// ADMIN : comptes et sessions
+// ----------------------------------------------------------------------------
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique // stocké en minuscules
+  passwordHash String // bcrypt — jamais le mot de passe en clair
+  role         AdminRole @default(OWNER)
+  isActive     Boolean   @default(true)
+
+  // Pas de compteur d'échecs ici : la limitation des tentatives passe par RateLimitBucket
+  // (par IP et par email, y compris pour les emails inconnus), sinon un verrouillage
+  // révélerait qu'un compte existe.
+  lastLoginAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions         AdminSession[]
+  statusChanges    OrderStatusHistory[]
+  recordedPayments Payment[]
+}
+
+// Session opaque : le cookie contient un jeton aléatoire, la base ne garde que son hash.
+// Pourquoi en base plutôt qu'un cookie signé : une session se révoque (déconnexion partout,
+// changement de mot de passe, compte désactivé).
+model AdminSession {
+  id          String   @id @default(cuid())
+  tokenHash   String   @unique // sha256 du jeton
+  adminUserId String
+  adminUser   AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  userAgent   String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([adminUserId])
+  @@index([expiresAt])
+}
+
+// ----------------------------------------------------------------------------
+// CATALOGUE
+// ----------------------------------------------------------------------------
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique // /categorie/[slug]
+  description String? @db.Text
+  // Image de la carte « Collection » de la landing (URL + identifiant Cloudinary).
+  imageUrl      String?
+  imagePublicId String?
+  // Couleur de la section sticky de la catégorie sur la landing (#RRGGBB). La couleur du texte est
+  // calculée pour rester lisible (contraste), jamais choisie à la main.
+  accentColor   String?
+  position      Int     @default(0)
+  // Archivée : masquée du site, jamais supprimée si des commandes historiques s'y rattachent.
+  isArchived Boolean @default(false)
+
+  products  Product[]
+  redirects SlugRedirect[]
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique // /produit/[slug]
+  description String  @db.Text
+  // Caractéristiques / composition, une ligne par entrée. Données structurées :
+  // l'assistant IA pourra les lire plus tard sans parser du texte libre.
+  characteristics String[]
+  usageAdvice     String?  @db.Text
+
+  price Int // FCFA, entier. Une seule devise au lancement : la devise vit dans StoreSettings.
+  // Prix promotionnel facultatif, toujours < price. S'il existe, c'est LUI que le client paie :
+  // le serveur facture `salePrice ?? price`.
+  salePrice Int?
+  // Poids en grammes (affiché en g ou en kg dans l'interface).
+  weightGrams Int?
+  // Référence interne facultative.
+  sku String? @unique
+  // null = stock non suivi (jamais « épuisé ») ; sinon décrémenté de façon atomique à la commande.
+  stock Int?
+
+  status    ProductStatus @default(DRAFT)
+  sortOrder Int           @default(0)
+  // « Mis en avant » : alimente la section Best-sellers de la landing (choix de la vendeuse).
+  isFeatured Boolean @default(false)
+  // Date de PREMIÈRE publication, posée une seule fois : sert au badge « Nouveau » (30 jours ou moins).
+  publishedAt DateTime?
+
+  // SEO : si vides, le site génère un titre et une méta-description à partir du nom et de la description.
+  seoTitle        String?
+  metaDescription String?
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images     ProductImage[]
+  orderItems OrderItem[]
+  redirects  SlugRedirect[]
+  focusedIn  StoreSettings[] @relation("FocusProduct")
+
+  @@index([status, sortOrder])
+  @@index([status, isFeatured])
+  @@index([categoryId, status])
+}
+
+// Quand le slug d'une page déjà publiée change, l'ancien est conservé ici : le site renvoie une
+// redirection permanente vers le slug actuel (aucun lien partagé ni référencé ne casse).
+// La ligne pointe vers l'entité (pas vers un slug) : A → B → C ne fait jamais de chaîne.
+model SlugRedirect {
+  id         String     @id @default(cuid())
+  entity     SlugEntity
+  fromSlug   String
+  productId  String?
+  product    Product?   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category?  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime   @default(now())
+
+  @@unique([entity, fromSlug])
+  @@index([productId])
+  @@index([categoryId])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  publicId  String // identifiant Cloudinary, pour supprimer / transformer
+  alt       String
+  position  Int     @default(0)
+
+  @@index([productId, position])
+}
+
+// ----------------------------------------------------------------------------
+// LIVRAISON
+// ----------------------------------------------------------------------------
+
+// Une ligne = une commune (ABIDJAN), une ville (INTERIOR) ou un pays (INTERNATIONAL).
+model DeliveryZone {
+  id       String   @id @default(cuid())
+  name     String
+  type     ZoneType
+  fee      Int? // FCFA ; null = « frais à confirmer » par la vendeuse
+  isActive Boolean  @default(true)
+  position Int      @default(0)
+  orders   Order[]
+
+  @@unique([type, name])
+  @@index([type, isActive])
+}
+
+// ----------------------------------------------------------------------------
+// CLIENTS ET COMMANDES
+// ----------------------------------------------------------------------------
+
+// Léger à dessein : l'adresse varie d'une commande à l'autre, elle vit donc dans Order.
+// Dédoublonnage par numéro (format international normalisé, ex. +2250700000000).
+model Customer {
+  id        String   @id @default(cuid())
+  firstName String
+  lastName  String
+  phone     String   @unique
+  email     String? // facultatif tant que WhatsApp est le canal principal
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+}
+
+model Order {
+  id        String @id @default(cuid())
+  // Référence publique, courte, NON séquentielle (ex. CMD-7K3M9QXP) : une référence
+  // devinable permettrait de lire les commandes des autres.
+  reference String @unique
+  // Générée côté navigateur à l'ouverture du formulaire : protège du double clic et des
+  // renvois réseau. Une même clé renvoie la commande déjà créée.
+  idempotencyKey String @unique
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  source         OrderSource    @default(WEBSITE)
+  deliveryStatus DeliveryStatus @default(PENDING)
+  // Copie de travail pour filtrer la liste ; recalculée par le service à chaque paiement
+  // ajouté ou annulé, à partir des lignes Payment (source de vérité).
+  paymentStatus  PaymentStatus  @default(TO_CONFIRM)
+
+  // Livraison
+  zoneType        ZoneType
+  deliveryZoneId  String?
+  deliveryZone    DeliveryZone? @relation(fields: [deliveryZoneId], references: [id], onDelete: SetNull)
+  shippingCountry String
+  shippingCity    String
+  shippingAddress String        @db.Text
+  customerNote    String?       @db.Text
+  internalNote    String?       @db.Text // visible de la vendeuse uniquement
+
+  // Montants (FCFA, entiers)
+  currency      String @default("XOF")
+  subtotal      Int
+  deliveryFee   Int? // null tant que « frais à confirmer »
+  total         Int? // null tant que deliveryFee est null : jamais de total définitif inventé
+  // Montant à régler pour confirmer : acompte (Abidjan, StoreSettings.depositAmount) ou
+  // total (hors Abidjan, une fois les frais connus). null tant que non déterminé.
+  upfrontAmount Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items    OrderItem[]
+  history  OrderStatusHistory[]
+  payments Payment[]
+  receipt  Receipt?
+  emails   EmailNotification[]
+
+  @@index([deliveryStatus, createdAt])
+  @@index([createdAt])
+  @@index([customerId])
+  @@index([paymentStatus])
+  @@index([zoneType])
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  // SetNull : supprimer un produit ne doit jamais effacer l'historique d'une commande.
+  // (En pratique : dépublier plutôt que supprimer.)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  productNameSnapshot String
+  unitPriceSnapshot   Int
+  quantity            Int
+  lineTotal           Int // unitPriceSnapshot × quantity, calculé côté serveur
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// Registre des paiements : une ligne = un encaissement = un reçu.
+// Saisi à la main par la vendeuse après réception du paiement (Wave pour l'acompte).
+// Le « montant payé » d'une commande = encaissements non annulés − remboursements : on ne le stocke pas.
+model Payment {
+  id      String      @id @default(cuid())
+  orderId String
+  order   Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  kind    PaymentKind
+  method  PaymentMethod @default(WAVE)
+  amount  Int // FCFA, entier, toujours positif (le signe vient de `kind`)
+  receivedAt DateTime @default(now()) // date de l'encaissement, modifiable par la vendeuse
+
+  // Identifiant de transaction du prestataire. Prévu pour le futur webhook de paiement en
+  // ligne : l'unicité rend le traitement idempotent (un webhook rejoué ne crée pas un second
+  // paiement). null pour les paiements saisis à la main.
+  providerRef String? @unique
+
+  // null = système (futur webhook)
+  recordedById String?
+  recordedBy   AdminUser? @relation(fields: [recordedById], references: [id], onDelete: SetNull)
+  note         String?
+
+  // Un reçu déjà remis au client ne se supprime pas : une erreur de saisie s'annule.
+  voidedAt   DateTime?
+  voidReason String?
+
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+}
+
+// Reçu : un par commande, créé dans la même transaction que la commande.
+// `data` fige ce qui ne doit JAMAIS changer après coup : boutique, client, adresse, lignes
+// (nom, prix, quantité), montants et modalités de paiement annoncées. Modifier le catalogue
+// ou la fiche client plus tard ne touche pas aux anciens reçus.
+// Le PDF est généré à la demande : données figées + paiements enregistrés (acompte, solde).
+// Document de suivi de commande : à ne pas présenter comme une facture fiscale sans vérification.
+model Receipt {
+  id       String   @id @default(cuid())
+  orderId  String   @unique
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  number   String   @unique // non séquentiel, dérivé de la référence de commande : REC-7K3M9QXP
+  issuedAt DateTime @default(now())
+  data     Json
+}
+
+// Journal des changements de statut, avec la date et le compte administrateur.
+// Une ligne = un changement de LIVRAISON ou de PAIEMENT (`kind`). Les valeurs sont les noms des
+// enums DeliveryStatus / PaymentStatus, validées par le service.
+// Création de la commande : previousValue = null, changedById = null (client / système).
+model OrderStatusHistory {
+  id            String     @id @default(cuid())
+  orderId       String
+  order         Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  kind          StatusKind
+  previousValue String?
+  newValue      String
+  changedById   String? // null = système / client
+  changedBy     AdminUser? @relation(fields: [changedById], references: [id], onDelete: SetNull)
+  note          String?
+  createdAt     DateTime   @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// ----------------------------------------------------------------------------
+// PARAMÈTRES (une seule ligne, id fixe)
+// ----------------------------------------------------------------------------
+
+model StoreSettings {
+  id                String   @id @default("singleton")
+  storeName         String
+  sellerWhatsApp    String // numéro de la vendeuse ; sert à construire le lien wa.me
+  notificationEmail String // reçoit l'alerte « nouvelle commande »
+  contactEmail      String?
+  contactPhone      String?
+  // Pour le reçu et les mentions légales (à fournir par la cliente).
+  legalName         String?
+  address           String?
+  // Produit de la section « Focus produit » de la landing : masquée s'il n'y en a pas.
+  focusProductId    String?
+  focusProduct      Product? @relation("FocusProduct", fields: [focusProductId], references: [id], onDelete: SetNull)
+  // Réseaux sociaux : un réseau sans lien n'est pas affiché.
+  instagramUrl      String?
+  tiktokUrl         String?
+  facebookUrl       String?
+  // Jamais affiché sur le site public : la vendeuse le communique après confirmation.
+  waveNumber        String?
+  defaultCurrency   String   @default("XOF") // affichée « FCFA »
+  depositAmount     Int      @default(2000) // acompte demandé pour les commandes à Abidjan
+  updatedAt         DateTime @updatedAt
+}
+
+// ----------------------------------------------------------------------------
+// INFRASTRUCTURE : emails fiables et limitation d'abus
+// ----------------------------------------------------------------------------
+
+// Outbox : la ligne est créée DANS la transaction de la commande. L'envoi Resend se fait
+// ensuite ; s'il échoue, la ligne reste PENDING et un cron la reprend. Une commande ne se
+// perd jamais parce que l'email est indisponible.
+model EmailNotification {
+  id                String      @id @default(cuid())
+  // Empêche les doublons : `${orderId}:NEW_ORDER_SELLER`, `${orderId}:STATUS:${status}`…
+  dedupeKey         String      @unique
+  type              EmailType
+  orderId           String?
+  order             Order?      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  toEmail           String
+  status            EmailStatus @default(PENDING)
+  attempts          Int         @default(0)
+  nextAttemptAt     DateTime    @default(now())
+  lastError         String?
+  providerMessageId String?
+  sentAt            DateTime?
+  createdAt         DateTime    @default(now())
+
+  @@index([status, nextAttemptAt])
+  @@index([orderId])
+}
+
+// Compteur à fenêtre fixe, en base : un compteur en mémoire ne marche pas sur Vercel
+// (chaque requête peut tomber sur une instance différente).
+// key : `login:ip:${sha256(ip)}`, `login:email:${sha256(email)}`, `order:ip:${sha256(ip)}`…
+// (jamais l'IP ni l'email en clair)
+model RateLimitBucket {
+  key     String   @id
+  count   Int      @default(0)
+  resetAt DateTime
+
+  @@index([resetAt])
+}
+
+// ----------------------------------------------------------------------------
+// À ACTIVER PLUS TARD (ne pas migrer au MVP)
+// ----------------------------------------------------------------------------
+
+// Variantes — seulement si le questionnaire (A3) répond « oui » :
+//
+// model ProductVariant {
+//   id        String  @id @default(cuid())
+//   productId String
+//   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+//   label     String  // « Taille M / Noir »
+//   price     Int?    // null = prix du produit
+//   stock     Int?
+//   isActive  Boolean @default(true)
+//   position  Int     @default(0)
+// }
+// + OrderItem.variantId / variantLabelSnapshot
+//
+// Assistant IA (phase 6) : Conversation et Message, à copier du modèle de l'assistant
+// d'AKATech Studio ; il lira Product, DeliveryZone et StoreSettings en lecture seule.
