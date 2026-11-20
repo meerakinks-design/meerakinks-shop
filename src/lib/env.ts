@@ -5,10 +5,14 @@ import { z } from 'zod';
 // Une variable laissée vide (« RESEND_API_KEY= », comme dans .env.example) équivaut à une variable absente : sans cela,
 // copier .env.example tel quel ferait échouer toute la validation et planter l'application.
 const optional = <T extends z.ZodTypeAny>(schema: T) => z.preprocess((value) => (value === '' ? undefined : value), schema.optional());
+const siteUrl = z.preprocess(
+  (value) => typeof value === 'string' && value !== '' && !/^[a-z][a-z\d+.-]*:\/\//i.test(value) ? `https://${value}` : value,
+  z.string().url(),
+);
 
 const serverEnvSchema = z.object({
   DATABASE_URL: z.string().min(1),
-  NEXT_PUBLIC_SITE_URL: optional(z.string().url()),
+  NEXT_PUBLIC_SITE_URL: optional(siteUrl),
   RESEND_API_KEY: optional(z.string().min(1)),
   EMAIL_FROM: optional(z.string().min(1)),
   CLOUDINARY_CLOUD_NAME: optional(z.string().min(1)),

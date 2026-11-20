@@ -32,6 +32,14 @@ describe('environnement', () => {
     expect(env.CRON_SECRET).toBe('un-secret-de-plus-de-16-caracteres');
   });
 
+  it('normalise le domaine du site quand le protocole est omis', async () => {
+    const env = await load({
+      DATABASE_URL: 'postgresql://u:p@localhost:5432/db',
+      NEXT_PUBLIC_SITE_URL: 'meerakinks.vercel.app',
+    });
+    expect(env.NEXT_PUBLIC_SITE_URL).toBe('https://meerakinks.vercel.app');
+  });
+
   it('exige DATABASE_URL', async () => {
     await expect(load({})).rejects.toThrow('DATABASE_URL');
   });

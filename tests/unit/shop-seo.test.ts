@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { serializeJsonLd } from '@/lib/shop/json-ld';
 import { hasShopFilters, parseShopParams, shopHref } from '@/lib/shop/search';
-import { absoluteUrl, summarize } from '@/lib/shop/seo';
+import { absoluteUrl, normalizeSiteUrl, summarize } from '@/lib/shop/seo';
 
 describe('serializeJsonLd', () => {
   it('empêche une description de fermer la balise <script>', () => {
@@ -35,6 +35,18 @@ describe('absoluteUrl', () => {
   });
   it('n’invente pas de domaine quand il n’est pas configuré', () => {
     expect(absoluteUrl('/produit/bonnet', undefined)).toBeNull();
+  });
+  it('accepte un domaine configuré sans protocole', () => {
+    expect(absoluteUrl('/produit/bonnet', 'boutique.vercel.app')).toBe('https://boutique.vercel.app/produit/bonnet');
+  });
+});
+
+describe('normalizeSiteUrl', () => {
+  it('ajoute https à un nom de domaine nu', () => {
+    expect(normalizeSiteUrl('meerakinks.vercel.app')).toBe('https://meerakinks.vercel.app');
+  });
+  it('préserve http/https et retire le chemin', () => {
+    expect(normalizeSiteUrl('https://boutique.ci/')).toBe('https://boutique.ci');
   });
 });
 
