@@ -150,7 +150,7 @@ Limite connue : une photo envoyée puis retirée **avant** d'enregistrer le prod
 
 ## Déploiement Vercel
 
-- **Build Command** : `npm run build:vercel`. Sans `migrate deploy`, le code part en production avec une base qui n'a pas ses tables : `prisma generate` seul ne suffit pas.
+- **Migrations automatiques en production** : `vercel.json` lance `npm run build:vercel` uniquement quand `VERCEL_ENV=production` ; les aperçus utilisent `npm run build` et ne migrent donc pas la base de production. `build:vercel` exécute `prisma generate`, `prisma migrate deploy`, puis `next build`.
 - Variables d'environnement Vercel : `DATABASE_URL`, `DIRECT_URL` (indispensable pour `migrate deploy`). **Pas** de `SEED_*` en production.
 - Crée le compte propriétaire en production en lançant le seed **une seule fois depuis ta machine**, avec `DATABASE_URL` pointant vers la base de production, puis supprime `SEED_ADMIN_PASSWORD`.
 - Vercel Hobby est réservé à un usage non commercial : une boutique réelle demande le plan Pro.
@@ -179,5 +179,6 @@ Limite connue : une photo envoyée puis retirée **avant** d'enregistrer le prod
 - **Politique de conservation** des données clients et procédure de suppression sur demande.
 - **Sauvegardes Neon** : vérifier la fenêtre de restauration du plan choisi et faire un test de restauration.
 - Page de **changement de mot de passe** (appellera `revokeAllSessions`).
-#   m e e r a k i n k s - s h o p  
+#   m e e r a k i n k s - s h o p 
+ 
  
