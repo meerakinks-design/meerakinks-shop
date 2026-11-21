@@ -1,6 +1,6 @@
 {
   "name": "boutique-whatsapp",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "private": true,
   "description": "Boutique e-commerce : commandes confirmées via WhatsApp",
   "engines": {
@@ -17,7 +17,10 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "e2e:visual": "node e2e/visual-check.mjs",
+    "e2e:pots": "node e2e/pots-sheet.mjs",
+    "e2e:burst": "node e2e/burst-sheet.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -37,6 +40,8 @@
     "@types/node": "20.19.43",
     "@types/react": "18.3.31",
     "@types/react-dom": "18.3.7",
+    "esbuild": "0.28.2",
+    "playwright-core": "1.63.0",
     "prisma": "5.22.0",
     "tsx": "4.23.15",
     "typescript": "5.9.3",

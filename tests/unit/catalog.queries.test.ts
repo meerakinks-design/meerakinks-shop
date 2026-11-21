@@ -141,3 +141,23 @@ describe('build sans base (CI)', () => {
     expect(db.storeSettings.findUnique).not.toHaveBeenCalled();
   });
 });
+
+describe('couleurs des catégories pour le mini-jeu du footer', () => {
+  it('lit les couleurs des catégories actives, dans l’ordre, sans celles qui n’en ont pas', async () => {
+    db.category.findMany.mockResolvedValue([{ accentColor: '#f4a6c0' }, { accentColor: null }, { accentColor: '#b69bd6' }]);
+    await expect(queries.getCategoryAccents()).resolves.toEqual(['#f4a6c0', '#b69bd6']);
+  });
+  it('ne lit que les catégories non archivées qui ont des produits PUBLIÉS', async () => {
+    db.category.findMany.mockResolvedValue([]);
+    await queries.getCategoryAccents();
+    const args = db.category.findMany.mock.calls[0]![0] as { where: { isArchived: boolean; products: { some: Record<string, unknown> } }; select: Record<string, boolean> };
+    expect(args.where.isArchived).toBe(false);
+    expect(args.where.products.some).toMatchObject({ status: 'PUBLISHED' });
+    expect(args.select).toEqual({ accentColor: true });
+  });
+  it('build sans base (CI) : liste vide, aucune requête', async () => {
+    process.env.SKIP_DB_AT_BUILD = '1';
+    await expect(queries.getCategoryAccents()).resolves.toEqual([]);
+    expect(db.category.findMany).not.toHaveBeenCalled();
+  });
+});

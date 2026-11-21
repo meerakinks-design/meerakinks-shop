@@ -18,7 +18,7 @@ const { CategorySections } = await import('@/components/shop/CategorySections');
 const { ShopGrid } = await import('@/components/shop/ShopGrid');
 const { ProductCard } = await import('@/components/shop/ProductCard');
 const { Header } = await import('@/components/shop/Header');
-const { Collections, Contact, Instagram, Reviews, Faq, Hero } = await import('@/components/shop/LandingSections');
+const { Collections, Contact, Instagram, Reviews, Faq, Hero, Focus } = await import('@/components/shop/LandingSections');
 
 const image = (id: string) => ({ url: `https://res.cloudinary.com/demo/image/upload/v1/boutique/products/${id}.jpg`, alt: `Photo ${id}` });
 const product = (id: string, overrides: Partial<ShopProduct> = {}): ShopProduct => ({
@@ -206,5 +206,13 @@ describe('sections de la landing', () => {
     expect(html.replace(/[\s\u202f\u00a0]/g, ' ')).toContain('3 500 FCFA');
     expect(html).not.toContain('2 000 FCFA');
     expect(html).not.toMatch(/<script[^>]*>[^<]*<[^/]/); // rien de non échappé dans le JSON-LD
+  });
+});
+
+describe('produit mis en avant de la landing', () => {
+  it('pas de barre d’achat collée : elle est prévue pour la fiche produit seulement (cahier §4.3)', () => {
+    const html = wrap(<Focus product={{ ...product('f1', { price: 8000 }), description: 'Une crème douce.', characteristics: ['Pot de 50 ml'], usageAdvice: null }} />);
+    expect(html).toContain('purchase-add');
+    expect(html).not.toContain('sticky-buy');
   });
 });

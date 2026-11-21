@@ -147,7 +147,7 @@ export function Focus({ product }: { product: FocusProduct }) {
               ))}
             </ul>
           )}
-          <ProductPurchase product={{ id: product.id, name: product.name, price: effectivePrice(product), stock: product.stock }} />
+          <ProductPurchase product={{ id: product.id, name: product.name, price: effectivePrice(product), stock: product.stock }} stickyBar={false} />
           <p>
             <Link className="section-link" href={`/produit/${product.slug}`}>
               {copy.primaryCta}

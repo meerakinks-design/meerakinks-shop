@@ -70,7 +70,7 @@ describe('accessibilité et mouvement réduit (CSS)', () => {
     expect(CSS).toMatch(/\.sp-u\s*{\s*display:\s*inline-block/);
   });
   it('rien n’est masqué tant que le composant n’a pas posé data-sp (texte visible sans JavaScript)', () => {
-    const hidden = [...CSS.matchAll(/([^{}]+)\{\s*opacity:\s*0;/g)].map((match) => match[1].trim());
+    const hidden = [...CSS.matchAll(/([^{}]+)\{\s*opacity:\s*0;/g)].map((match) => (match[1] ?? '').trim());
     // `from` est l'image de départ de l'animation : elle ne s'applique qu'une fois data-sp posé sur « in ».
     expect(hidden.filter((selector) => selector !== 'from' && !selector.includes("[data-sp='hidden']"))).toEqual([]);
   });

@@ -30,6 +30,9 @@ Pas de couche « domain » : la logique métier vit dans `src/server/services/`,
 | 018 | **Resend par son API REST** (`fetch`, sans SDK), transport injectable | Un seul endpoint, testable sans réseau, une dépendance de moins | `User-Agent` obligatoire ; comportement vérifié sur la documentation, pas contre un vrai compte |
 | 019 | **Reçu PDF avec `pdf-lib`** (JavaScript pur, polices standard), généré à la demande, jamais stocké | Aucun fichier de police ni binaire à embarquer sur Vercel ; le reçu suit toujours les paiements | Latin occidental seulement : autres caractères remplacés par « ? » |
 | 021 | **Effet « spaghetti » en CSS pur, sans GSAP** (v0.9, D-29) : la courbe `elastic.out(0.75, 0.3)` de Rabbit Shop est recalculée (`lib/shop/spaghetti.ts`) et écrite en `linear()` ; le texte complet reste dans le HTML serveur | Aucune dépendance de plus, rien à charger, le texte est lisible sans JavaScript, un test empêche la courbe de dériver | Le découpage se fait au rendu : un titre de plus de ~60 lettres allonge un peu le HTML ; pas de `reverse` animé (le texte est réarmé en sortant par le bas) |
+| 022 | **Mini-jeu « Cosmetic Smash » : moteur pur, dessin séparé, code chargé à la demande** (v0.10, D-19, P-42) : la logique (physique, score, 30 s, pause) est dans `lib/smash/engine.ts` sans aucun accès au navigateur ; les pots sont dessinés en canvas (`pots.ts`), les éclats et la crème dans `effects.ts` ; `game.ts` relie le tout et n'est importé qu'à l'approche du footer | Le moteur se teste sans écran ni horloge (graine aléatoire, pas de temps injecté) ; le jeu ne pèse rien tant qu'on n'approche pas du footer, et ne démarre qu'au clic sur « Jouer » | Les pots sont dessinés par le code (pas de photos) : ils ont le volume et les reflets d'un rendu, pas le grain d'une photo. Le jeu est dans le footer, donc sur toutes les pages qui en ont un |
+| 023 | **La barre d'achat collée est réservée à la fiche produit, et se range devant le footer** (v0.10, cahier §4.3) | Sur la landing, le composant du produit mis en avant la montrait dès le haut de la page et par-dessus tout le footer (trouvé au contrôle dans Chromium) | Sur la fiche, la barre apparaît dès que le bouton principal n'est pas à l'écran, y compris au chargement quand il est sous la ligne de flottaison d'un petit téléphone : à valider |
+| 024 | **Contrôle visuel dans Chromium sans base de données** (v0.10) : `E2E_FAKE_DATA=1` remplace 5 services de lecture par des données de démonstration (`e2e/fakes/`), les vraies pages tournent telles quelles | On joue les vrais composants dans un vrai navigateur (téléphone et ordinateur) sans Neon ni Cloudinary | Refusé en production (`next.config.mjs` lève une erreur si `NODE_ENV=production`). Ne remplace pas un test contre la vraie base |
 | 020 | **Cron quotidien dans `vercel.json`** | Le plan Hobby refuse tout autre rythme (déploiement en échec) ; la tentative immédiate couvre le cas normal | En production (Pro), passer à `*/10 * * * *` |
 
 **Modules activés** (justifiés) : auth admin · Resend · Cloudinary · Vercel Cron · rate-limit en base.
@@ -122,6 +125,8 @@ boutique/
 │   │   ├── whatsapp.ts              # buildOrderMessage(), buildWaLink() — fonctions pures
 │   │   ├── money.ts                 # formatFcfa()
 │   │   ├── shop/spaghetti.ts        # courbe élastique de Rabbit, découpe en mots et lettres (v0.9)
+│   │   ├── smash/                   # mini-jeu (v0.10) : engine.ts (logique pure) · palette.ts · pots.ts (dessin des pots) ·
+│   │   │                            #   effects.ts (éclats, crème) · render.ts · game.ts (chargé à la demande)
 │   │   └── constants/order-status.ts  # libellés FR, couleurs, transitions autorisées
 │   │
 │   ├── features/cart/               # panier : store client, persisté en localStorage
@@ -131,12 +136,14 @@ boutique/
 │   │   ├── admin/                   # ProductForm, ImageUploader, CategoriesManager ✅ · OrderTable, StatusSelect… (étape 6)
 │   │   └── layout/
 │   │   (shop/Spaghetti.tsx : effet « spaghetti » des titres et textes, v0.9)
+│   │   (shop/SmashGame.tsx : bloc du mini-jeu du footer, v0.10)
 │   ├── content/                     # FAQ, livraison, à-propos : données typées, pas du JSX
 │   │   ├── faq.ts                   #   → lisibles par l'assistant IA plus tard
 │   │   └── livraison.ts             #   → le texte « validé » du questionnaire
 │   ├── styles/
 │   │   ├── tokens.css               # couleurs, typo, rayons : à brancher sur la charte graphique
 │   │   ├── spaghetti.css            # courbe élastique `linear()` et états de l'effet (v0.9)
+│   │   ├── smash.css                # bloc du mini-jeu (v0.10)
 │   │   └── globals.css
 │   └── middleware.ts                # filtre rapide /admin (cookie présent) + en-têtes noindex ;
 │                                    # la vraie vérification reste dans server/auth/guards.ts
@@ -144,6 +151,8 @@ boutique/
 │   ├── unit/                        # pricing, whatsapp, stock, transitions de statut
 │   ├── integration/                 # createOrder : idempotence, survente, prix falsifié
 │   └── e2e/                         # parcours : produit → panier → commande → admin
+├── e2e/                             # contrôle visuel dans Chromium (v0.10) : visual-check.mjs · game-check.mjs · fakes/ · fixtures.ts
+│                                    #   pots-sheet.mjs et burst-sheet.mjs : planches pour juger les pots et l'éclatement
 ├── docs/
 │   ├── adr/                         # une décision = un fichier
 │   └── erd.md

@@ -9,8 +9,9 @@ import { HistoryModal } from '@/components/shop/HistoryModal';
 import { ModalRouteSync } from '@/components/shop/ModalRouteSync';
 import { CHECKOUT_ENABLED } from '@/lib/constants/features';
 import { hasContactChannels } from '@/lib/shop/contact';
-import { getPublicSettings, getPublicZones, hasCollections } from '@/server/services/catalog.queries';
+import { getCategoryAccents, getPublicSettings, getPublicZones, hasCollections } from '@/server/services/catalog.queries';
 import '@/styles/shop.css';
+import '@/styles/smash.css';
 import '@/styles/spaghetti.css';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -25,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
-  const [settings, showCollections, zones] = await Promise.all([getPublicSettings(), hasCollections(), getPublicZones()]);
+  const [settings, showCollections, zones, accents] = await Promise.all([getPublicSettings(), hasCollections(), getPublicZones(), getCategoryAccents()]);
   const showContact = hasContactChannels(settings);
 
   return (
@@ -37,7 +38,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       <main id="contenu" tabIndex={-1}>
         {children}
       </main>
-      <Footer settings={settings} showCollections={showCollections} />
+      <Footer settings={settings} showCollections={showCollections} accents={accents} />
       {/* Les modals vivent dans le layout : l'icône du panier fonctionne sur toutes les pages. */}
       <CartModal depositAmount={settings.depositAmount} />
       {CHECKOUT_ENABLED && <CheckoutModal depositAmount={settings.depositAmount} zones={zones} />}

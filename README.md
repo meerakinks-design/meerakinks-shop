@@ -1,8 +1,9 @@
-# Boutique e-commerce WhatsApp — v0.9
+# Boutique e-commerce WhatsApp — v0.10
 
 Livré : back-office (produits, catégories, photos), vitrine (landing, boutique, catégories, fiche produit, panier en modal avec devis du serveur) **et, depuis la v0.6, la commande** : formulaire en modal, `POST /api/v1/orders`, enregistrement des commandes, page de confirmation et message WhatsApp.
 **Depuis la v0.7** : chaque commande déclenche l'envoi des emails (alerte à la vendeuse avec le **reçu PDF**, accusé au client) avec reprise automatique ; le reçu PDF est aussi servi au back-office.
 **Depuis la v0.9** : l'**effet « spaghetti »** (D-18, D-29) anime les titres et les textes de la landing, repris de l'animation des titres de Rabbit Shop (voir « Effet spaghetti » plus bas). Rien d'autre n'a changé : ni schéma, ni API.
+**Depuis la v0.10** : le **mini-jeu « Cosmetic Smash »** du footer (D-19, P-42), un **contrôle visuel dans Chromium** (téléphone et ordinateur) qui a fait trouver et corriger quatre défauts (voir « Contrôle visuel »), et deux documents de référence à jour : cahier v2.6.1 et landing v1.3.1 (dans `docs/`).
 Les écrans de gestion des commandes (statuts, paiements, annulation) arrivent à l'étape suivante (voir `docs/ARBORESCENCE.md`).
 
 ## État de la livraison
@@ -18,6 +19,10 @@ Les écrans de gestion des commandes (statuts, paiements, annulation) arrivent �
 | Emails testés contre un **vrai compte Resend** et un vrai lecteur de messagerie | ❌ non (client Resend testé avec un réseau simulé, d'après la documentation officielle) : voir « À vérifier à la main » 18 à 25 |
 | Mise en page du reçu PDF | ✅ un exemple rendu en image et relu à l'œil ; pas de contrôle sur un vrai téléphone |
 | **v0.9 — effet « spaghetti »** : 31 tests ajoutés (courbe, CSS, découpe, rendu serveur) et test de rendu de la vitrine adapté | ✅ passés, mais **avec un lanceur provisoire** (pas de `node_modules` ni de réseau dans mon environnement) ; **relance `npm test` et `npm run typecheck`** |
+| **v0.10 — `tsc --noEmit`** | ✅ propre. La v0.9 livrée avait une erreur de typage dans `tests/unit/spaghetti.test.ts` (corrigée : `match[1]` pouvait être `undefined`) |
+| **v0.10 — tests (`npm test`)** | ✅ **587 tests** (528 hérités de la v0.9 + 59), lancés avec le vrai Vitest. Nouveaux : moteur du jeu (26), couleurs (6), éclats (7), dessin des pots (8), rendu du bloc et du footer (7), requête des couleurs (3), barre collée (2). Le moteur a été vérifié par **mutation** (le casser volontairement fait échouer les tests) |
+| **v0.10 — contrôle dans Chromium** (`npm run e2e:visual`) | ✅ **179 vérifications sur 179**, téléphone 390 × 844 et ordinateur 1440 × 900, sur les vraies pages avec des données de démonstration. Captures relues à l'œil. **Pas** sur un vrai téléphone, **pas** sur Safari ni Firefox |
+| **v0.10 — `next build`** (commande activée, sans base) | ✅ ; le code du jeu est un chunk à part (`smash.*.js`, 25,8 Ko), **absent** du premier chargement de la landing |
 | Déployé | ❌ non |
 
 ## Démarrage local
@@ -109,6 +114,35 @@ Le même appel répété renvoie la même référence (200 au lieu de 201).
 - **Pas concernés** (exceptions de la landing §26) : prix et montants, libellés de boutons et de formulaires, messages d'erreur, pages légales, contenu du panier, réponses de la FAQ, avis réels, titres de catégories venus de la base, titres de navigation du pied de page.
 - **Pas encore** : le titre du pied de page et celui du mini-jeu (le mini-jeu n'existe pas encore, étape 13) ; l'**image qui flotte près de la lettre survolée** (option laissée de côté pour l'instant).
 
+## Mini-jeu « Cosmetic Smash » (v0.10)
+
+Dans le footer (donc sur toutes les pages qui en ont un). Cahier §4.6, D-19, P-42 ; textes validés : landing §15.
+
+- **Principe** : des pots cosmétiques sont lancés depuis le bas du terrain, le visiteur les touche, ils éclatent (éclats de verre, éclaboussure de crème, points qui montent). 30 secondes. Trois tailles : **les plus petits rapportent le plus** (10 / 20 / 30 points). Les pots reprennent les **couleurs des catégories** de la boutique (palette de repli si aucune).
+- **Moteur séparé du dessin** : `src/lib/smash/engine.ts` ne connaît ni le navigateur ni le canvas (physique, score, chronomètre, pause, toucher, balayage, clavier). Aléatoire et temps sont injectés : 26 tests.
+- **Pots dessinés en canvas** (`pots.ts`) : pot de crème, flacon pompe, compte-gouttes, tube, bouteille ; verre, plastique et métal construits avec des dégradés, reflets, ombres. Génériques : aucune marque, aucun texte. `npm run e2e:pots` régénère une planche-contact pour les juger à l'œil.
+- **Chargement** : le code du jeu (`game.ts`) est importé quand le footer approche (700 px avant), pas avant ; pas de préchargement en mode « économie de données ». **Le jeu ne démarre qu'au clic sur « Jouer »** : avant, ni canvas ni boucle d'animation.
+- **Accessibilité** : avec « réduire les animations », le bouton disparaît et le message validé s'affiche (réglé en CSS, sans clignotement ; le code n'est même pas chargé). Clavier : **Espace ou Entrée** casse le pot le plus bas ; « Pause » et « Recommencer » sont de vrais boutons. Pause automatique si l'onglet est masqué ou si le jeu sort de l'écran (jamais de reprise surprise). Annonces pour les lecteurs d'écran : pause, reprise, fin de partie.
+- **Le défilement n'est jamais bloqué** : `touch-action: pan-y`, aucun `preventDefault` sur les gestes. Sur téléphone, un **toucher** ou un **balayage horizontal** joue ; un glissement vertical fait défiler la page.
+- **Pas de son** dans cette version (« son désactivé par défaut » : il n'y en a pas). Aucun bouton ajouté, les libellés n'étant pas validés.
+- **Valeurs à régler 🟡** : toutes dans `SMASH` (`engine.ts`) : durée, tailles, points, cadence des pots, gravité.
+- **Textes à valider** (ajoutés par le code, absents de la landing §15, dans `content/landing.ts` → `smash`) : « Reprendre » (bouton après Pause), l'aide « Touchez ou cliquez les pots… Au clavier : Espace ou Entrée. », le nom de la zone pour les lecteurs d'écran, et les annonces « Partie en pause. » / « Partie reprise. ».
+- **Écart entre les documents** : la landing §15 dit « rien n'est chargé tant que le jeu n'est pas lancé » ; le cahier §4.6 dit « chargement différé quand le footer approche ». J'ai suivi le cahier (et ta consigne) : le code se charge à l'approche du footer, le jeu ne démarre qu'au clic.
+
+## Contrôle visuel dans Chromium (v0.10)
+
+`npm run e2e:visual` joue les **vraies pages** dans un vrai Chromium, au format téléphone et ordinateur, **sans base de données** : `E2E_FAKE_DATA=1` (posé par le script) remplace cinq services de lecture (`e2e/fakes/`) par des données de démonstration (`e2e/fixtures.ts`). Refusé pour un build de production. Les photos Cloudinary sont remplacées par des dessins. Prérequis : `npx playwright install chromium`. `E2E_ONLY=jeu,ticket` (liste de scénarios : `landing`, `produit`, `panier`, `ticket`, `jeu`) ne joue qu'une partie. Sorties : `e2e/output/` (captures, `report.json`), code de sortie 1 en cas d'échec.
+
+Ce qui est vérifié : fiche produit (galerie, flèches, pastilles, balayage au doigt, quantité), barre d'achat collée, panier en feuille (ancrage, quantités, Échap, `#panier`), commande → confirmation → imprimante à ticket (étapes, **PNG téléchargé tout seul, une seule fois**, pas de nouveau téléchargement à la réouverture, mouvement réduit), mini-jeu complet (partie de 30 s comprise), erreurs de console et de réseau.
+
+**Quatre défauts trouvés et corrigés :**
+1. **Barre d'achat collée sur la landing** : elle s'affichait dès le haut de la page (à 7 000 px de son produit) et restait par-dessus tout, **footer compris** (liens légaux masqués). Prévue pour la fiche produit seulement (cahier §4.3) : désactivée sur la landing (`stickyBar={false}`).
+2. **Barre collée sur la fiche** : recouvrait aussi le pied de page. Elle se range maintenant quand le footer est à l'écran.
+3. **`tsc` en erreur** dans `tests/unit/spaghetti.test.ts` (livré en v0.9).
+4. Mes premiers éclats du jeu étaient trop pâles sur le fond clair : contraste, tailles et forme de la crème revus après une planche (`npm run e2e:burst`).
+
+**À savoir** : sur un petit téléphone (390 × 844), le bouton « Ajouter au panier » de la fiche est sous la ligne de flottaison au chargement ; la barre collée s'affiche donc tout de suite (le code l'affiche dès que le bouton n'est pas à l'écran). Le cahier dit « dès que le bouton principal sort de l'écran » : **à trancher** (voir décision 023).
+
 ## Photos (Cloudinary)
 
 1. Crée un compte Cloudinary et renseigne dans `.env.local` : `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
@@ -151,6 +185,10 @@ Limite connue : une photo envoyée puis retirée **avant** d'enregistrer le prod
 23. Passe une commande de test dont le prénom contient `<b>essai</b>` : l'email de la vendeuse l'affiche comme du texte.
 24. Ajoute un paiement à la main (table `Payment`, `kind` DEPOSIT) : le PDF de `/api/v1/admin/orders/<référence>/receipt` affiche le paiement, le total encaissé et le reste à payer.
 25. Vérifie que ton plan Vercel accepte la fréquence du cron choisie (le déploiement est refusé sinon).
+26. **Le jeu sur un vrai téléphone** (iPhone Safari et Android Chrome) : fluidité, taille des pots, facilité à toucher un petit pot, un geste vertical qui défile bien la page, rotation de l'écran en pleine partie.
+27. **Le jeu, à jouer** : 30 secondes, cadence et points (valeurs 🟡 dans `SMASH`) ; ce que je vois dans les captures ne dit rien du plaisir de jeu. Jouer aussi avec un lecteur d'écran et au clavier seul.
+28. **Les pots** à l'œil sur ton écran, dans les vraies couleurs de catégories (`npm run e2e:pots` donne la planche).
+29. **Safari et Firefox** : le contrôle automatique ne couvre que Chromium (`color-mix`, `touch-action` et `IntersectionObserver` sont utilisés).
 
 ## Commandes
 
@@ -182,8 +220,8 @@ Limite connue : une photo envoyée puis retirée **avant** d'enregistrer le prod
 
 ## Pas encore fait (à ne pas oublier)
 
-- **Effet « spaghetti » à l'œil** : rebond, vitesse et lisibilité sur ordinateur et téléphone, avec et sans « réduire les animations » ; titres longs et polices de la charte une fois reçues. Jamais vu dans un navigateur.
-- **Contrôle visuel dans un navigateur** (ordinateur et téléphone) : le rendu a été vérifié par des tests de rendu serveur et par `next build`, pas à l'œil.
+- **Effet « spaghetti » à l'œil** : en v0.10 les titres et textes ont été vus **en capture fixe** dans Chromium (ils s'affichent complets, sans erreur) ; l'**animation elle-même** (rebond, vitesse) n'a pas été jugée. À regarder sur ordinateur et téléphone, avec et sans « réduire les animations » ; titres longs et polices de la charte une fois reçues.
+- **Contrôle visuel sur vrais appareils** : fait dans Chromium (voir plus haut), pas sur un vrai téléphone ni sur Safari et Firefox.
 - **Emails et reçu PDF jamais testés contre un vrai Resend** ni dans de vraies messageries : points 18 à 25 ci-dessus. Le gabarit « changement de statut » attend l'écran des commandes. Un lien « Renvoyer » pour les emails abandonnés (`requeueEmail`) attend ce même écran.
 - **Commandes dans le back-office** (liste, statuts, paiements, annulation qui **restitue le stock**) : étape 10. D'ici là, une commande se lit en base.
 - **Revalidation des pages** quand la vendeuse modifiera les zones ou l'acompte (écran Livraison/Paramètres, étape 10) : les pages publiques embarquent la liste des zones.

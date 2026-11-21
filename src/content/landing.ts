@@ -102,6 +102,25 @@ export const LANDING = {
     primaryCta: 'Découvrir la boutique',
     secondaryCta: 'Voir les nouveautés',
   },
+  smash: {
+    // Textes validés (landing §15).
+    title: 'Une petite pause beauté ?',
+    text: 'Envie d’une petite pause ludique ? Lancez Cosmetic Smash et amusez-vous quelques instants.',
+    play: 'Jouer',
+    score: 'Score',
+    time: 'Temps',
+    pause: 'Pause',
+    restart: 'Recommencer',
+    over: 'Bien joué ! Envie de refaire une partie ?',
+    replay: 'Rejouer',
+    reducedMotion: 'Le jeu est désactivé car vous avez demandé moins d’animations.',
+    // 🟡 Libellés techniques ajoutés par le code, absents du document de la landing §15 : À VALIDER.
+    resume: 'Reprendre',
+    boardLabel: 'Zone de jeu Cosmetic Smash',
+    hint: 'Touchez ou cliquez les pots pour les faire éclater. Au clavier : Espace ou Entrée.',
+    livePaused: 'Partie en pause.',
+    liveResumed: 'Partie reprise.',
+  },
   footer: {
     intro: '{storeName} vous propose une sélection de produits de beauté et d’accessoires pour accompagner vos envies et vos routines au quotidien.',
   },

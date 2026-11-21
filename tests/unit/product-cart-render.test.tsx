@@ -66,6 +66,12 @@ describe('achat sur la fiche produit', () => {
     expect(html).toContain('tabindex="-1"');
   });
 
+  it('barre collée désactivée (produit mis en avant de la landing) : le bouton principal reste, la barre n’existe pas', () => {
+    const out = wrap(<ProductPurchase product={{ id: 'p3', name: 'Crème', price: 6900, stock: 5 }} stickyBar={false} />);
+    expect(out).toContain('purchase-add');
+    expect(out).not.toContain('sticky-buy');
+  });
+
   it('produit épuisé : message, ni bouton ni barre', () => {
     const out = wrap(<ProductPurchase product={{ id: 'p2', name: 'Savon noir', price: 4000, stock: 0 }} />);
     expect(out).toContain('épuisé');

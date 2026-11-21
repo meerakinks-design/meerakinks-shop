@@ -9,14 +9,17 @@ import { QuantityStepper } from './QuantityStepper';
 
 interface ProductPurchaseProps {
   product: { id: string; name: string; price: number; stock: number | null };
+  /** Barre d'achat collée en bas du téléphone : prévue pour la FICHE PRODUIT seulement (cahier §4.3). Désactivée pour le produit mis en avant de la landing. */
+  stickyBar?: boolean;
 }
 
 /**
  * Achat de la fiche produit : ligne « Quantité − 1 + », grand bouton « Ajouter au panier ↗ » avec le prix à droite,
  * et, sur téléphone, une barre collée en bas qui reprend le bouton dès que le bouton principal sort de l'écran.
+ * La barre se range quand le pied de page est à l'écran : elle ne recouvre jamais ses liens ni le mini-jeu.
  * Le prix affiché est une indication (prix × quantité) : le total officiel est celui du devis du serveur (RM-02).
  */
-export function ProductPurchase({ product }: ProductPurchaseProps) {
+export function ProductPurchase({ product, stickyBar = true }: ProductPurchaseProps) {
   const { add, quantityOf, hydrated } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
@@ -29,11 +32,29 @@ export function ProductPurchase({ product }: ProductPurchaseProps) {
 
   useEffect(() => {
     const anchor = anchorRef.current;
-    if (!anchor || typeof IntersectionObserver === 'undefined') return undefined;
-    const observer = new IntersectionObserver(([entry]) => setBarVisible(entry ? !entry.isIntersecting : false));
-    observer.observe(anchor);
-    return () => observer.disconnect();
-  }, [soldOut]);
+    if (!stickyBar || !anchor || typeof IntersectionObserver === 'undefined') return undefined;
+    // La barre est visible quand le bouton principal n'est pas à l'écran ET que le pied de page n'y est pas non plus.
+    let anchorOnScreen = true;
+    let footerOnScreen = false;
+    const update = () => setBarVisible(!anchorOnScreen && !footerOnScreen);
+    const anchorObserver = new IntersectionObserver(([entry]) => {
+      anchorOnScreen = entry ? entry.isIntersecting : true;
+      update();
+    });
+    anchorObserver.observe(anchor);
+    const footer = document.querySelector('.site-footer');
+    const footerObserver = footer
+      ? new IntersectionObserver(([entry]) => {
+          footerOnScreen = entry ? entry.isIntersecting : false;
+          update();
+        })
+      : null;
+    if (footer) footerObserver?.observe(footer);
+    return () => {
+      anchorObserver.disconnect();
+      footerObserver?.disconnect();
+    };
+  }, [soldOut, stickyBar]);
 
   useEffect(() => () => window.clearTimeout(resetTimer.current), []);
 
@@ -71,15 +92,17 @@ export function ProductPurchase({ product }: ProductPurchaseProps) {
         {inCart > 0 && <p className="help-text">Déjà dans votre panier : {inCart}</p>}
       </div>
 
-      <div className={`sticky-buy${barVisible ? ' is-visible' : ''}`} aria-hidden={!barVisible}>
-        <div className="sticky-buy-info">
-          <span className="sticky-buy-name">{product.name}</span>
-          <strong>{total}</strong>
+      {stickyBar && (
+        <div className={`sticky-buy${barVisible ? ' is-visible' : ''}`} aria-hidden={!barVisible}>
+          <div className="sticky-buy-info">
+            <span className="sticky-buy-name">{product.name}</span>
+            <strong>{total}</strong>
+          </div>
+          <button type="button" className="sticky-buy-add" onClick={handleAdd} tabIndex={barVisible ? 0 : -1}>
+            {justAdded ? PRODUCT_TEXT.added : PRODUCT_TEXT.stickyAdd}
+          </button>
         </div>
-        <button type="button" className="sticky-buy-add" onClick={handleAdd} tabIndex={barVisible ? 0 : -1}>
-          {justAdded ? PRODUCT_TEXT.added : PRODUCT_TEXT.stickyAdd}
-        </button>
-      </div>
+      )}
     </>
   );
 }

@@ -5,8 +5,9 @@ import { MODAL_HASHES, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { fill } from '@/lib/shop/template';
 import type { PublicSettings } from '@/server/services/catalog.queries';
 import { ModalLink } from './ModalLink';
+import { SmashGame } from './SmashGame';
 
-export function Footer({ settings, showCollections }: { settings: PublicSettings; showCollections: boolean }) {
+export function Footer({ settings, showCollections, accents = [] }: { settings: PublicSettings; showCollections: boolean; accents?: readonly string[] }) {
   const { storeName } = settings;
   const socials = [
     { label: 'Instagram', href: settings.instagramUrl },
@@ -16,6 +17,7 @@ export function Footer({ settings, showCollections }: { settings: PublicSettings
 
   return (
     <footer className="site-footer">
+      <SmashGame accents={accents} />
       <div className="container footer-grid">
         <div>
           <p className="brand">{storeName}</p>

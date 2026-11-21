@@ -137,6 +137,17 @@ export async function hasCollections(): Promise<boolean> {
   return count > 0;
 }
 
+/** Couleurs des catégories actives (avec produits publiés) : les pots du mini-jeu du footer les reprennent (D-19). */
+export async function getCategoryAccents(): Promise<string[]> {
+  if (skipDatabase()) return [];
+  const rows = await prisma.category.findMany({
+    where: { isArchived: false, products: { some: PUBLISHED } },
+    orderBy: [{ position: 'asc' }, { name: 'asc' }],
+    select: { accentColor: true },
+  });
+  return rows.map((row) => row.accentColor).filter((color): color is string => Boolean(color));
+}
+
 // ---------------------------------------------------------------------------
 // Landing
 // ---------------------------------------------------------------------------

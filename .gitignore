@@ -24,3 +24,4 @@ next-env.d.ts
 *.tbz2
 *.tar.xz
 *.txz
+e2e/output/
