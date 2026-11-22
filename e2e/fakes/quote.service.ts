@@ -15,7 +15,7 @@ export async function quoteCart(items: readonly QuoteRequestItem[]): Promise<Car
   const lines: QuoteLine[] = [...requested].map(([productId, requestedQuantity]) => {
     const product = findProduct(productId);
     if (!product) {
-      return { productId, status: 'unavailable', slug: null, name: 'Produit indisponible', imageUrl: null, imageAlt: '', unitPrice: 0, regularPrice: null, requestedQuantity, quantity: 0, maxQuantity: 0, lineTotal: 0 };
+      return { productId, variantId: null, variantLabel: null, status: 'unavailable', slug: null, name: 'Produit indisponible', imageUrl: null, imageAlt: '', unitPrice: 0, regularPrice: null, requestedQuantity, quantity: 0, maxQuantity: 0, lineTotal: 0 };
     }
     const unitPrice = effectivePrice(product);
     const base = {

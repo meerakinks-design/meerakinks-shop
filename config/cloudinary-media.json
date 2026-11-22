@@ -1,0 +1,7 @@
+{
+  "baseFolder": "meera/public",
+  "imageExtensions": ["png", "jpg", "jpeg", "webp", "gif", "avif", "svg", "bmp", "tif", "tiff", "heic", "heif"],
+  "videoExtensions": ["webm", "mp4", "mov", "m4v", "avi", "mkv"],
+  "audioExtensions": ["mp3", "wav", "ogg", "m4a", "aac"],
+  "localOnly": ["fonts/", "favicon.ico", "brand/favicon-icon.png", "brand/apple-touch-icon.png"]
+}

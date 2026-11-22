@@ -204,3 +204,40 @@ export function buildStatusChangedEmail(input: StatusEmailInput): EmailContent {
   const text = [`Bonjour ${first},`, '', `Le statut de votre commande ${input.reference} est maintenant : ${label}.`].join('\n');
   return { subject: toSubject(`Votre commande ${input.reference} : ${label}`), html: layout({ title: `Commande ${input.reference}`, body, storeName: input.storeName }), text };
 }
+
+// ---------------------------------------------------------------------------
+// Alerte analytics — NEW_VISITOR (aucune donnée personnelle ni adresse IP)
+// ---------------------------------------------------------------------------
+
+export interface NewVisitorEmailInput {
+  storeName: string;
+  source: string;
+  landingPath: string | null;
+  country: string | null;
+  region: string | null;
+  city: string | null;
+}
+
+export function buildNewVisitorEmail(input: NewVisitorEmailInput): EmailContent {
+  const location = [input.city, input.region, input.country].filter(Boolean).join(', ') || 'non précisée';
+  const body = [
+    paragraph('<strong>Un nouveau visiteur a accepté les statistiques anonymes.</strong>'),
+    heading('Première page'),
+    paragraph(escapeHtml(input.landingPath || '/')),
+    heading('Provenance'),
+    paragraph(escapeHtml(input.source || 'direct')),
+    heading('Zone approximative'),
+    paragraph(escapeHtml(location)),
+    paragraph(`<span style="color:${MUTED}">Aucune adresse IP ni donnée de commande n’est enregistrée dans cette alerte.</span>`),
+  ].join('');
+  const text = [
+    'Nouveau visiteur',
+    '',
+    `Première page : ${input.landingPath || '/'}`,
+    `Provenance : ${input.source || 'direct'}`,
+    `Zone approximative : ${location}`,
+    '',
+    'Aucune adresse IP ni donnée de commande n’est enregistrée dans cette alerte.',
+  ].join('\n');
+  return { subject: toSubject(`Nouveau visiteur — ${input.storeName}`), html: layout({ title: 'Nouveau visiteur', body, storeName: input.storeName }), text };
+}

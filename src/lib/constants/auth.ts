@@ -25,3 +25,8 @@ export const LOGIN_MAX_ATTEMPTS_PER_EMAIL = 5;
 export const PASSWORD_MIN_LENGTH = 12;
 export const PASSWORD_MAX_BYTES = 72;
 export const BCRYPT_COST = 12;
+
+export const CHANGE_PASSWORD_API_PATH = '/api/v1/admin/auth/password';
+export const ADMIN_PASSWORD_PATH = '/admin/mot-de-passe';
+export const PASSWORD_CHANGE_MAX_ATTEMPTS = 5;
+export const PASSWORD_CHANGE_WINDOW_SECONDS = LOGIN_WINDOW_SECONDS;

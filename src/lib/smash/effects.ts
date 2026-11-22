@@ -56,6 +56,12 @@ export interface Popup {
   maxLife: number;
 }
 
+export interface CutHalf {
+  x: number; y: number; vx: number; vy: number; angle: number; spin: number;
+  life: number; maxLife: number; radius: number; paletteIndex: number;
+  kind: SmashEvent['kind']; side: 'left' | 'right';
+}
+
 export type Material = 'glass' | 'plastic';
 
 /** Gravité des éclats, en multiples de la hauteur du terrain par seconde² (un peu plus forte que celle des pots : ils sont petits). */
@@ -67,16 +73,21 @@ export class Effects {
   splats: Splat[] = [];
   rings: Ring[] = [];
   popups: Popup[] = [];
+  cutHalves: CutHalf[] = [];
 
   constructor(private readonly random: () => number = Math.random) {}
 
   get active(): boolean {
-    return this.shards.length + this.drops.length + this.splats.length + this.rings.length + this.popups.length > 0;
+    return this.shards.length + this.drops.length + this.splats.length + this.rings.length + this.popups.length + this.cutHalves.length > 0;
   }
 
   /** Éclatement d'un pot : le verre donne beaucoup d'éclats fins et brillants, le plastique peu de gros morceaux mats. */
   burst(event: SmashEvent, material: Material): void {
     const { x, y, radius, paletteIndex } = event;
+    for (const side of ['left', 'right'] as const) {
+      const direction = side === 'left' ? -1 : 1;
+      this.cutHalves.push({ x: x + direction * radius * 0.18, y, vx: event.vx * 0.25 + direction * (55 + this.random() * 35), vy: event.vy * 0.2 - 35 - this.random() * 40, angle: event.angle, spin: direction * (1.2 + this.random() * 2), life: 0, maxLife: 620, radius, paletteIndex, kind: event.kind, side });
+    }
     const scale = radius / 36;
     const shardCount = Math.round((material === 'glass' ? 18 : 10) * (0.8 + 0.4 * this.random()));
     for (let index = 0; index < shardCount; index += 1) {
@@ -155,11 +166,19 @@ export class Effects {
       popup.life += dtMs;
       popup.y -= 46 * seconds;
     }
+    for (const half of this.cutHalves) {
+      half.life += dtMs;
+      half.vy += gravity * 0.55 * seconds;
+      half.x += half.vx * seconds;
+      half.y += half.vy * seconds;
+      half.angle += half.spin * seconds;
+    }
     this.shards = this.shards.filter((shard) => shard.life < shard.maxLife);
     this.drops = this.drops.filter((drop) => drop.life < drop.maxLife);
     this.splats = this.splats.filter((splat) => splat.life < splat.maxLife);
     this.rings = this.rings.filter((ring) => ring.life < ring.maxLife);
     this.popups = this.popups.filter((popup) => popup.life < popup.maxLife);
+    this.cutHalves = this.cutHalves.filter((half) => half.life < half.maxLife);
   }
 
   clear(): void {
@@ -168,6 +187,7 @@ export class Effects {
     this.splats = [];
     this.rings = [];
     this.popups = [];
+    this.cutHalves = [];
   }
 
   /** Un morceau de verre : polygone irrégulier à 3 ou 4 sommets, plutôt allongé. */

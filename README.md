@@ -143,14 +143,36 @@ Ce qui est vérifié : fiche produit (galerie, flèches, pastilles, balayage au 
 
 **À savoir** : sur un petit téléphone (390 × 844), le bouton « Ajouter au panier » de la fiche est sous la ligne de flottaison au chargement ; la barre collée s'affiche donc tout de suite (le code l'affiche dès que le bouton n'est pas à l'écran). Le cahier dit « dès que le bouton principal sort de l'écran » : **à trancher** (voir décision 023).
 
-## Photos (Cloudinary)
+## Médias (Cloudinary)
 
+**Tout média passe par Cloudinary : rien n'est stocké sur le disque du serveur** (système de fichiers éphémère sur Vercel).
+
+### 1. Envois depuis le back-office
 1. Crée un compte Cloudinary et renseigne dans `.env.local` : `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
-2. Le navigateur envoie les photos **directement à Cloudinary** avec une signature fournie par `/api/v1/admin/uploads/sign` (valable 1 h, limitée au dossier `boutique/products` et aux formats JPG, PNG, WebP). Le secret ne quitte jamais le serveur, et une photo de téléphone ne passe pas par Vercel (limite de 4,5 Mo par requête).
+2. Le navigateur envoie les fichiers **directement à Cloudinary** avec une signature fournie par `POST /api/v1/admin/uploads/sign` (valable 1 h, administrateur connecté, 60 signatures/heure). Le secret ne quitte jamais le serveur, et un fichier de téléphone ne passe pas par Vercel (limite de 4,5 Mo par requête).
+   - `kind: "image"` (défaut) : dossier `boutique/products`, formats **JPG, PNG, WebP, GIF, AVIF** (8 Mo max côté interface).
+   - `kind: "video"` : dossier `boutique/videos`, formats **WebM, MP4, MOV** (100 Mo max). Prêt côté serveur et client (`uploadMediaToCloudinary`) ; le formulaire produit n'envoie pour l'instant que des photos.
+   - SVG jamais accepté depuis le back-office (un SVG peut embarquer du script). Cloudinary vérifie le format sur le contenu réel du fichier, pas sur l'extension.
 3. À l'enregistrement, le serveur n'accepte que des images de **ton** compte et de **ton** dossier : une URL externe est refusée.
-4. Sans ces variables, tout fonctionne sauf l'ajout de photos : l'interface affiche « Le service d'images n'est pas configuré ».
+4. L'affichage se fait depuis Cloudinary (`res.cloudinary.com`, format et qualité automatiques via `f_auto,q_auto`). Sans les variables, tout fonctionne sauf l'ajout de médias : « Le service d'images n'est pas configuré ».
 
-Limite connue : une photo envoyée puis retirée **avant** d'enregistrer le produit reste chez Cloudinary (non référencée). À nettoyer plus tard par une tâche planifiée.
+### 2. Médias du dossier `public/` (logo…)
+- `npm run media:sync` (`scripts/upload-cloudinary.js`) envoie `public/` vers Cloudinary dans `meera/public/…` : images (png, jpg, webp, gif, avif, svg…), vidéos (webm, mp4, mov…), sons (mp3, wav…) et, à défaut, tout autre fichier en « raw ». `--force` renvoie tout, `npm run media:sync:dry` simule. Relançable sans doublon.
+- Le site les lit avec `cld('/brand/logo-meera-kinks.png')` (`src/lib/cloudinary-static.ts`), comme `cld()` de rabbit. La configuration (dossier racine, formats, fichiers locaux) est dans `config/cloudinary-media.json`, lue par le script ET par le site.
+- **Restent locaux** : les polices (`public/fonts/`) et les icônes de site (`/favicon.ico`, `brand/favicon-icon.png`, `brand/apple-touch-icon.png`), réclamées par le navigateur avant tout le reste.
+- Ordre de mise en ligne : 1) `npm run media:sync`, 2) renseigner `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` (même valeur que `CLOUDINARY_CLOUD_NAME`) sur Vercel, 3) redéployer. Sans cette variable, le site sert les fichiers locaux.
+- La CSP autorise `res.cloudinary.com` en `img-src` et `media-src`, `api.cloudinary.com` en `connect-src`.
+
+Limite connue : un média envoyé puis retiré **avant** d'enregistrer le produit reste chez Cloudinary (non référencé). À nettoyer plus tard par une tâche planifiée.
+
+## Interface et animations
+
+- **Loader d'entrée** (`IntroLoader`) : sur l'accueil seulement, une fois par session (`sessionStorage`) — cercles concentriques, objets de la marque, logo, puis rideau retiré. Le contenu de la page est dans le HTML dès le début : le loader n'est qu'un calque.
+- **Transition entre les pages** (`PageTransition`) : variante 05 du labo (vortex WebGL), en WebGL natif (pas de three.js). Elle intercepte les liens internes qui changent de page ; le reste (ctrl/cmd + clic, nouvel onglet, ancres, modals, liens externes) est laissé au navigateur. Pour exclure un lien : `data-no-transition`. Sans WebGL, navigation normale.
+- **Menu et panier** : deux `<dialog>` natifs portés par l'ancre (`#menu`, `#panier`) — bouton Retour du téléphone, Échap et focus piégé fonctionnent. Le menu (`MenuModal`) utilise des rideaux de couleur et des liens qui montent un à un (GSAP).
+- **Réduire les animations** (réglage système) : pas de loader, pas de transition, menu sans animation, hero fixe.
+- **Échelle typographique** (`tokens.css`) : `--text-hero` (4), `--text-content` (1), `--text-section` (2), `--text-desc` (3) ; polices de la charte (Poppins, Great Vibes).
+- **Logos** : `logo-meera-kinks.png` (L1, sur fond beige) et `logo-meera-kinks-beige.png` (L3, sur fond marron — grand logo du pied de page), tous deux synchronisés par `npm run media:sync`.
 
 ## À vérifier à la main (une fois la base et Cloudinary branchés)
 

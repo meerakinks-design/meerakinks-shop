@@ -24,4 +24,6 @@ export const newPasswordSchema = z
     message: `Le mot de passe est trop long (${PASSWORD_MAX_BYTES} octets maximum).`,
   });
 
+export const changePasswordSchema = z.object({ currentPassword: z.string({ required_error: 'Renseigne ton mot de passe actuel.' }).min(1).max(128), newPassword: newPasswordSchema, confirmPassword: z.string({ required_error: 'Confirme ton nouveau mot de passe.' }).min(1) }).refine((v) => v.newPassword === v.confirmPassword, { path: ['confirmPassword'], message: 'Les deux mots de passe ne sont pas identiques.' }).refine((v) => v.newPassword !== v.currentPassword, { path: ['newPassword'], message: 'Choisis un mot de passe différent de l’actuel.' });
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 export { emailField };

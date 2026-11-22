@@ -26,6 +26,7 @@ interface AddableProduct {
   /** Prix facturé (promotion comprise) : sert UNIQUEMENT à l'estimation affichée avant le devis du serveur. */
   price: number;
   stock: number | null;
+  variantId?: string | null;
 }
 
 interface CartContextValue {
@@ -38,10 +39,10 @@ interface CartContextValue {
   quoteStatus: QuoteStatus;
   /** Estimation pour l'en-tête ; null tant qu'un prix est inconnu. */
   estimatedTotal: number | null;
-  quantityOf: (productId: string) => number;
+  quantityOf: (productId: string, variantId?: string | null) => number;
   add: (product: AddableProduct, quantity?: number) => void;
-  setQuantity: (productId: string, quantity: number, max?: number) => void;
-  remove: (productId: string) => void;
+  setQuantity: (productId: string, quantity: number, max?: number, variantId?: string | null) => void;
+  remove: (productId: string, variantId?: string | null) => void;
   clear: () => void;
   retryQuote: () => void;
   announce: (message: string) => void;
@@ -109,7 +110,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setQuoteStatus('loading');
     const timer = window.setTimeout(async () => {
       const result = await postJson<CartQuote>('/api/v1/cart/quote', {
-        items: cart.lines.map((line) => ({ productId: line.productId, quantity: line.quantity })),
+        items: cart.lines.map((line) => ({ productId: line.productId, variantId: line.variantId, quantity: line.quantity })),
       });
       if (requestId !== requestCounter.current) return; // une demande plus récente a pris le relais
       if (!result.ok) {
@@ -136,19 +137,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
     (product: AddableProduct, quantity = 1) => {
       if (isOutOfStock(product.stock)) return;
       setPrices((current) => ({ ...current, [product.id]: product.price }));
-      setCart((current) => addToCart(current, product.id, quantity, Date.now(), maxOrderableQuantity(product.stock)));
+      setCart((current) => addToCart(current, product.id, quantity, Date.now(), maxOrderableQuantity(product.stock), product.variantId ?? null));
       announce(`${product.name} ajouté à votre panier`);
     },
     [announce],
   );
 
-  const setQuantity = useCallback((productId: string, quantity: number, max?: number) => {
-    setCart((current) => setLineQuantity(current, productId, quantity, Date.now(), max));
+  const setQuantity = useCallback((productId: string, quantity: number, max?: number, variantId: string | null = null) => {
+    setCart((current) => setLineQuantity(current, productId, quantity, Date.now(), max, variantId));
   }, []);
 
   const remove = useCallback(
-    (productId: string) => {
-      setCart((current) => removeLine(current, productId));
+    (productId: string, variantId: string | null = null) => {
+      setCart((current) => removeLine(current, productId, Date.now(), variantId));
       announce('Article retiré du panier');
     },
     [announce],
@@ -156,7 +157,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clear = useCallback(() => setCart(emptyCart()), []);
   const retryQuote = useCallback(() => setRetryToken((token) => token + 1), []);
-  const quantityOf = useCallback((productId: string) => quantityInCart(cart, productId), [cart]);
+  const quantityOf = useCallback((productId: string, variantId: string | null = null) => quantityInCart(cart, productId, variantId), [cart]);
 
   const quoteIsCurrent = quote !== null && quotedKey === linesKey;
   const estimatedTotal = useMemo(() => {

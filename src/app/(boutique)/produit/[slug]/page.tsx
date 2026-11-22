@@ -90,7 +90,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             {hasPromotion(product) && <s aria-label={`Ancien prix ${formatFcfa(product.price)}`}>{formatFcfa(product.price)}</s>} <strong>{formatFcfa(price)}</strong>
           </p>
 
-          <ProductPurchase product={{ id: product.id, name: product.name, price, stock: product.stock }} />
+          <ProductPurchase product={{ id: product.id, name: product.name, price, salePrice: product.salePrice, stock: product.stock, optionLabel: product.optionLabel, variants: product.variants }} />
 
           {(product.characteristics.length > 0 || product.weightGrams !== null) && (
             <section aria-labelledby="caracteristiques" className="info-card">

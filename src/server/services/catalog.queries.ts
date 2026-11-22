@@ -272,6 +272,8 @@ export async function getProductPage(id: string, now: Date = new Date()) {
       seoTitle: true,
       metaDescription: true,
       updatedAt: true,
+      optionLabel: true,
+      variants: { where: { isActive: true }, orderBy: { position: 'asc' }, select: { id: true, label: true, price: true, salePrice: true, stock: true } },
     },
   });
   if (!row) return null;
@@ -286,6 +288,8 @@ export async function getProductPage(id: string, now: Date = new Date()) {
     seoTitle: row.seoTitle,
     metaDescription: row.metaDescription,
     updatedAt: row.updatedAt.toISOString(),
+    optionLabel: row.optionLabel,
+    variants: row.variants,
   };
 }
 

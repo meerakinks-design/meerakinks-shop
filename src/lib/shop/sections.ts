@@ -36,8 +36,8 @@ export type ShopLayout =
   | { mode: 'categories'; sections: CategorySection[]; others: ShopProduct[] }
   | { mode: 'grid'; products: ShopProduct[] };
 
-// Couleurs PROVISOIRES quand une catégorie n'a pas de couleur : remplacées par la charte graphique (F0b).
-export const FALLBACK_ACCENTS = ['#f4a6c0', '#f2c94c', '#b69bd6', '#b7d36b'] as const;
+// Couleurs de secours de la charte : Hydratation orange, Nettoyage/Pousse jaune-orangé, Nutrition marron.
+export const FALLBACK_ACCENTS = ['#F47C26', '#FF9500', '#7F3F20', '#D95525', '#F2B590', '#F8EEDC'] as const;
 
 export function buildShopLayout(categories: readonly ShopCategory[], products: readonly ShopProduct[]): ShopLayout {
   const ordered = [...categories].sort((a, b) => a.position - b.position || a.name.localeCompare(b.name, 'fr'));

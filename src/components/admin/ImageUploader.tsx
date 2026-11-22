@@ -31,7 +31,7 @@ export function ImageUploader({ images, onChange, defaultAlt, error }: ImageUplo
     const slotsLeft = MAX_PRODUCT_IMAGES - images.length;
     const accepted = files.slice(0, Math.max(slotsLeft, 0)).filter((file) => {
       if (!isAllowedType(file.type)) {
-        issues.push(`« ${file.name} » : format refusé (JPG, PNG ou WebP uniquement).`);
+        issues.push(`« ${file.name} » : format refusé (JPG, PNG, WebP, GIF ou AVIF uniquement).`);
         return false;
       }
       if (file.size > MAX_IMAGE_BYTES) {
@@ -81,7 +81,7 @@ export function ImageUploader({ images, onChange, defaultAlt, error }: ImageUplo
   return (
     <fieldset className="field">
       <legend>Photos</legend>
-      <p className="help-text">La première photo est la photo principale. JPG, PNG ou WebP, 8 Mo maximum chacune.</p>
+      <p className="help-text">La première photo est la photo principale. JPG, PNG, WebP, GIF ou AVIF, 8 Mo maximum chacune. Elles sont envoyées directement chez Cloudinary.</p>
 
       {images.length > 0 && (
         <ul className="image-grid">

@@ -18,6 +18,7 @@ const { CategorySections } = await import('@/components/shop/CategorySections');
 const { ShopGrid } = await import('@/components/shop/ShopGrid');
 const { ProductCard } = await import('@/components/shop/ProductCard');
 const { Header } = await import('@/components/shop/Header');
+const { MenuModal } = await import('@/components/shop/MenuModal');
 const { Collections, Contact, Instagram, Reviews, Faq, Hero, Focus } = await import('@/components/shop/LandingSections');
 
 const image = (id: string) => ({ url: `https://res.cloudinary.com/demo/image/upload/v1/boutique/products/${id}.jpg`, alt: `Photo ${id}` });
@@ -125,41 +126,81 @@ describe('carte produit', () => {
 });
 
 describe('en-tête et panier', () => {
-  const html = wrap(<Header storeName="Awa Beauty" showCollections showContact />);
-  it('affiche la marque, la navigation et le panier avec un nom accessible complet', () => {
+  const html = wrap(<Header storeName="Awa Beauty" />);
+  it('affiche le logo à gauche, le bouton Boutique, le panier (nom accessible complet) et le bouton menu', () => {
     expect(html).toContain('Awa Beauty');
     expect(html).toContain('href="/boutique"');
-    expect(html).toContain('href="/#collections"');
-    expect(html).toContain('href="#notre-histoire"');
-    expect(html).toContain('href="/#contact"');
     expect(html).toContain('href="#panier"');
+    expect(html).toContain('href="#menu"');
     expect(html).toContain('aria-label="Panier : vide"');
+    expect(html).toContain('aria-label="Ouvrir le menu"');
+    expect(html.indexOf('class="brand"')).toBeLessThan(html.indexOf('class="header-shop"'));
+    expect(html.indexOf('class="header-shop"')).toBeLessThan(html.indexOf('cart-button'));
+    expect(html.indexOf('cart-button')).toBeLessThan(html.indexOf('menu-toggle'));
   });
   it('panier vide : ni badge ni montant', () => {
     expect(html).not.toContain('cart-badge');
     expect(html).not.toContain('cart-total');
   });
-  it('le panier est dans la barre ET dans le menu mobile', () => {
-    expect(html.match(/href="#panier"/g)).toHaveLength(2);
+  it('aucune navigation en ligne : tout le reste passe par le menu en modal', () => {
+    expect(html).not.toContain('main-nav');
+    expect(html).not.toContain('/#collections');
+    expect(html).not.toContain('notre-histoire');
   });
-  it('le menu mobile est replié par défaut', () => {
-    expect(html).toContain('aria-expanded="false"');
+});
+
+describe('menu en modal', () => {
+  const socials = [{ label: 'Instagram', href: 'https://instagram.com/awa' }];
+  it('liste Boutique, Notre histoire et Mon panier, et le contrôle de fermeture', () => {
+    const html = wrap(<MenuModal storeName="Awa Beauty" showCollections={false} showContact={false} socials={[]} />);
+    expect(html).toContain('<dialog');
+    expect(html).toContain('aria-label="Menu"');
+    expect(html).toContain('href="/boutique"');
+    expect(html).toContain('href="#notre-histoire"');
+    expect(html).toContain('href="#panier"');
+    expect(html).toContain('aria-label="Fermer le menu"');
   });
   it('n’affiche aucun lien mort : « Collections » et « Contact » disparaissent quand leur section n’existe pas', () => {
-    const bare = wrap(<Header storeName="Awa Beauty" showCollections={false} showContact={false} />);
+    const bare = wrap(<MenuModal storeName="Awa Beauty" showCollections={false} showContact={false} socials={[]} />);
     expect(bare).not.toContain('href="/#collections"');
     expect(bare).not.toContain('href="/#contact"');
-    expect(bare).toContain('href="/boutique"');
-    expect(bare).toContain('href="#notre-histoire"');
+    const full = wrap(<MenuModal storeName="Awa Beauty" showCollections showContact socials={[]} />);
+    expect(full).toContain('href="/#collections"');
+    expect(full).toContain('href="/#contact"');
+  });
+  it('réseaux sociaux : seulement ceux configurés, dans un nouvel onglet sans fuite de référent', () => {
+    expect(wrap(<MenuModal storeName="Awa Beauty" showCollections showContact socials={[]} />)).not.toContain('menu-socials');
+    const html = wrap(<MenuModal storeName="Awa Beauty" showCollections showContact socials={socials} />);
+    expect(html).toContain('href="https://instagram.com/awa"');
+    expect(html).toContain('rel="noopener noreferrer"');
   });
 });
 
 describe('sections de la landing', () => {
   it('Hero : le lien « best-sellers » n’existe que si la section existe', () => {
-    expect(renderToStaticMarkup(<Hero showBestSellers />)).toContain('href="/#best-sellers"');
-    const without = renderToStaticMarkup(<Hero showBestSellers={false} />);
+    expect(renderToStaticMarkup(<Hero showBestSellers iconSrc="/brand/favicon-icon.png" />)).toContain('href="/#best-sellers"');
+    const without = renderToStaticMarkup(<Hero showBestSellers={false} iconSrc="/brand/favicon-icon.png" />);
     expect(without).not.toContain('best-sellers');
     expect(without).toContain('href="/boutique"');
+  });
+
+  it('Hero : titre en deux temps (slogan de la charte), badge qui tourne, et la tête de la marque tant qu’aucun produit n’a de photo', () => {
+    const html = renderToStaticMarkup(<Hero showBestSellers={false} iconSrc="/brand/favicon-icon.png" />);
+    expect(html).toContain('class="hero-title-main">Embrassez<');
+    expect(html).toContain('class="hero-title-script">vos kinks !<');
+    expect(html).toContain('Embrassez vos kinks !'); // titre complet pour les lecteurs d'écran et le référencement
+    expect(html).toContain('class="hero-badge"');
+    expect(html).toContain('class="hero-icon"');
+    expect(html).not.toContain('hero-main');
+  });
+
+  it('Hero : les produits avec photo prennent la scène (un principal, trois qui flottent au plus) ; sans photo, ils sont ignorés', () => {
+    const products = [product('1'), product('2'), product('3'), product('4'), product('5'), product('6', { image: null })];
+    const html = renderToStaticMarkup(<Hero showBestSellers products={products} iconSrc="/brand/favicon-icon.png" />);
+    expect(html).toContain('href="/produit/slug-1"');
+    expect(html.match(/class="hero-float hero-float-\d"/g)).toHaveLength(3);
+    expect(html).not.toContain('slug-5');
+    expect(html).not.toContain('class="hero-icon"');
   });
 
   it('Collections : une carte par catégorie vers /categorie/[slug], et « Offres » comme raccourci de la boutique', () => {
@@ -214,5 +255,19 @@ describe('produit mis en avant de la landing', () => {
     const html = wrap(<Focus product={{ ...product('f1', { price: 8000 }), description: 'Une crème douce.', characteristics: ['Pot de 50 ml'], usageAdvice: null }} />);
     expect(html).toContain('purchase-add');
     expect(html).not.toContain('sticky-buy');
+  });
+});
+
+describe('loader d’entrée et transition de page', () => {
+  it('le serveur ne rend jamais le loader : le contenu est dans le HTML (référencement, accessibilité, pas de décalage d’hydratation)', async () => {
+    const { IntroLoader } = await import('@/components/shop/IntroLoader');
+    expect(renderToStaticMarkup(<IntroLoader logoSrc="/l.png" iconSrc="/i.png" storeName="Awa Beauty" />)).toBe('');
+  });
+  it('le calque de transition est un canvas masqué aux lecteurs d’écran, sans effet sur les clics', async () => {
+    const { PageTransition } = await import('@/components/shop/PageTransition');
+    const html = renderToStaticMarkup(<PageTransition />);
+    expect(html).toContain('<canvas');
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).toContain('class="page-transition"');
   });
 });

@@ -3,7 +3,7 @@ import { INSTAGRAM_POSTS, MAX_INSTAGRAM_POSTS, MIN_INSTAGRAM_POSTS } from '@/con
 import { faqItems } from '@/content/faq';
 import { LANDING } from '@/content/landing';
 import { REVIEWS } from '@/content/avis';
-import { categoryPath, MODAL_HASHES, PUBLIC_ROUTES } from '@/lib/constants/routes';
+import { categoryPath, MODAL_HASHES, productPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { fill } from '@/lib/shop/template';
 import { hasContactChannels } from '@/lib/shop/contact';
 import { whatsappLink } from '@/lib/shop/whatsapp';
@@ -19,17 +19,28 @@ import Spaghetti from './Spaghetti';
 import { effectivePrice } from '@/lib/shop/product-display';
 import { summarize } from '@/lib/shop/seo';
 
-export function Hero({ showBestSellers }: { showBestSellers: boolean }) {
+/**
+ * Héros (référence My Frida + Bucks) : gros titre (taille 4) dont le dernier mot passe en cursive, bouton pastille
+ * incliné, badge circulaire qui tourne, disque orange derrière les produits qui flottent. Les produits viennent
+ * du catalogue ; sans photo, la tête aux deux puffs de la marque tient la scène.
+ */
+export function Hero({ showBestSellers, products = [], iconSrc }: { showBestSellers: boolean; products?: readonly ShopProduct[]; iconSrc: string }) {
   const hero = LANDING.hero;
+  const [main, ...floating] = products.filter((product) => product.image).slice(0, 4);
   return (
     <section className="hero" aria-labelledby="hero-title">
-      <div className="container">
-        <Spaghetti as="p" className="eyebrow" trigger="mount">{hero.eyebrow}</Spaghetti>
-        <Spaghetti as="h1" id="hero-title" trigger="mount">{hero.title}</Spaghetti>
-        <Spaghetti as="p" className="lead" trigger="mount">{hero.text}</Spaghetti>
+      <div className="container hero-inner">
+        <p className="eyebrow hero-eyebrow">{hero.eyebrow}</p>
+        <h1 id="hero-title" className="hero-title">
+          <span className="hero-title-main">{hero.titleMain}</span>
+          <span className="hero-title-script">{hero.titleScript}</span>
+          <span className="visually-hidden"> — {hero.title}</span>
+        </h1>
+        <p className="lead hero-lead">{hero.text}</p>
         <div className="hero-actions">
-          <Link className="btn" href={PUBLIC_ROUTES.shop}>
+          <Link className="btn btn-pill" href={PUBLIC_ROUTES.shop}>
             {hero.primaryCta}
+            <span aria-hidden="true">›</span>
           </Link>
           {showBestSellers && (
             <Link className="btn btn-quiet" href="/#best-sellers">
@@ -37,8 +48,39 @@ export function Hero({ showBestSellers }: { showBestSellers: boolean }) {
             </Link>
           )}
         </div>
-        <p className="help-text">{hero.reassurance}</p>
+
+        <div className="hero-stage" aria-hidden={main ? undefined : 'true'}>
+          <div className="hero-disc" />
+          {main ? (
+            <Link href={productPath(main.slug)} className="hero-main" aria-label={`Voir ${main.name}`}>
+              <ProductImage image={main.image} sizes="(min-width: 900px) 30rem, 80vw" priority />
+            </Link>
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="hero-icon" src={iconSrc} alt="" width={420} height={420} />
+          )}
+          {floating.slice(0, 3).map((product, index) => (
+            <span key={product.id} className={`hero-float hero-float-${index + 1}`} aria-hidden="true">
+              <ProductImage image={product.image} widths={[160, 240, 320]} sizes="8rem" />
+            </span>
+          ))}
+          <svg className="hero-badge" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
+            <defs>
+              <path id="hero-badge-circle" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0" />
+            </defs>
+            <circle cx="100" cy="100" r="96" className="hero-badge-bg" />
+            <text className="hero-badge-text">
+              <textPath href="#hero-badge-circle" startOffset="0">
+                {`${hero.badge} • ${hero.badge} • `}
+              </textPath>
+            </text>
+            <image href={iconSrc} x="46" y="46" width="108" height="108" />
+          </svg>
+        </div>
       </div>
+      <svg className="hero-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path d="M0,70 C240,10 480,10 720,60 C960,110 1200,110 1440,50 L1440,120 L0,120 Z" />
+      </svg>
     </section>
   );
 }
@@ -114,7 +156,7 @@ export function BestSellers({ products }: { products: readonly ShopProduct[] }) 
 export function StoryTeaser({ storeName }: { storeName: string }) {
   const copy = LANDING.story;
   return (
-    <section className="section section-tinted" aria-labelledby="story-title">
+    <section className="section section-brand" aria-labelledby="story-title">
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="story-title">{copy.title}</Spaghetti>
@@ -162,19 +204,25 @@ export function Focus({ product }: { product: FocusProduct }) {
 export function Why() {
   const copy = LANDING.why;
   return (
-    <section id="pourquoi-nous" className="section section-tinted" aria-labelledby="why-title">
+    <section id="pourquoi-nous" className="section section-brand" aria-labelledby="why-title">
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="why-title">{copy.title}</Spaghetti>
         <Spaghetti as="p" className="lead">{copy.intro}</Spaghetti>
-        <ul className="why-grid">
-          {copy.items.map((item) => (
-            <li key={item.title}>
-              <Spaghetti as="h3">{item.title}</Spaghetti>
-              <Spaghetti as="p">{item.text}</Spaghetti>
-            </li>
+        <div className="why-grid">
+          {copy.items.map((item, index) => (
+            <details key={item.title} className="why-item" name="why" open={index === 0}>
+              <summary>
+                <span>{item.title}</span>
+                <span className="why-dot" aria-hidden="true" />
+              </summary>
+              <div className="why-body">
+                <span className="why-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                <p>{item.text}</p>
+              </div>
+            </details>
           ))}
-        </ul>
+        </div>
       </div>
     </section>
   );
@@ -335,7 +383,7 @@ export function Contact({ settings }: { settings: PublicSettings }) {
 export function FinalCta() {
   const copy = LANDING.finalCta;
   return (
-    <section className="section final-cta" aria-labelledby="final-title">
+    <section className="section final-cta section-brand" aria-labelledby="final-title">
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="final-title">{copy.title}</Spaghetti>

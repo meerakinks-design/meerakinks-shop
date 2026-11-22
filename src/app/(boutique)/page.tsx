@@ -5,6 +5,7 @@ import { ShopGrid } from '@/components/shop/ShopGrid';
 import Spaghetti from '@/components/shop/Spaghetti';
 import { BestSellers, Collections, Contact, Faq, FinalCta, Focus, Hero, Instagram, Marquee, Reviews, StoryTeaser, Why } from '@/components/shop/LandingSections';
 import { LANDING } from '@/content/landing';
+import { cld } from '@/lib/cloudinary-static';
 import { hasPromotion } from '@/lib/shop/product-display';
 import { buildShopLayout } from '@/lib/shop/sections';
 import { absoluteUrl } from '@/lib/shop/seo';
@@ -28,7 +29,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero showBestSellers={featured.length > 0} />
+      <Hero showBestSellers={featured.length > 0} products={featured} iconSrc={cld('/brand/favicon-icon.png')} />
       <Marquee />
       {layout.mode === 'categories' && <Collections sections={layout.sections} hasOffers={products.some(hasPromotion)} />}
 

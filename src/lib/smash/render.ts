@@ -78,6 +78,7 @@ export class SmashRenderer {
 
     // Éclaboussures de crème au fond (sous les pots et les éclats).
     for (const splat of effects.splats) this.drawSplat(splat);
+    for (const half of effects.cutHalves) this.drawCutHalf(half);
 
     for (const pot of engine.pots) {
       const scale = (pot.radius * POT_SPAN) / DESIGN.visualHeight;
@@ -100,6 +101,38 @@ export class SmashRenderer {
     for (const drop of effects.drops) this.drawDrop(drop);
     for (const shard of effects.shards) this.drawShard(shard);
     for (const popup of effects.popups) this.drawPopup(popup);
+  }
+
+  private drawCutHalf(half: Effects['cutHalves'][number]) {
+    const { ctx } = this;
+    const sprite = this.sprite(half.kind, half.paletteIndex);
+    const scale = (half.radius * POT_SPAN) / DESIGN.visualHeight;
+    const progress = half.life / half.maxLife;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, (1 - progress) * 1.4);
+    ctx.translate(half.x, half.y);
+    ctx.rotate(half.angle);
+    ctx.scale(scale, scale);
+    ctx.beginPath();
+    if (half.side === 'left') ctx.rect(-DESIGN.width / 2 - 2, -DESIGN.height / 2 - 2, DESIGN.width / 2 + 2, DESIGN.height + 4);
+    else ctx.rect(0, -DESIGN.height / 2 - 2, DESIGN.width / 2 + 2, DESIGN.height + 4);
+    ctx.clip();
+    ctx.drawImage(sprite.canvas as CanvasImageSource, -DESIGN.width / 2, -DESIGN.height / 2, DESIGN.width, DESIGN.height);
+    ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, (1 - progress) * 1.5);
+    ctx.translate(half.x, half.y);
+    ctx.rotate(half.angle);
+    ctx.strokeStyle = 'rgba(255,248,231,0.95)';
+    ctx.lineWidth = Math.max(1.2, half.radius * 0.045);
+    ctx.beginPath();
+    ctx.moveTo(0, -half.radius * 1.18);
+    ctx.lineTo(0, half.radius * 1.18);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(89,38,20,0.72)';
+    ctx.lineWidth = Math.max(0.8, half.radius * 0.02);
+    ctx.stroke();
+    ctx.restore();
   }
 
   private drawSplat(splat: Effects['splats'][number]) {

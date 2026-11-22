@@ -26,7 +26,6 @@ export function ProductCard({ product, showCategory = false, priority = false, s
         </Link>
         {product.isNew && <span className="badge-new">Nouveau</span>}
         {outOfStock && <span className="badge-out">Épuisé</span>}
-        <CardCartControl product={{ id: product.id, name: product.name, price, stock: product.stock }} />
       </div>
       <h3 className="product-card-name">
         <Link href={productPath(product.slug)}>{product.name}</Link>
@@ -39,6 +38,15 @@ export function ProductCard({ product, showCategory = false, priority = false, s
           <span className="dot" aria-hidden="true" /> {product.category.name}
         </p>
       )}
+      <div className="product-card-actions">
+        <CardCartControl variant="bar" product={{ id: product.id, name: product.name, price, stock: product.stock }} />
+        <Link className="product-card-view" href={productPath(product.slug)}>
+          <span>Voir le produit</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+            <path d="M7 17L17 7M9 7h8v8" />
+          </svg>
+        </Link>
+      </div>
     </article>
   );
 }

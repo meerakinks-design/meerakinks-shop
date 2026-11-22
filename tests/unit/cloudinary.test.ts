@@ -31,10 +31,26 @@ describe('createUploadSignature', () => {
     const { createHash } = await import('node:crypto');
     const result = cloudinary.createUploadSignature(1_700_000_000_000);
     const expected = createHash('sha1')
-      .update('allowed_formats=jpg,jpeg,png,webp&folder=boutique/products&timestamp=1700000000' + 'secret-de-test')
+      .update('allowed_formats=jpg,jpeg,png,webp,gif,avif&folder=boutique/products&timestamp=1700000000' + 'secret-de-test')
       .digest('hex');
     expect(result.signature).toBe(expected);
-    expect(result).toMatchObject({ cloudName: 'demo', apiKey: '123456789012345', timestamp: 1_700_000_000, folder: 'boutique/products' });
+    expect(result).toMatchObject({ cloudName: 'demo', apiKey: '123456789012345', timestamp: 1_700_000_000, folder: 'boutique/products', resourceType: 'image' });
+    expect(JSON.stringify(result)).not.toContain('secret-de-test');
+  });
+
+  it('accepte GIF et AVIF pour les images, jamais SVG (un SVG peut embarquer du script)', async () => {
+    const { allowedFormats } = cloudinary.createUploadSignature(1_700_000_000_000);
+    expect(allowedFormats.split(',')).toEqual(expect.arrayContaining(['jpg', 'png', 'webp', 'gif', 'avif']));
+    expect(allowedFormats).not.toContain('svg');
+  });
+
+  it('signe les vidéos (webm, mp4, mov) dans leur propre dossier, avec le type « video »', async () => {
+    const { createHash } = await import('node:crypto');
+    const result = cloudinary.createUploadSignature(1_700_000_000_000, 'video');
+    const expected = createHash('sha1')
+      .update('allowed_formats=webm,mp4,mov&folder=boutique/videos&timestamp=1700000000' + 'secret-de-test')
+      .digest('hex');
+    expect(result).toMatchObject({ folder: 'boutique/videos', allowedFormats: 'webm,mp4,mov', resourceType: 'video', signature: expected });
     expect(JSON.stringify(result)).not.toContain('secret-de-test');
   });
 });

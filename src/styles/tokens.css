@@ -1,18 +1,30 @@
-/* Tokens PROVISOIRES : remplacés par la charte graphique de la marque (questionnaire F0b).
-   Tout le site lit ces variables, jamais de couleur écrite en dur dans un composant. */
+/* Charte Meëra Kinks v1.2 — palette officielle et typographies locales.
+   Répartition de surface visée sur la vitrine : 40 % Orange Meëra · 50 % Beige crème · 10 % Marron chocolat.
+   - Orange (#F47C26) : couleur de marque — boutons, bandeaux, sections d'identité, catégories.
+   - Beige (#F8EEDC)  : fonds, espaces de respiration, sections.
+   - Marron (#7F3F20) : textes, titres, pied de page, détails.
+   Contrastes (WCAG) : marron sur beige 6,9:1 · marron sur orange 2,9:1 · beige sur orange 2,3:1.
+   Sur l'orange : titres en grand et gras seulement ; tout texte courant ou petit se pose sur une carte beige ou un fond marron. */
+@font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiEyp8kv8JHgFVrFJA.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiByp8kv8JHgFVrLGT9V1s.ttf') format('truetype'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiByp8kv8JHgFVrLEj6V1s.ttf') format('truetype'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiByp8kv8JHgFVrLCz7V1s.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiByp8kv8JHgFVrLDD4V1s.ttf') format('truetype'); font-weight: 800; font-display: swap; }
+@font-face { font-family: 'Great Vibes'; src: url('/fonts/great-vibes.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 :root {
-  --color-bg: #faf7f2;
-  --color-surface: #ffffff;
-  --color-text: #231f1c;
-  --color-text-muted: #6b625b;
-  --color-border: #e6dfd6;
-  --color-primary: #231f1c;
-  --color-primary-contrast: #ffffff;
-  --color-danger: #b42318;
-  --color-success: #30a46c;
-  --color-focus: #1f6feb;
-
-  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --color-beige: #F8EEDC; --color-orange: #F47C26; --color-brown: #7F3F20;
+  --color-gold-orange: #FF9500; --color-terracotta: #D95525; --color-peach: #F2B590;
+  --color-bg: var(--color-beige); --color-surface: #FFF9F0; --color-text: var(--color-brown);
+  --color-text-muted: #96664D; --color-border: #E8C8AD; --color-primary: var(--color-orange);
+  --color-primary-contrast: var(--color-brown); /* texte posé sur l'orange */ --color-danger: var(--color-terracotta); --color-success: #6E8B45; --color-focus: var(--color-gold-orange);
+  --font-body: 'Poppins', system-ui, sans-serif; --font-brand: 'Great Vibes', cursive;
+  /* Échelle typographique (repères des captures) — polices de la charte : Poppins (textes), Great Vibes (touches manuscrites).
+     4 = héros · 1 = contenu des sections · 2 = titres de sections · 3 = descriptions */
+  --text-hero: clamp(3.5rem, 17vw, 9rem);
+  --text-hero-script: clamp(3.75rem, 18.5vw, 10rem);
+  --text-content: clamp(1.5rem, 5.6vw, 2.5rem);
+  --text-section: clamp(1.875rem, 7.4vw, 3.5rem);
+  --text-desc: clamp(1.0625rem, 4.3vw, 1.375rem);
   --radius: 12px;
   --space-1: 0.25rem;
   --space-2: 0.5rem;

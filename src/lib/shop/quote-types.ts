@@ -2,6 +2,8 @@ export type QuoteLineStatus = 'ok' | 'limited' | 'out_of_stock' | 'unavailable';
 
 export interface QuoteLine {
   productId: string;
+  variantId?: string | null;
+  variantLabel?: string | null;
   status: QuoteLineStatus;
   slug: string | null;
   name: string;

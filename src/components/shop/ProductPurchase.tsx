@@ -8,7 +8,7 @@ import { useCart } from './CartProvider';
 import { QuantityStepper } from './QuantityStepper';
 
 interface ProductPurchaseProps {
-  product: { id: string; name: string; price: number; stock: number | null };
+  product: { id: string; name: string; price: number; salePrice?: number | null; stock: number | null; optionLabel?: string; variants?: { id: string; label: string; price: number | null; salePrice: number | null; stock: number | null }[] };
   /** Barre d'achat collée en bas du téléphone : prévue pour la FICHE PRODUIT seulement (cahier §4.3). Désactivée pour le produit mis en avant de la landing. */
   stickyBar?: boolean;
 }
@@ -24,11 +24,15 @@ export function ProductPurchase({ product, stickyBar = true }: ProductPurchasePr
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
   const [barVisible, setBarVisible] = useState(false);
+  const [variantId, setVariantId] = useState<string | null>(product.variants?.[0]?.id ?? null);
   const anchorRef = useRef<HTMLButtonElement>(null);
   const resetTimer = useRef<number | undefined>(undefined);
-  const max = maxOrderableQuantity(product.stock);
-  const inCart = hydrated ? quantityOf(product.id) : 0;
-  const soldOut = isOutOfStock(product.stock);
+  const variant = product.variants?.find((item) => item.id === variantId) ?? null;
+  const currentPrice = variant?.salePrice ?? variant?.price ?? product.salePrice ?? product.price;
+  const currentStock = variant ? variant.stock : product.stock;
+  const max = maxOrderableQuantity(currentStock);
+  const inCart = hydrated ? quantityOf(product.id, variantId) : 0;
+  const soldOut = isOutOfStock(currentStock);
 
   useEffect(() => {
     const anchor = anchorRef.current;
@@ -67,10 +71,10 @@ export function ProductPurchase({ product, stickyBar = true }: ProductPurchasePr
   }
 
   const chosen = Math.max(1, Math.min(quantity, max));
-  const total = formatFcfa(product.price * chosen);
+  const total = formatFcfa(currentPrice * chosen);
 
   function handleAdd() {
-    add(product, chosen);
+    add({ ...product, price: currentPrice, stock: currentStock, variantId }, chosen);
     setJustAdded(true);
     window.clearTimeout(resetTimer.current);
     resetTimer.current = window.setTimeout(() => setJustAdded(false), 1800);
@@ -79,6 +83,14 @@ export function ProductPurchase({ product, stickyBar = true }: ProductPurchasePr
   return (
     <>
       <div className="purchase">
+        {product.variants && product.variants.length > 0 && (
+          <label className="purchase-row">
+            <span className="purchase-row-label">{product.optionLabel ?? 'Option'}</span>
+            <select value={variantId ?? ''} onChange={(event) => setVariantId(event.target.value || null)} aria-label={product.optionLabel ?? 'Option'}>
+              {product.variants.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
+            </select>
+          </label>
+        )}
         <div className="purchase-row">
           <span className="purchase-row-label">{PRODUCT_TEXT.quantity}</span>
           <QuantityStepper min={1} max={max} value={chosen} onChange={(next) => setQuantity(Math.max(1, Math.min(next, max)))} label={product.name} />

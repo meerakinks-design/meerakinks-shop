@@ -4,7 +4,11 @@
 export const LANDING = {
   hero: {
     eyebrow: 'VOTRE BEAUTÉ, VOTRE MOMENT',
-    title: 'Et si prendre soin de vous devenait votre plus beau rituel ?',
+    // Titre en deux temps (graisse très forte + cursive Great Vibes), comme « My Frida / my moment ». Slogan de la charte v1.2.
+    title: 'Embrassez vos kinks !',
+    titleMain: 'Embrassez',
+    titleScript: 'vos kinks !',
+    badge: 'Embrassez vos kinks',
     text: 'Découvrez une sélection de produits de beauté et d’accessoires choisis pour accompagner vos envies, vos habitudes et vos petits moments rien qu’à vous.',
     primaryCta: 'Découvrir la boutique',
     secondaryCta: 'Voir nos best-sellers',
@@ -117,7 +121,7 @@ export const LANDING = {
     // 🟡 Libellés techniques ajoutés par le code, absents du document de la landing §15 : À VALIDER.
     resume: 'Reprendre',
     boardLabel: 'Zone de jeu Cosmetic Smash',
-    hint: 'Touchez ou cliquez les pots pour les faire éclater. Au clavier : Espace ou Entrée.',
+    hint: 'Tranchez les pots avec le doigt ou la souris : un slash les coupe en deux. Au clavier : Espace ou Entrée.',
     livePaused: 'Partie en pause.',
     liveResumed: 'Partie reprise.',
   },

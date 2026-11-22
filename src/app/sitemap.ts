@@ -1,12 +1,17 @@
 import type { MetadataRoute } from 'next';
 import { categoryPath, productPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
-import { normalizeSiteUrl } from '@/lib/shop/seo';
+import { siteBaseUrl } from '@/lib/shop/seo';
 import { listSitemapEntries } from '@/server/services/catalog.queries';
 
 export const revalidate = 3600;
 
+/**
+ * Pages à indexer : accueil, boutique, catégories, produits publiés. Ni le back-office, ni la commande, ni les pages
+ * légales provisoires (noindex tant qu'elles ne sont pas validées). Sans adresse de site configurée en production : vide.
+ */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000');
+  const base = siteBaseUrl();
+  if (!base) return [];
   const { products, categories } = await listSitemapEntries();
   return [
     { url: `${base}${PUBLIC_ROUTES.home}` },

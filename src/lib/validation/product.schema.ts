@@ -45,6 +45,20 @@ const skuField = z.preprocess(
     .transform((value) => value ?? null),
 );
 
+export const productVariantSchema = z.object({
+  label: z.string().trim().min(1, 'Indiquez le libellé de la variante.').max(100),
+  sku: skuField,
+  price: optionalInteger('le prix de la variante', 1, 100_000_000),
+  salePrice: optionalInteger('le prix promotionnel de la variante', 1, 100_000_000),
+  stock: z.number().int().min(0).max(100_000).nullable(),
+  isActive: z.boolean().default(true),
+  position: z.number().int().min(0).max(10_000).default(0),
+}).superRefine((value, context) => {
+  if (value.salePrice !== null && value.price !== null && value.salePrice >= value.price) {
+    context.addIssue({ code: 'custom', path: ['salePrice'], message: 'Le prix promotionnel doit être inférieur au prix normal.' });
+  }
+});
+
 export const productInputSchema = z
   .object({
     name: z.string({ required_error: 'Donne un nom au produit.' }).trim().min(2, 'Le nom est trop court.').max(120, 'Le nom est trop long.'),
@@ -80,6 +94,8 @@ export const productInputSchema = z
     metaDescription: emptyToNull(160),
     sortOrder: z.number().int().min(0).max(10_000).default(0),
     images: z.array(productImageSchema).max(MAX_PRODUCT_IMAGES, `${MAX_PRODUCT_IMAGES} photos maximum.`),
+    optionLabel: z.string().trim().min(1).max(50).default('Option'),
+    variants: z.array(productVariantSchema).max(100, '100 variantes maximum.').default([]),
   })
   .superRefine((value, context) => {
     if (value.salePrice !== null && value.salePrice >= value.price) {
@@ -92,6 +108,8 @@ export const productInputSchema = z
     if (new Set(publicIds).size !== publicIds.length) {
       context.addIssue({ code: 'custom', path: ['images'], message: 'La même photo est présente deux fois.' });
     }
+    const labels = value.variants.map((variant) => variant.label.toLowerCase());
+    if (new Set(labels).size !== labels.length) context.addIssue({ code: 'custom', path: ['variants'], message: 'Chaque variante doit avoir un libellé différent.' });
   });
 
 /** Ce que le navigateur envoie. */
@@ -99,3 +117,4 @@ export type ProductFormInput = z.input<typeof productInputSchema>;
 /** Ce que le serveur manipule, après validation et normalisation. */
 export type ProductData = z.output<typeof productInputSchema>;
 export type ProductImageInput = z.infer<typeof productImageSchema>;
+export type ProductVariantInput = z.infer<typeof productVariantSchema>;

@@ -7,11 +7,16 @@ import { absoluteUrl } from '@/lib/shop/seo';
 import { listActiveCategories, listShopProducts } from '@/server/services/catalog.queries';
 
 // Les variantes filtrées ou triées ont pour adresse canonique /boutique (pas de contenu dupliqué).
-export const metadata: Metadata = {
+const baseMetadata: Metadata = {
   title: 'Boutique',
   description: 'Découvrez tous nos produits, par catégorie, par nouveautés ou par offres.',
   alternates: { canonical: '/boutique' },
 };
+
+export function generateMetadata({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }): Metadata {
+  const query = typeof searchParams.q === 'string' ? searchParams.q.trim() : '';
+  return query ? { ...baseMetadata, robots: { index: false, follow: true }, alternates: undefined } : baseMetadata;
+}
 
 // Recherche et filtres lus dans l'adresse : la page est calculée à chaque demande.
 export const dynamic = 'force-dynamic';

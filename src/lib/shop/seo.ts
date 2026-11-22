@@ -23,3 +23,6 @@ export function absoluteUrl(path: string, siteUrl: string | undefined = process.
   if (!siteUrl) return null;
   return new URL(path, `${normalizeSiteUrl(siteUrl)}/`).toString();
 }
+
+export function siteBaseUrl(siteUrl: string | undefined = process.env.NEXT_PUBLIC_SITE_URL, nodeEnv: string | undefined = process.env.NODE_ENV): string | null { if (siteUrl) return normalizeSiteUrl(siteUrl); return nodeEnv === 'production' ? null : 'http://localhost:3000'; }
+export function googleVerificationToken(value: string | undefined): string | null { return value && /^[A-Za-z0-9_-]{10,100}$/.test(value) ? value : null; }

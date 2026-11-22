@@ -36,7 +36,7 @@ const ORDER_SELECT = {
   total: true,
   upfrontAmount: true,
   customer: { select: { firstName: true, lastName: true, phone: true } },
-  items: { orderBy: { id: 'asc' }, select: { productId: true, productNameSnapshot: true, unitPriceSnapshot: true, quantity: true, lineTotal: true } },
+  items: { orderBy: { id: 'asc' }, select: { productId: true, variantId: true, variantLabelSnapshot: true, productNameSnapshot: true, unitPriceSnapshot: true, quantity: true, lineTotal: true } },
 } satisfies Prisma.OrderSelect;
 type OrderRow = Prisma.OrderGetPayload<{ select: typeof ORDER_SELECT }>;
 
@@ -72,7 +72,7 @@ function toRecap(row: OrderRow): OrderRecap {
     zoneType: row.zoneType,
     placeLabel: formatPlaceLabel(row.zoneType, row.shippingCity, row.shippingCountry),
     lines: row.items.map((item) => ({
-      name: item.productNameSnapshot,
+      name: item.variantLabelSnapshot ? `${item.productNameSnapshot} — ${item.variantLabelSnapshot}` : item.productNameSnapshot,
       quantity: item.quantity,
       unitPrice: item.unitPriceSnapshot,
       lineTotal: item.lineTotal,
@@ -160,6 +160,8 @@ function isSameRequest(row: OrderRow, input: OrderInput): boolean {
 
 interface PricedLine {
   productId: string;
+  variantId: string | null;
+  variantLabel: string | null;
   name: string;
   unitPrice: number;
   quantity: number;
@@ -236,6 +238,7 @@ async function insertOrder(tx: Prisma.TransactionClient, input: OrderInput): Pro
       items: {
         create: lines.map((line) => ({
           productId: line.productId,
+          ...(line.variantId ? { variantId: line.variantId, variantLabelSnapshot: line.variantLabel } : {}),
           productNameSnapshot: line.name,
           unitPriceSnapshot: line.unitPrice,
           quantity: line.quantity,
@@ -275,7 +278,7 @@ function cartChanged(problems: string[]): HttpError {
 async function priceAndReserve(tx: Prisma.TransactionClient, items: OrderInput['items']): Promise<PricedLine[]> {
   const products = await tx.product.findMany({
     where: { id: { in: items.map((item) => item.productId) } },
-    select: { id: true, name: true, price: true, salePrice: true, stock: true, status: true },
+    select: { id: true, name: true, price: true, salePrice: true, stock: true, status: true, variants: { where: { isActive: true }, select: { id: true, label: true, price: true, salePrice: true, stock: true } } },
   });
   const byId = new Map(products.map((product) => [product.id, product]));
 
@@ -285,31 +288,40 @@ async function priceAndReserve(tx: Prisma.TransactionClient, items: OrderInput['
     const product = byId.get(item.productId);
     if (!product || product.status !== 'PUBLISHED') {
       problems.push('Un produit de votre panier n’est plus disponible.');
-    } else if (isOutOfStock(product.stock)) {
-      problems.push(`${product.name} : épuisé.`);
-    } else if (product.stock !== null && item.quantity > product.stock) {
-      problems.push(`${product.name} : il n’en reste que ${product.stock}.`);
     } else {
-      const unitPrice = effectivePrice(product);
+      const variant = item.variantId ? product.variants.find((candidate) => candidate.id === item.variantId) : null;
+      if (item.variantId && !variant) { problems.push(`${product.name} : cette variante n’est plus disponible.`); continue; }
+      const stock = variant ? variant.stock : product.stock;
+      if (isOutOfStock(stock)) {
+        problems.push(`${product.name}${variant ? ` — ${variant.label}` : ''} : épuisé.`);
+        continue;
+      }
+      if (stock !== null && item.quantity > stock) {
+        problems.push(`${product.name} : il n’en reste que ${stock}.`);
+        continue;
+      }
+      const priced = { price: variant?.price ?? product.price, salePrice: variant?.salePrice ?? product.salePrice };
+      const unitPrice = effectivePrice(priced);
       lines.push({
         productId: product.id,
+        variantId: variant?.id ?? null,
+        variantLabel: variant?.label ?? null,
         name: product.name,
         unitPrice,
         quantity: item.quantity,
         lineTotal: lineTotal({ unitPrice, quantity: item.quantity }),
-        tracksStock: product.stock !== null,
+        tracksStock: stock !== null,
       });
     }
   }
   if (problems.length > 0) throw cartChanged(problems);
 
   // Ordre fixe : deux commandes simultanées ne se bloquent pas mutuellement.
-  for (const line of [...lines].sort((a, b) => a.productId.localeCompare(b.productId))) {
+  for (const line of [...lines].sort((a, b) => `${a.productId}:${a.variantId ?? ''}`.localeCompare(`${b.productId}:${b.variantId ?? ''}`))) {
     if (!line.tracksStock) continue;
-    const { count } = await tx.product.updateMany({
-      where: { id: line.productId, stock: { gte: line.quantity } },
-      data: { stock: { decrement: line.quantity } },
-    });
+    const { count } = line.variantId
+      ? await tx.productVariant.updateMany({ where: { id: line.variantId, stock: { gte: line.quantity }, isActive: true }, data: { stock: { decrement: line.quantity } } })
+      : await tx.product.updateMany({ where: { id: line.productId, stock: { gte: line.quantity } }, data: { stock: { decrement: line.quantity } } });
     if (count !== 1) throw cartChanged([`${line.name} : stock insuffisant.`]);
   }
   return lines;

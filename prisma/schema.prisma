@@ -16,8 +16,7 @@
 // Reçu : une ligne `Receipt` par commande, avec les données FIGÉES à la création ; le PDF est
 // généré à la demande à partir de ces données et des paiements enregistrés.
 //
-// Hors schéma MVP (Scope Lock) : variantes produit, assistant IA, paiement en ligne.
-// Voir les blocs commentés en bas de fichier.
+// Les variantes et l’analytique propriétaire font désormais partie du MVP.
 // ============================================================================
 
 generator client {
@@ -107,6 +106,7 @@ enum EmailType {
   NEW_ORDER_SELLER         // alerte à la vendeuse
   ORDER_RECEIVED_CUSTOMER  // accusé de réception au client (si email fourni)
   STATUS_CHANGED_CUSTOMER  // changement de statut (si activé et email fourni)
+  NEW_VISITOR              // alerte d’arrivée analytics (consentement requis)
 }
 
 enum EmailStatus {
@@ -139,6 +139,7 @@ model AdminUser {
   sessions         AdminSession[]
   statusChanges    OrderStatusHistory[]
   recordedPayments Payment[]
+  auditLogs        AdminAuditLog[]
 }
 
 // Session opaque : le cookie contient un jeton aléatoire, la base ne garde que son hash.
@@ -155,6 +156,18 @@ model AdminSession {
 
   @@index([adminUserId])
   @@index([expiresAt])
+}
+
+model AdminAuditLog {
+  id          String     @id @default(cuid())
+  action      String
+  adminUserId String?
+  adminUser   AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+  details     Json?
+  createdAt   DateTime   @default(now())
+  @@index([createdAt])
+  @@index([action, createdAt])
+  @@index([adminUserId])
 }
 
 // ----------------------------------------------------------------------------
@@ -194,6 +207,8 @@ model Product {
   // Prix promotionnel facultatif, toujours < price. S'il existe, c'est LUI que le client paie :
   // le serveur facture `salePrice ?? price`.
   salePrice Int?
+  // Libellé affiché devant les options lorsqu’un produit possède plusieurs variantes.
+  optionLabel String @default("Option")
   // Poids en grammes (affiché en g ou en kg dans l'interface).
   weightGrams Int?
   // Référence interne facultative.
@@ -219,6 +234,7 @@ model Product {
   updatedAt DateTime @updatedAt
 
   images     ProductImage[]
+  variants   ProductVariant[]
   orderItems OrderItem[]
   redirects  SlugRedirect[]
   focusedIn  StoreSettings[] @relation("FocusProduct")
@@ -226,6 +242,26 @@ model Product {
   @@index([status, sortOrder])
   @@index([status, isFeatured])
   @@index([categoryId, status])
+}
+
+model ProductVariant {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  label     String
+  sku       String? @unique
+  price     Int?
+  salePrice Int?
+  stock     Int?
+  isActive  Boolean @default(true)
+  position  Int     @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@unique([productId, label])
+  @@index([productId, isActive, position])
 }
 
 // Quand le slug d'une page déjà publiée change, l'ancien est conservé ici : le site renvoie une
@@ -268,6 +304,8 @@ model DeliveryZone {
   name     String
   type     ZoneType
   fee      Int? // FCFA ; null = « frais à confirmer » par la vendeuse
+  deliveryMinHours Int?
+  deliveryMaxHours Int?
   isActive Boolean  @default(true)
   position Int      @default(0)
   orders   Order[]
@@ -288,10 +326,13 @@ model Customer {
   lastName  String
   phone     String   @unique
   email     String? // facultatif tant que WhatsApp est le canal principal
+  anonymizedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   orders Order[]
+
+  @@index([anonymizedAt])
 }
 
 model Order {
@@ -330,6 +371,7 @@ model Order {
   // Montant à régler pour confirmer : acompte (Abidjan, StoreSettings.depositAmount) ou
   // total (hors Abidjan, une fois les frais connus). null tant que non déterminé.
   upfrontAmount Int?
+  stockRestoredAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -356,14 +398,18 @@ model OrderItem {
   // (En pratique : dépublier plutôt que supprimer.)
   productId String?
   product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   productNameSnapshot String
+  variantLabelSnapshot String?
   unitPriceSnapshot   Int
   quantity            Int
   lineTotal           Int // unitPriceSnapshot × quantity, calculé côté serveur
 
   @@index([orderId])
   @@index([productId])
+  @@index([variantId])
 }
 
 // Registre des paiements : une ligne = un encaissement = un reçu.
@@ -456,7 +502,47 @@ model StoreSettings {
   waveNumber        String?
   defaultCurrency   String   @default("XOF") // affichée « FCFA »
   depositAmount     Int      @default(2000) // acompte demandé pour les commandes à Abidjan
+  paymentRules      String?  @db.Text
+  deliveryRules     String?  @db.Text
+  deliveryLeadTimeNote String? @db.Text
   updatedAt         DateTime @updatedAt
+}
+
+// Visite propriétaire : aucune adresse IP et aucun lien vers un client ou une commande.
+model VisitorSession {
+  id                 String   @id @default(cuid())
+  visitorKey         String   @unique
+  firstSeenAt        DateTime @default(now())
+  lastSeenAt         DateTime @default(now())
+  durationSeconds    Int      @default(0)
+  country            String?
+  region             String?
+  city               String?
+  source             String   @default("direct")
+  landingPath        String?
+  device             String?
+  browser            String?
+  arrivalAlertSentAt DateTime?
+  events             VisitorEvent[]
+
+  @@index([firstSeenAt])
+  @@index([source, firstSeenAt])
+  @@index([country, region, city])
+}
+
+model VisitorEvent {
+  id              String         @id @default(cuid())
+  sessionId       String
+  session         VisitorSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  type            String
+  path            String?
+  target          String?
+  durationSeconds Int?
+  metadata        Json?
+  occurredAt      DateTime       @default(now())
+
+  @@index([sessionId, occurredAt])
+  @@index([type, occurredAt])
 }
 
 // ----------------------------------------------------------------------------
@@ -498,23 +584,4 @@ model RateLimitBucket {
   @@index([resetAt])
 }
 
-// ----------------------------------------------------------------------------
-// À ACTIVER PLUS TARD (ne pas migrer au MVP)
-// ----------------------------------------------------------------------------
-
-// Variantes — seulement si le questionnaire (A3) répond « oui » :
-//
-// model ProductVariant {
-//   id        String  @id @default(cuid())
-//   productId String
-//   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-//   label     String  // « Taille M / Noir »
-//   price     Int?    // null = prix du produit
-//   stock     Int?
-//   isActive  Boolean @default(true)
-//   position  Int     @default(0)
-// }
-// + OrderItem.variantId / variantLabelSnapshot
-//
-// Assistant IA (phase 6) : Conversation et Message, à copier du modèle de l'assistant
-// d'AKATech Studio ; il lira Product, DeliveryZone et StoreSettings en lecture seule.
+// L’assistant IA reste hors de cette itération : il lira ces modèles en lecture seule dans une phase dédiée.

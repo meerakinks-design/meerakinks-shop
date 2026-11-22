@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { CLOUDINARY_ALLOWED_FORMATS, CLOUDINARY_UPLOAD_FOLDER } from '@/lib/constants/images';
+import { CLOUDINARY_UPLOAD_FOLDER, UPLOAD_SETTINGS, type UploadKind } from '@/lib/constants/images';
 import { getServerEnv } from '@/lib/env';
 import { HttpError } from '@/server/http';
 import { logError } from '@/server/logger';
@@ -27,22 +27,22 @@ export function signCloudinaryParams(params: Record<string, string | number>, ap
 /**
  * Signature d'un envoi direct navigateur → Cloudinary. Le secret ne quitte jamais le serveur ;
  * le navigateur ne reçoit que la signature, valable une heure, pour ce dossier et ces formats.
+ * `kind` : « image » (JPG, PNG, WebP, GIF, AVIF) ou « vidéo » (WebM, MP4, MOV) ; chaque type a son dossier et ses formats.
  * On envoie directement à Cloudinary : une photo de téléphone dépasse la limite de 4,5 Mo
  * du corps d'une requête sur Vercel.
  */
-export function createUploadSignature(nowMs: number = Date.now()) {
+export function createUploadSignature(nowMs: number = Date.now(), kind: UploadKind = 'image') {
   const { cloudName, apiKey, apiSecret } = getCloudinaryConfig();
+  const { folder, allowedFormats } = UPLOAD_SETTINGS[kind];
   const timestamp = Math.floor(nowMs / 1000);
-  const signature = signCloudinaryParams(
-    { allowed_formats: CLOUDINARY_ALLOWED_FORMATS, folder: CLOUDINARY_UPLOAD_FOLDER, timestamp },
-    apiSecret,
-  );
+  const signature = signCloudinaryParams({ allowed_formats: allowedFormats, folder, timestamp }, apiSecret);
   return {
     cloudName,
     apiKey,
     timestamp,
-    folder: CLOUDINARY_UPLOAD_FOLDER,
-    allowedFormats: CLOUDINARY_ALLOWED_FORMATS,
+    folder,
+    allowedFormats,
+    resourceType: kind,
     signature,
   };
 }

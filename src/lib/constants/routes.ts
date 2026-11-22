@@ -11,12 +11,14 @@ export const PUBLIC_ROUTES = {
   cgu: '/cgu',
   legalNotice: '/mentions-legales',
   privacy: '/politique-de-confidentialite',
+  cookies: '/cookies',
 } as const;
 
 export const MODAL_HASHES = {
   cart: '#panier',
   checkout: '#commande',
   story: '#notre-histoire',
+  menu: '#menu',
 } as const;
 
 export const productPath = (slug: string) => `/produit/${slug}`;

@@ -1,14 +1,21 @@
 // Envoi direct navigateur → Cloudinary avec une signature fournie par notre serveur.
+// Rien de ce qui est envoyé depuis le back-office ne passe par le disque de notre serveur.
 import type { UploadSignature } from '@/lib/admin-api';
 import { NETWORK_FAILURE } from '@/lib/api-client';
 import type { ApiResult } from '@/lib/api-result';
+import type { UploadKind } from '@/lib/constants/images';
 
 interface CloudinaryUploadResponse {
   secure_url?: string;
   public_id?: string;
 }
 
-export async function uploadImageToCloudinary(
+const FORMAT_HINT: Record<UploadKind, string> = {
+  image: 'JPG, PNG, WebP, GIF ou AVIF',
+  video: 'WebM, MP4 ou MOV',
+};
+
+export async function uploadMediaToCloudinary(
   file: File,
   signature: UploadSignature,
 ): Promise<ApiResult<{ url: string; publicId: string }>> {
@@ -21,7 +28,7 @@ export async function uploadImageToCloudinary(
   form.append('allowed_formats', signature.allowedFormats);
 
   try {
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${signature.cloudName}/image/upload`, {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${signature.cloudName}/${signature.resourceType}/upload`, {
       method: 'POST',
       body: form,
     });
@@ -33,7 +40,7 @@ export async function uploadImageToCloudinary(
       ok: false,
       error: {
         code: 'INTERNAL_ERROR',
-        message: `« ${file.name} » n’a pas pu être envoyée. Vérifie le format (JPG, PNG ou WebP) et la taille.`,
+        message: `« ${file.name} » n’a pas pu être envoyé. Vérifie le format (${FORMAT_HINT[signature.resourceType]}) et la taille.`,
         retryable: true,
       },
     };
@@ -41,3 +48,6 @@ export async function uploadImageToCloudinary(
     return NETWORK_FAILURE;
   }
 }
+
+/** Nom conservé : le formulaire produit envoie des photos. */
+export const uploadImageToCloudinary = uploadMediaToCloudinary;

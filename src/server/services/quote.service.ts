@@ -7,6 +7,7 @@ export type { CartQuote, QuoteLine, QuoteLineStatus } from '@/lib/shop/quote-typ
 
 export interface QuoteRequestItem {
   productId: string;
+  variantId?: string | null;
   quantity: number;
 }
 
@@ -16,14 +17,16 @@ export interface QuoteRequestItem {
  */
 export async function quoteCart(items: readonly QuoteRequestItem[]): Promise<CartQuote> {
   // Fusionne les lignes en double et borne les quantités : on ne fait pas confiance au navigateur.
-  const requested = new Map<string, number>();
+  const requested = new Map<string, { productId: string; variantId: string | null; quantity: number }>();
   for (const item of items) {
-    requested.set(item.productId, Math.min((requested.get(item.productId) ?? 0) + item.quantity, MAX_QUANTITY_PER_LINE));
+    const key = `${item.productId}:${item.variantId ?? ''}`;
+    const previous = requested.get(key)?.quantity ?? 0;
+    requested.set(key, { productId: item.productId, variantId: item.variantId ?? null, quantity: Math.min(previous + item.quantity, MAX_QUANTITY_PER_LINE) });
   }
   if (requested.size === 0) return { lines: [], subtotal: 0 };
 
   const products = await prisma.product.findMany({
-    where: { id: { in: [...requested.keys()] } },
+    where: { id: { in: [...new Set([...requested.values()].map((item) => item.productId))] } },
     select: {
       id: true,
       slug: true,
@@ -33,29 +36,36 @@ export async function quoteCart(items: readonly QuoteRequestItem[]): Promise<Car
       stock: true,
       status: true,
       images: { orderBy: { position: 'asc' }, take: 1, select: { url: true, alt: true } },
+      variants: { where: { isActive: true }, select: { id: true, label: true, price: true, salePrice: true, stock: true } },
     },
   });
   const byId = new Map(products.map((product) => [product.id, product]));
 
-  const lines: QuoteLine[] = [...requested].map(([productId, requestedQuantity]) => {
+  const lines: QuoteLine[] = [...requested.values()].map(({ productId, variantId, quantity: requestedQuantity }) => {
     const product = byId.get(productId);
     if (!product || product.status !== 'PUBLISHED') {
-      return { productId, status: 'unavailable', slug: null, name: 'Produit indisponible', imageUrl: null, imageAlt: '', unitPrice: 0, regularPrice: null, requestedQuantity, quantity: 0, maxQuantity: 0, lineTotal: 0 };
+      return { productId, variantId, variantLabel: null, status: 'unavailable', slug: null, name: 'Produit indisponible', imageUrl: null, imageAlt: '', unitPrice: 0, regularPrice: null, requestedQuantity, quantity: 0, maxQuantity: 0, lineTotal: 0 };
     }
-    const unitPrice = effectivePrice(product);
+    const variant = variantId ? product.variants.find((item) => item.id === variantId) : null;
+    if (variantId && !variant) return { productId, variantId, variantLabel: null, status: 'unavailable', slug: product.slug, name: product.name, imageUrl: product.images[0]?.url ?? null, imageAlt: product.images[0]?.alt ?? product.name, unitPrice: 0, regularPrice: null, requestedQuantity, quantity: 0, maxQuantity: 0, lineTotal: 0 };
+    const priced = { price: variant?.price ?? product.price, salePrice: variant?.salePrice ?? product.salePrice };
+    const unitPrice = effectivePrice(priced);
+    const stock = variant ? variant.stock : product.stock;
     const base = {
       productId,
+      variantId,
+      variantLabel: variant?.label ?? null,
       slug: product.slug,
       name: product.name,
       imageUrl: product.images[0]?.url ?? null,
       imageAlt: product.images[0]?.alt ?? product.name,
       unitPrice,
-      regularPrice: hasPromotion(product) ? product.price : null,
+      regularPrice: hasPromotion(priced) ? priced.price : null,
       requestedQuantity,
-      maxQuantity: maxOrderableQuantity(product.stock),
+      maxQuantity: maxOrderableQuantity(stock),
     };
-    if (isOutOfStock(product.stock)) return { ...base, status: 'out_of_stock' as const, quantity: 0, lineTotal: 0 };
-    const quantity = product.stock === null ? requestedQuantity : Math.min(requestedQuantity, product.stock);
+    if (isOutOfStock(stock)) return { ...base, status: 'out_of_stock' as const, quantity: 0, lineTotal: 0 };
+    const quantity = stock === null ? requestedQuantity : Math.min(requestedQuantity, stock);
     return {
       ...base,
       status: quantity < requestedQuantity ? ('limited' as const) : ('ok' as const),

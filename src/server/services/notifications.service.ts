@@ -4,7 +4,7 @@ import { prisma } from '@/server/db';
 import { createResendTransport, getEmailConfig, EmailSendError, scrubError, type EmailConfig, type EmailTransport, type OutgoingEmail } from '@/server/integrations/resend';
 import { renderReceiptPdf } from '@/server/integrations/pdf';
 import { logError, logInfo } from '@/server/logger';
-import { buildCustomerReceivedEmail, buildSellerNewOrderEmail, buildStatusChangedEmail, type EmailContent } from '@/server/services/email-templates';
+import { buildCustomerReceivedEmail, buildNewVisitorEmail, buildSellerNewOrderEmail, buildStatusChangedEmail, type EmailContent } from '@/server/services/email-templates';
 import { loadOrderDocument } from '@/server/services/receipt-pdf.service';
 import { parseReceiptData } from '@/server/services/receipt.service';
 
@@ -71,6 +71,10 @@ interface ComposedEmail extends EmailContent {
 
 /** Construit l'email d'une ligne. Le reçu PDF n'est joint qu'à l'alerte de la vendeuse. */
 async function composeEmail(row: DueRow): Promise<ComposedEmail> {
+  if (row.type === 'NEW_VISITOR') {
+    const settings = await prisma.storeSettings.findUnique({ where: { id: STORE_SETTINGS_ID }, select: { storeName: true } });
+    return buildNewVisitorEmail({ storeName: settings?.storeName ?? 'Meëra Kinks', source: 'direct', landingPath: '/', country: null, region: null, city: null });
+  }
   if (!row.orderId) throw new PermanentEmailError('Email sans commande associée.');
   const order = await loadOrderDocument({ id: row.orderId });
   if (!order?.receipt) throw new PermanentEmailError('Commande ou reçu introuvable.');

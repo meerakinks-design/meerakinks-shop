@@ -1,0 +1,14 @@
+{
+  "brand/logo-meera-kinks-beige.png": {
+    "hash": "2494ff94747d437a71cfc7ac531f944ef814c60d2281d1c1867d01549a172b0b",
+    "publicId": "meera/public/brand/logo-meera-kinks-beige",
+    "resourceType": "image",
+    "updatedAt": "2026-11-22T05:25:51.710Z"
+  },
+  "brand/logo-meera-kinks.png": {
+    "hash": "80a6a00a5bae47413c12a5f30879fa406780797b903e69ea8457f015a9dfddd4",
+    "publicId": "meera/public/brand/logo-meera-kinks",
+    "resourceType": "image",
+    "updatedAt": "2026-11-22T05:25:58.401Z"
+  }
+}

@@ -68,8 +68,10 @@ export async function getAdminProduct(id: string) {
       seoTitle: true,
       metaDescription: true,
       sortOrder: true,
+      optionLabel: true,
       categoryId: true,
       images: { orderBy: { position: 'asc' }, select: { url: true, publicId: true, alt: true } },
+      variants: { orderBy: { position: 'asc' } },
     },
   });
 }
@@ -143,6 +145,7 @@ function scalarFields(data: ProductData) {
     metaDescription: data.metaDescription,
     sortOrder: data.sortOrder,
     categoryId: data.categoryId,
+    optionLabel: data.optionLabel,
   };
 }
 
@@ -173,6 +176,7 @@ export async function createProduct(data: ProductData): Promise<{ id: string; sl
         // Première publication : la date est posée ici, et jamais modifiée ensuite.
         publishedAt: data.status === 'PUBLISHED' ? new Date() : null,
         images: { create: data.images.map((image, position) => ({ ...image, position })) },
+        variants: { create: data.variants.map((variant) => ({ ...variant })) },
       },
       select: { id: true, slug: true },
     });
@@ -210,6 +214,16 @@ export async function updateProduct(id: string, data: ProductData): Promise<{ id
           publishedAt: existing.publishedAt ?? (data.status === 'PUBLISHED' ? new Date() : null),
         },
       });
+      if (tx.productVariant) {
+        await tx.productVariant.deleteMany({ where: { productId: id, orderItems: { none: {} } } });
+        for (const variant of data.variants) {
+          await tx.productVariant.upsert({
+            where: { productId_label: { productId: id, label: variant.label } },
+            update: { ...variant },
+            create: { productId: id, ...variant },
+          });
+        }
+      }
       await tx.productImage.deleteMany({ where: { productId: id } });
       if (data.images.length > 0) {
         await tx.productImage.createMany({ data: data.images.map((image, position) => ({ ...image, productId: id, position })) });

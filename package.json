@@ -20,18 +20,24 @@
     "db:studio": "prisma studio",
     "e2e:visual": "node e2e/visual-check.mjs",
     "e2e:pots": "node e2e/pots-sheet.mjs",
-    "e2e:burst": "node e2e/burst-sheet.mjs"
+    "e2e:burst": "node e2e/burst-sheet.mjs",
+    "db:verify-restore": "tsx scripts/verify-restore.ts",
+    "media:sync": "node scripts/upload-cloudinary.js",
+    "media:sync:dry": "node scripts/upload-cloudinary.js --dry-run"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "5.22.0",
+    "@vercel/analytics": "1.6.1",
     "bcryptjs": "2.4.3",
+    "gsap": "^3.12.7",
     "next": "14.2.35",
     "pdf-lib": "1.17.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "write-excel-file": "4.1.1",
     "zod": "3.25.76"
   },
   "devDependencies": {

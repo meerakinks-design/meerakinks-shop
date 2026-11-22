@@ -92,11 +92,12 @@ export const orderInputSchema = baseOrderSchema
   .superRefine((value, context) => {
     const seen = new Set<string>();
     for (const item of value.items) {
-      if (seen.has(item.productId)) {
+      const lineKey = `${item.productId}:${item.variantId ?? ''}`;
+      if (seen.has(lineKey)) {
         context.addIssue({ code: z.ZodIssueCode.custom, path: ['items'], message: 'Un produit apparaît deux fois dans la commande.' });
         break;
       }
-      seen.add(item.productId);
+      seen.add(lineKey);
     }
     if (!value.deliveryZoneId && !value.placeName) {
       context.addIssue({ code: z.ZodIssueCode.custom, path: ['placeName'], message: PLACE_REQUIRED_MESSAGES[value.zoneType] });

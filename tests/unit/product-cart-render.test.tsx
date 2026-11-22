@@ -91,11 +91,12 @@ describe('pastilles de réassurance', () => {
 });
 
 describe('en-tête mobile', () => {
-  const html = wrap(<Header storeName="Awa Beauty" showCollections showContact />);
-  it('logo à gauche ; panier et hamburger à droite, en icônes', () => {
-    expect(html.indexOf('class="brand"')).toBeLessThan(html.indexOf('class="cart-button"'));
-    expect(html.indexOf('class="cart-button"')).toBeLessThan(html.indexOf('class="menu-toggle"'));
-    expect(html).toContain('M4 7h16M4 12h16M4 17h16'); // hamburger
+  const html = wrap(<Header storeName="Awa Beauty" />);
+  it('logo à gauche ; Boutique, panier (icône) et menu (icône) à droite', () => {
+    expect(html.indexOf('class="brand"')).toBeLessThan(html.indexOf('class="header-shop"'));
+    expect(html.indexOf('class="header-shop"')).toBeLessThan(html.indexOf('cart-button'));
+    expect(html.indexOf('cart-button')).toBeLessThan(html.indexOf('menu-toggle'));
+    expect(html).toContain('M4 9h16M4 15h16'); // hamburger
     expect(html).not.toContain('☰');
   });
 });

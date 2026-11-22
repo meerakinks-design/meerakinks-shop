@@ -150,6 +150,8 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
       metaDescription: values.metaDescription.trim() || null,
       sortOrder: parseFcfaInput(values.sortOrder) ?? 0,
       images: values.images,
+      optionLabel: 'Option',
+      variants: [],
     };
 
     setIsPending(true);

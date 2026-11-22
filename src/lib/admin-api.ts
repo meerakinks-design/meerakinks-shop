@@ -1,5 +1,6 @@
 // Contrat des routes /api/v1/admin côté navigateur : un composant appelle `adminApi.*`, jamais une URL.
 import { deleteJson, postJson, putJson } from '@/lib/api-client';
+import type { UploadKind } from '@/lib/constants/images';
 import type { CategoryFormInput } from '@/lib/validation/category.schema';
 import type { ProductFormInput } from '@/lib/validation/product.schema';
 
@@ -9,6 +10,8 @@ export interface UploadSignature {
   timestamp: number;
   folder: string;
   allowedFormats: string;
+  /** Type de média signé : détermine l'adresse d'envoi chez Cloudinary (/image/upload ou /video/upload). */
+  resourceType: UploadKind;
   signature: string;
 }
 
@@ -26,6 +29,6 @@ export const adminApi = {
     remove: (id: string) => deleteJson<Record<string, never>>(`${BASE}/categories/${encodeURIComponent(id)}`),
   },
   uploads: {
-    sign: () => postJson<UploadSignature>(`${BASE}/uploads/sign`),
+    sign: (kind: UploadKind = 'image') => postJson<UploadSignature>(`${BASE}/uploads/sign`, { kind }),
   },
 };
