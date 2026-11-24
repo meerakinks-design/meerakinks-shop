@@ -4,9 +4,9 @@ import { ORDER_LIMITS, PLACE_LABELS, ZONE_TYPES, ZONE_TYPE_LABELS, type ZoneType
 import { PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { formatFcfa } from '@/lib/money';
 import { controlIdFor, type CheckoutAmounts, type CheckoutErrors, type CheckoutValues } from '@/lib/shop/checkout-form';
-import { DIAL_CODES, OTHER_DIAL_CODE } from '@/lib/shop/phone';
 import type { PublicZones } from '@/lib/shop/zones';
 import { OrderNotice, OrderTotals } from './OrderSummary';
+import { PhoneInput } from './PhoneInput';
 
 export type CheckoutStatus = 'idle' | 'sending' | 'done';
 
@@ -121,31 +121,17 @@ export function CheckoutForm(props: CheckoutFormProps) {
           <input type="text" autoComplete="name" placeholder="Votre nom et prénom" maxLength={ORDER_LIMITS.fullName} {...text('fullName')} {...a11y(id('fullName'), errors.fullName)} />
         </Field>
 
-        <Field id={id('phone')} label="Téléphone (WhatsApp)" error={phoneError} help="Avec l’indicatif de votre pays : la vendeuse vous contactera sur ce numéro.">
-          <div className="phone-row">
-            <select aria-label="Indicatif du pays" name="dialCode" value={values.dialCode} onChange={(event) => onChange('dialCode', event.target.value)}>
-              {DIAL_CODES.map((dial) => (
-                <option key={dial.code} value={dial.code}>
-                  {dial.label}
-                </option>
-              ))}
-              <option value={OTHER_DIAL_CODE}>Autre pays</option>
-            </select>
-            {values.dialCode === OTHER_DIAL_CODE && (
-              <input
-                className="dial-input"
-                type="text"
-                inputMode="numeric"
-                maxLength={4}
-                placeholder="Indicatif"
-                aria-label="Indicatif du pays, chiffres seulement"
-                name="otherDialCode"
-                value={values.otherDialCode}
-                onChange={(event) => onChange('otherDialCode', event.target.value)}
-              />
-            )}
-            <input type="tel" inputMode="tel" autoComplete="tel-national" maxLength={ORDER_LIMITS.phone} {...text('phone')} {...a11y(id('phone'), phoneError, true)} />
-          </div>
+        <Field id={id('phone')} label="Téléphone (WhatsApp)" error={phoneError} help="La vendeuse vous contactera sur ce numéro. Votre pays n’est pas dans la liste ? Tapez simplement son indicatif.">
+          <PhoneInput
+            id={id('phone')}
+            dialCode={values.dialCode}
+            phone={values.phone}
+            onDialCodeChange={(dialCode) => onChange('dialCode', dialCode)}
+            onPhoneChange={(phone) => onChange('phone', phone)}
+            invalid={Boolean(phoneError)}
+            describedBy={phoneError ? `${id('phone')}-error` : `${id('phone')}-help`}
+            maxLength={ORDER_LIMITS.phone}
+          />
         </Field>
 
         <Field id={id('email')} label="Email" optional error={errors.email} help="Pour recevoir un accusé de réception de votre commande.">

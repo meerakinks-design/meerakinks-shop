@@ -1,5 +1,6 @@
 // Textes de la landing : « Meëra Kinks — Textes du site e-commerce » (AKATech Writer, v1.0).
 // {storeName} vient des paramètres : aucun champ à compléter n'est écrit dans le code (garde-fou, test).
+// `titleGhost` : mots-clés d'un titre affichés en « ghost » (contour, sans remplissage), comparés sans majuscule ni ponctuation.
 // Règles éditoriales : « Meëra Kinks » avec tréma, vouvoiement partout, aucune promesse de résultat, rien d'inventé
 // (ni prix, ni promotion, ni avis, ni garantie).
 
@@ -20,6 +21,7 @@ export const LANDING = {
   collections: {
     eyebrow: 'TROUVEZ LE SOIN QUI VOUS CORRESPOND',
     title: 'Chaque besoin a sa couleur.',
+    titleGhost: ['besoin'],
     text: 'Vos cheveux ont leurs propres besoins. Repérez la couleur qui vous guide et découvrez les soins pensés pour votre routine.',
     cta: 'Découvrir la gamme',
     offersLabel: 'Promotions',
@@ -29,6 +31,7 @@ export const LANDING = {
   shop: {
     eyebrow: 'LA SÉLECTION MEËRA KINKS',
     title: 'Vos prochains essentiels sont ici.',
+    titleGhost: ['essentiels'],
     text: 'Parcourez les soins disponibles et choisissez ceux qui correspondent aux besoins de vos cheveux.',
     othersTitle: 'Autres soins',
     cta: 'Voir toute la boutique',
@@ -37,6 +40,7 @@ export const LANDING = {
   bestSellers: {
     eyebrow: 'LA SÉLECTION DU MOMENT',
     title: 'À découvrir en ce moment.',
+    titleGhost: ['découvrir'],
     text: 'Découvrez une sélection de soins mis en avant par l’équipe et trouvez peut-être votre prochain indispensable.',
     cta: 'Voir les produits',
     added: 'Ajouté à votre panier ✓',
@@ -44,6 +48,7 @@ export const LANDING = {
   story: {
     eyebrow: 'DERRIÈRE MEËRA KINKS',
     title: 'Une autre façon de prendre soin de vos kinks.',
+    titleGhost: ['kinks'],
     intro: [
       '{storeName} est née d’une conviction : les cheveux crépus méritent des soins pensés pour leurs besoins et une routine que l’on comprend facilement.',
       'Notre univers associe le naturel, la joie et la fierté de porter sa texture. Grâce à un code couleur simple, nous vous aidons à repérer les soins selon votre besoin : hydratation, nettoyage, pousse et nutrition.',
@@ -58,6 +63,7 @@ export const LANDING = {
   focus: {
     eyebrow: 'LE SOIN À DÉCOUVRIR',
     title: 'Un essentiel à intégrer à votre routine.',
+    titleGhost: ['routine'],
     text: 'Découvrez ce soin, ses caractéristiques et les conseils d’utilisation pour savoir s’il correspond à vos besoins.',
     primaryCta: 'Découvrir le produit',
     secondaryCta: 'Ajouter au panier',
@@ -65,6 +71,7 @@ export const LANDING = {
   why: {
     eyebrow: 'LE SOIN EN TOUTE SIMPLICITÉ',
     title: 'Vos cheveux ont des besoins. Notre gamme vous guide.',
+    titleGhost: ['cheveux', 'gamme'],
     intro: 'Choisir un soin ne devrait pas être compliqué. {storeName} organise ses produits par besoin pour vous aider à composer une routine plus facilement.',
     items: [
       { title: 'Une gamme facile à repérer', text: 'Un code couleur vous aide à identifier les familles de soins et à vous orienter selon votre besoin.' },
@@ -79,6 +86,7 @@ export const LANDING = {
   reviews: {
     eyebrow: 'VOS MOTS COMPTENT',
     title: 'Vos retours nous font avancer.',
+    titleGhost: ['retours'],
     text: 'Votre expérience peut aider d’autres personnes à découvrir {storeName}. Merci de prendre le temps de la partager.',
     shareCta: 'Partager mon expérience',
     shareMessage: 'Bonjour, je souhaite partager mon avis sur mon expérience avec {storeName}.',
@@ -87,6 +95,7 @@ export const LANDING = {
   instagram: {
     eyebrow: 'RESTONS CONNECTÉS',
     title: 'La beauté de vos kinks, au quotidien.',
+    titleGhost: ['kinks'],
     text: 'Retrouvez {storeName} sur les réseaux pour découvrir les soins, les nouveautés et des inspirations autour des cheveux crépus.',
     cta: 'Suivre {storeName}',
     caption: 'Retrouvez toutes nos actualités sur Instagram.',
@@ -94,12 +103,14 @@ export const LANDING = {
   faq: {
     eyebrow: 'VOUS AVEZ DES QUESTIONS ?',
     title: 'Tout ce qu’il faut savoir avant de commander.',
+    titleGhost: ['commander'],
     text: 'Retrouvez les réponses aux questions fréquentes sur les produits, les commandes, le paiement et la livraison.',
     cta: 'Une autre question ? Écrivez-nous sur WhatsApp.',
   },
   contact: {
     eyebrow: 'NOUS SOMMES À VOTRE ÉCOUTE',
     title: 'Parlons de votre routine.',
+    titleGhost: ['routine'],
     text: 'Une question sur un soin, une disponibilité ou une commande ? Écrivez-nous. Notre équipe vous répond et vous accompagne.',
     cta: 'Nous écrire sur WhatsApp',
     whatsappMessage: 'Bonjour {storeName}, j’aimerais obtenir un renseignement sur vos soins.',
@@ -115,11 +126,12 @@ export const LANDING = {
       },
       nameLabel: 'Nom complet',
       namePlaceholder: 'Votre nom et prénom',
-      replyLabel: 'Comment souhaitez-vous recevoir notre réponse ?',
-      replyWhatsapp: 'Sur WhatsApp',
-      replyEmail: 'Par e-mail',
-      phoneLabel: 'Numéro WhatsApp',
-      emailLabel: 'Adresse e-mail',
+      contactLabel: 'Contact',
+      contactHelp: 'Choisissez où recevoir notre réponse : sur WhatsApp ou par e-mail.',
+      channelAria: 'Moyen de contact',
+      replyWhatsapp: 'WhatsApp',
+      replyEmail: 'E-mail',
+      phoneHelp: 'Votre pays n’est pas dans la liste ? Tapez simplement son indicatif, il est accepté.',
       emailPlaceholder: 'Votre adresse e-mail',
       referenceLabel: 'Référence de commande',
       referenceHelp: 'Elle commence par CMD-. Vous la trouvez sur votre reçu.',
@@ -137,6 +149,7 @@ export const LANDING = {
   finalCta: {
     eyebrow: 'VOS KINKS, VOTRE ROUTINE',
     title: 'Et si vous commenciez par le bon soin ?',
+    titleGhost: ['bon', 'soin'],
     text: 'Explorez les gammes, découvrez les produits et choisissez les soins qui correspondent aux besoins de vos cheveux.',
     primaryCta: 'Explorer les soins',
     secondaryCta: 'Voir les nouveautés',

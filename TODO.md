@@ -4,7 +4,7 @@ _État au 23 novembre 2026 (boutique-3 : boutique-1 + variantes v0.10 + lot v0.1
 
 ## Refonte du 23 novembre (boutique-3)
 
-- [x] Menu, panier, commande et confirmation : un seul mécanisme de modal « rideaux » par la droite (`CurtainModal`) ; bande du site visible à gauche sur téléphone.
+- [x] Menu, panier, commande et confirmation : un seul mécanisme de modal « rideaux » par la droite (`CurtainModal`) ; plein écran sur téléphone (la bande du site à gauche a été retirée).
 - [x] Confirmation de commande en modal (`#confirmation`) ; la page `/commande/confirmation` est conservée.
 - [x] Pied de page en trois parties : logo, signature et icônes · informations · navigation ; jeu pleine largeur (carré sur téléphone) ; filigrane « MEËRA KINKS » en texte ; crédit « Créé par AKATech Studio » (logo au survol).
 - [x] Pages `/a-propos` (ancien modal « Notre histoire ») et `/credits`.

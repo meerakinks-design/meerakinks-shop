@@ -92,7 +92,7 @@ describe('pastilles de réassurance', () => {
 
 describe('en-tête mobile', () => {
   const html = wrap(<Header storeName="Awa Beauty" />);
-  it('logo à gauche ; Boutique, panier (icône) et menu (icône) à droite', () => {
+  it('logo à gauche ; Commander, panier (icône) et menu (icône) à droite', () => {
     expect(html.indexOf('class="brand"')).toBeLessThan(html.indexOf('class="header-shop"'));
     expect(html.indexOf('class="header-shop"')).toBeLessThan(html.indexOf('cart-button'));
     expect(html.indexOf('cart-button')).toBeLessThan(html.indexOf('menu-toggle'));

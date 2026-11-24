@@ -33,6 +33,13 @@ describe('formulaire de contact : champs exigés selon les choix', () => {
     expect(errors(base({ phone: '12' }))?.phone).toBeDefined();
   });
 
+  it('indicatif tapé par le client : un pays absent de la liste est accepté, un indicatif effacé est demandé', () => {
+    expect(contactInputSchema.parse(base({ dialCode: '971', phone: '50 123 4567' })).phoneE164).toBe('+971501234567');
+    expect(errors(base({ dialCode: '', phone: '0612345678' }))?.phone?.[0]).toContain('indicatif');
+    // Un numéro collé en entier avec « + » n'a pas besoin d'indicatif séparé.
+    expect(contactInputSchema.parse(base({ dialCode: '', phone: '+971 50 123 4567' })).phoneE164).toBe('+971501234567');
+  });
+
   it('réponse par e-mail : l’adresse est exigée, le numéro ne l’est plus', () => {
     expect(errors(base({ replyChannel: 'EMAIL', phone: '', email: '' }))?.email?.[0]).toBe('Indiquez votre adresse e-mail.');
     expect(errors(base({ replyChannel: 'EMAIL', phone: '', email: 'pas-un-mail' }))?.email?.[0]).toBe('Adresse e-mail invalide.');

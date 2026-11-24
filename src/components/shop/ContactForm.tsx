@@ -5,8 +5,9 @@ import { LANDING } from '@/content/landing';
 import { postJson } from '@/lib/api-client';
 import { CONTACT_LIMITS, CONTACT_TOPICS, type ContactTopic, type ReplyChannel } from '@/lib/constants/contact';
 import { createIdempotencyKey } from '@/lib/shop/checkout-form';
-import { DEFAULT_DIAL_CODE, DIAL_CODES } from '@/lib/shop/phone';
+import { DEFAULT_DIAL_CODE } from '@/lib/shop/phone';
 import { contactInputSchema } from '@/lib/validation/contact.schema';
+import { PhoneInput } from './PhoneInput';
 
 const copy = LANDING.contact.form;
 
@@ -70,7 +71,7 @@ export function ContactForm({ whatsappHref }: { whatsappHref: string | null }) {
   const [key, setKey] = useState<string | null>(null);
 
   const id = (name: string) => `${idPrefix}-${name}`;
-  const controlId = (field: FieldName) => (field === 'replyChannel' ? id('replyChannel-whatsapp') : id(field));
+  const controlId = (field: FieldName) => id(field);
 
   function change<K extends keyof Values>(field: K, value: Values[K]) {
     setValues((current) => ({ ...current, [field]: value }));
@@ -165,44 +166,57 @@ export function ContactForm({ whatsappHref }: { whatsappHref: string | null }) {
         {fieldError('name')}
       </div>
 
-      <fieldset className="field" aria-describedby={errors.replyChannel ? `${id('replyChannel')}-error` : undefined}>
-        <legend>{copy.replyLabel}</legend>
-        <label className="radio-row" htmlFor={id('replyChannel-whatsapp')}>
-          <input id={id('replyChannel-whatsapp')} type="radio" name="replyChannel" value="WHATSAPP" checked={values.replyChannel === 'WHATSAPP'} onChange={() => change('replyChannel', 'WHATSAPP')} />
-          <span>{copy.replyWhatsapp}</span>
-        </label>
-        <label className="radio-row" htmlFor={id('replyChannel-email')}>
-          <input id={id('replyChannel-email')} type="radio" name="replyChannel" value="EMAIL" checked={values.replyChannel === 'EMAIL'} onChange={() => change('replyChannel', 'EMAIL')} />
-          <span>{copy.replyEmail}</span>
-        </label>
-        {fieldError('replyChannel')}
-      </fieldset>
-
-      {values.replyChannel === 'WHATSAPP' ? (
-        <div className="field">
-          <label htmlFor={id('phone')}>{copy.phoneLabel}</label>
-          <div className="phone-row">
-            <select aria-label="Indicatif du pays" name="dialCode" autoComplete="tel-country-code" value={values.dialCode} onChange={(event) => change('dialCode', event.target.value)}>
-              {DIAL_CODES.map((dial) => (
-                <option key={dial.code} value={dial.code}>
-                  {dial.label}
-                </option>
-              ))}
-            </select>
-            <input {...describe('phone')} type="tel" name="phone" inputMode="tel" autoComplete="tel-national" value={values.phone} onChange={(event) => change('phone', event.target.value)} />
+      {/* UN seul champ « Contact » : le select choisit WhatsApp ou e-mail, le champ d'à côté s'adapte. */}
+      <div className="field field-full">
+        <label htmlFor={values.replyChannel === 'WHATSAPP' ? id('phone') : id('email')}>{copy.contactLabel}</label>
+        <div className="contact-input">
+          <select
+            {...describe('replyChannel')}
+            name="replyChannel"
+            aria-label={copy.channelAria}
+            value={values.replyChannel}
+            onChange={(event) => change('replyChannel', event.target.value as ReplyChannel)}
+          >
+            <option value="WHATSAPP">{copy.replyWhatsapp}</option>
+            <option value="EMAIL">{copy.replyEmail}</option>
+          </select>
+          <div className="contact-value">
+            {values.replyChannel === 'WHATSAPP' ? (
+              <PhoneInput
+                id={id('phone')}
+                dialCode={values.dialCode}
+                phone={values.phone}
+                onDialCodeChange={(dialCode) => change('dialCode', dialCode)}
+                onPhoneChange={(phone) => change('phone', phone)}
+                invalid={Boolean(errors.phone)}
+                describedBy={errors.phone ? `${id('phone')}-error` : `${id('contact')}-help`}
+              />
+            ) : (
+              <input
+                {...describe('email', `${id('contact')}-help`)}
+                type="email"
+                name="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder={copy.emailPlaceholder}
+                value={values.email}
+                onChange={(event) => change('email', event.target.value)}
+              />
+            )}
           </div>
-          {fieldError('phone')}
         </div>
-      ) : (
-        <div className="field">
-          <label htmlFor={id('email')}>{copy.emailLabel}</label>
-          <input {...describe('email')} type="email" name="email" inputMode="email" autoComplete="email" placeholder={copy.emailPlaceholder} value={values.email} onChange={(event) => change('email', event.target.value)} />
-          {fieldError('email')}
-        </div>
-      )}
+        {fieldError('replyChannel')}
+        {fieldError('phone')}
+        {fieldError('email')}
+        {!errors.phone && !errors.email && (
+          <p id={`${id('contact')}-help`} className="help-text">
+            {values.replyChannel === 'WHATSAPP' ? copy.phoneHelp : copy.contactHelp}
+          </p>
+        )}
+      </div>
 
       {values.topic === 'ORDER' && (
-        <div className="field">
+        <div className="field field-full">
           <label htmlFor={id('orderReference')}>{copy.referenceLabel}</label>
           <input
             {...describe('orderReference', `${id('orderReference')}-help`)}
@@ -223,7 +237,7 @@ export function ContactForm({ whatsappHref }: { whatsappHref: string | null }) {
         </div>
       )}
 
-      <div className="field">
+      <div className="field field-full">
         <label htmlFor={id('message')}>{copy.messageLabel}</label>
         <textarea
           {...describe('message', `${id('message')}-count`)}
@@ -241,7 +255,7 @@ export function ContactForm({ whatsappHref }: { whatsappHref: string | null }) {
         </p>
       </div>
 
-      <div className="field">
+      <div className="field field-full">
         <label className="check-row" htmlFor={id('consent')}>
           <input {...describe('consent')} type="checkbox" name="consent" checked={values.consent} onChange={(event) => change('consent', event.target.checked)} />
           <span>{copy.consent}</span>

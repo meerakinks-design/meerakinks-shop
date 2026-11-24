@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DIAL_CODES, formatPhoneDisplay, normalizePhone } from '@/lib/shop/phone';
+import { DIAL_CODES, dialCountryName, formatPhoneDisplay, normalizePhone, sanitizeDialCode } from '@/lib/shop/phone';
 
 const e164 = (dial: string, number: string) => {
   const result = normalizePhone(dial, number);
@@ -63,5 +63,23 @@ describe('formatPhoneDisplay', () => {
   });
   it('laisse les autres pays tels quels', () => {
     expect(formatPhoneDisplay('+33612345678')).toBe('+33612345678');
+  });
+});
+
+describe('indicatif tapé librement', () => {
+  it('ne garde que les chiffres (« + », espaces et lettres disparaissent) et au plus 4', () => {
+    expect(sanitizeDialCode('+225')).toBe('225');
+    expect(sanitizeDialCode(' +971 ')).toBe('971');
+    expect(sanitizeDialCode('abc')).toBe('');
+    expect(sanitizeDialCode('12345')).toBe('1234');
+  });
+  it('reconnaît le pays d’un indicatif connu, et laisse passer un indicatif inconnu', () => {
+    expect(dialCountryName('225')).toBe('Côte d’Ivoire');
+    expect(dialCountryName('+33')).toBe('France');
+    expect(dialCountryName('971')).toBeNull();
+    expect(normalizePhone('971', '50 123 4567')).toEqual({ ok: true, e164: '+971501234567' }); // pays absent de la liste : accepté
+  });
+  it('un numéro collé en entier avec « + » passe sans indicatif séparé', () => {
+    expect(normalizePhone('', '+971 50 123 4567')).toEqual({ ok: true, e164: '+971501234567' });
   });
 });

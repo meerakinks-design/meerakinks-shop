@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { INSTAGRAM_POSTS, MAX_INSTAGRAM_POSTS, MIN_INSTAGRAM_POSTS } from '@/content/instagram';
 import { faqItems } from '@/content/faq';
@@ -108,7 +109,7 @@ export function Collections({ sections, hasOffers }: { sections: readonly Catego
     <section id="collections" className="section" aria-labelledby="collections-title">
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="collections-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="collections-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
         <ul className="collection-cards">
           {sections.map((section) => (
@@ -137,7 +138,7 @@ export function BestSellers({ products }: { products: readonly ShopProduct[] }) 
     <section id="best-sellers" className="section" aria-labelledby="best-sellers-title">
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="best-sellers-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="best-sellers-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
         <ul className="row-scroll">
           {products.map((product, index) => (
@@ -162,7 +163,7 @@ export function StoryTeaser({ storeName }: { storeName: string }) {
     <section className="section section-brand" aria-labelledby="story-title">
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="story-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="story-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.intro[0], { storeName })}</p>
         <Link href={PUBLIC_ROUTES.about} className="btn btn-quiet">
           {copy.openCta}
@@ -182,7 +183,7 @@ export function Focus({ product }: { product: FocusProduct }) {
         </div>
         <div>
           <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-          <Spaghetti as="h2" id="focus-title">{copy.title}</Spaghetti>
+          <Spaghetti as="h2" id="focus-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
           <p className="lead">{copy.text}</p>
           <Spaghetti as="h3">{product.name}</Spaghetti>
           <p>{summarize(product.description, 240)}</p>
@@ -205,28 +206,34 @@ export function Focus({ product }: { product: FocusProduct }) {
   );
 }
 
+/**
+ * « Le soin en toute simplicité » : de vraies étapes. Chaque étape est une carte à onglet ; en défilant, les cartes se
+ * posent les unes sur les autres (sticky, légèrement inclinées) et seuls les onglets des étapes précédentes restent
+ * visibles, comme sur la capture de référence. Tout le texte est dans le HTML ; l'empilement est du CSS pur (ui.css).
+ */
 export function Why({ storeName }: { storeName: string }) {
   const copy = LANDING.why;
   return (
     <section id="pourquoi-nous" className="section section-brand" aria-labelledby="why-title">
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="why-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="why-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.intro, { storeName })}</p>
-        <div className="why-grid">
+        <ol className="why-steps" role="list">
           {copy.items.map((item, index) => (
-            <details key={item.title} className="why-item" name="why" open={index === 0}>
-              <summary>
-                <span>{item.title}</span>
-                <span className="why-dot" aria-hidden="true" />
-              </summary>
-              <div className="why-body">
+            <li key={item.title} className="why-step" style={{ '--i': index } as CSSProperties}>
+              <h3 className="why-step-tab">
+                <span className="why-step-dot" aria-hidden="true" />
+                <span className="why-step-title">{item.title}</span>
+                <span className="why-step-dot" aria-hidden="true" />
+              </h3>
+              <div className="why-step-card">
                 <span className="why-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
                 <p>{item.text}</p>
               </div>
-            </details>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </section>
   );
@@ -244,7 +251,7 @@ export function Reviews({ settings }: { settings: PublicSettings }) {
     <section id="avis" className="section" aria-labelledby="reviews-title">
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="reviews-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="reviews-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         {reviews.length > 0 ? (
           <>
             <p className="lead">{fill(copy.text, { storeName: settings.storeName })}</p>
@@ -284,7 +291,7 @@ export function Instagram({ settings }: { settings: PublicSettings }) {
     <section id="instagram" className="section section-tinted" aria-labelledby="instagram-title">
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="instagram-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="instagram-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.text, { storeName: settings.storeName })}</p>
         <ul className="instagram-grid">
           {INSTAGRAM_POSTS.slice(0, MAX_INSTAGRAM_POSTS).map((post) => (
@@ -316,7 +323,7 @@ export function Faq({ settings }: { settings: PublicSettings }) {
     <section id="faq" className="section" aria-labelledby="faq-title">
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="faq-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="faq-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
         <div className="faq-list">
           {items.map((item) => (
@@ -364,7 +371,7 @@ export function Contact({ settings }: { settings: PublicSettings }) {
     <section id="contact" className="section section-tinted" aria-labelledby="contact-title">
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="contact-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="contact-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
         {hasChannels && (
           <div className="hero-actions">
@@ -397,7 +404,7 @@ export function FinalCta() {
     <section className="section final-cta section-brand" aria-labelledby="final-title">
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="final-title">{copy.title}</Spaghetti>
+        <Spaghetti as="h2" id="final-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
         <div className="hero-actions">
           <Link className="btn" href={PUBLIC_ROUTES.shop}>

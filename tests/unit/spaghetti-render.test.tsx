@@ -108,6 +108,25 @@ describe('landing — l’effet est branché sur les titres, sans rien perdre du
     }
   });
 
+  it('Pourquoi nous : de vraies étapes (liste ordonnée de cartes à onglet), plus d’accordéon ; deux mots-clés en ghost', () => {
+    const html = renderToStaticMarkup(<Why storeName="Awa Beauty" />);
+    expect(html).toContain('<ol class="why-steps"');
+    expect(html.match(/class="why-step"/g)).toHaveLength(LANDING.why.items.length);
+    expect(html.match(/class="why-step-tab"/g)).toHaveLength(LANDING.why.items.length);
+    expect(html).not.toContain('<details');
+    expect(html.match(/is-ghost/g)).toHaveLength(LANDING.why.titleGhost.length);
+  });
+
+  it('ghost : seuls les mots-clés reçoivent la classe ; le texte et le nom accessible restent intacts', () => {
+    const html = renderToStaticMarkup(<Spaghetti as="h2" ghost={['kinks']}>La beauté de vos Kinks, ici</Spaghetti>);
+    expect(html.match(/class="sp-w is-ghost"/g)).toHaveLength(1);
+    expect(html.match(/class="sp-w"/g)).toHaveLength(5);
+    expect(html).toContain('aria-label="La beauté de vos Kinks, ici"');
+    expect(plain(html)).toBe('La beauté de vos Kinks, ici');
+    // sans mot-clé : le rendu est strictement celui d’avant
+    expect(renderToStaticMarkup(<Spaghetti as="h2">Vos kinks</Spaghetti>)).not.toContain('is-ghost');
+  });
+
   it('FAQ : les réponses restent un texte simple (exception de la landing §26)', () => {
     const html = renderToStaticMarkup(<Faq settings={{ storeName: 'Awa Beauty', whatsappNumber: null, whatsappLink: null, contactEmail: null, contactPhone: null, instagramUrl: null, tiktokUrl: null, facebookUrl: null, focusProductId: null, depositAmount: 2000 }} />);
     const answers = [...html.matchAll(/<summary>.*?<\/summary><p>(.*?)<\/p>/g)].map((match) => match[1]);

@@ -73,7 +73,7 @@ interface ComposedEmail extends EmailContent {
 async function composeEmail(row: DueRow): Promise<ComposedEmail> {
   if (row.type === 'NEW_VISITOR') {
     const settings = await prisma.storeSettings.findUnique({ where: { id: STORE_SETTINGS_ID }, select: { storeName: true } });
-    return buildNewVisitorEmail({ storeName: settings?.storeName ?? 'Meëra Kinks', source: 'direct', landingPath: '/', country: null, region: null, city: null });
+    return buildNewVisitorEmail({ storeName: settings?.storeName ?? 'MEËRA KINKS', source: 'direct', landingPath: '/', country: null, region: null, city: null });
   }
   if (!row.orderId) throw new PermanentEmailError('Email sans commande associée.');
   const order = await loadOrderDocument({ id: row.orderId });

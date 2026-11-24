@@ -126,7 +126,7 @@ describe('réglages publics', () => {
   });
   it('retombent sur des valeurs par défaut sans ligne de réglages', async () => {
     db.storeSettings.findUnique.mockResolvedValue(null);
-    expect((await queries.getPublicSettings()).storeName).toBe('Ma boutique');
+    expect((await queries.getPublicSettings()).storeName).toBe('MEËRA KINKS');
   });
 });
 
@@ -136,7 +136,7 @@ describe('build sans base (CI)', () => {
     expect(await queries.getShopData(NOW)).toEqual({ categories: [], products: [] });
     expect(await queries.getFeaturedProducts(8, NOW)).toEqual([]);
     expect(await queries.getProductPage('p1', NOW)).toBeNull();
-    expect((await queries.getPublicSettings()).storeName).toBe('Ma boutique');
+    expect((await queries.getPublicSettings()).storeName).toBe('MEËRA KINKS');
     expect(db.product.findMany).not.toHaveBeenCalled();
     expect(db.storeSettings.findUnique).not.toHaveBeenCalled();
   });

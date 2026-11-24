@@ -14,11 +14,16 @@ interface SpaghettiProps {
   trigger?: 'scroll' | 'mount';
   id?: string;
   className?: string;
+  /** Mots-clés affichés en « ghost » (contour sans remplissage), comparés sans majuscule ni ponctuation. Sans effet sur le texte ni sur le nom accessible. */
+  ghost?: readonly string[];
   /** Texte brut uniquement : jamais de balises, de liens ni de prix (voir les exceptions de la landing §26). */
   children: string;
 }
 
 const defaultMode = (tag: SpaghettiTag): SpaghettiMode => (tag === 'h1' || tag === 'h2' ? 'chars' : 'words');
+
+/** Un mot sans sa ponctuation de bord ni sa casse : « kinks, » et « Kinks » désignent le même mot-clé. */
+const bare = (word: string) => word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').toLocaleLowerCase('fr');
 
 /**
  * Effet « spaghetti » (D-18, D-29). Le texte complet est dans le HTML dès le rendu serveur : sans JavaScript,
@@ -29,11 +34,12 @@ const defaultMode = (tag: SpaghettiTag): SpaghettiMode => (tag === 'h1' || tag =
  *    déjà visible reste tel quel (aucun clignotement) ; il se rejoue s'il repasse sous l'écran puis revient.
  * Mouvement réduit : le CSS neutralise tout et ce composant ne masque rien.
  */
-export default function Spaghetti({ as = 'span', mode, trigger = 'scroll', id, className, children }: SpaghettiProps) {
+export default function Spaghetti({ as = 'span', mode, trigger = 'scroll', id, className, ghost, children }: SpaghettiProps) {
   const ref = useRef<HTMLElement>(null);
   const resolvedMode = mode ?? defaultMode(as);
   const plan = planSpaghetti(children, resolvedMode);
   const Tag = as as ElementType;
+  const ghostWords = new Set((ghost ?? []).map(bare));
 
   useEffect(() => {
     const element = ref.current;
@@ -84,7 +90,7 @@ export default function Spaghetti({ as = 'span', mode, trigger = 'scroll', id, c
   const words = plan.words.map((word, wordIndex) => {
     const content =
       resolvedMode === 'chars' ? (
-        <span className="sp-w">
+        <span className={ghostWords.has(bare(word.text)) ? 'sp-w is-ghost' : 'sp-w'}>
           {word.chars?.map((char) => (
             <span key={char.index} className="sp-u" style={{ '--i': char.index } as CSSProperties}>
               {char.text}
@@ -92,7 +98,7 @@ export default function Spaghetti({ as = 'span', mode, trigger = 'scroll', id, c
           ))}
         </span>
       ) : (
-        <span className="sp-w sp-u" style={{ '--i': word.index } as CSSProperties}>
+        <span className={ghostWords.has(bare(word.text)) ? 'sp-w sp-u is-ghost' : 'sp-w sp-u'} style={{ '--i': word.index } as CSSProperties}>
           {word.text}
         </span>
       );

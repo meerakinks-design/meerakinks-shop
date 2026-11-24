@@ -46,6 +46,22 @@ describe('garde-fou de publication (document de la landing §21)', () => {
   });
 });
 
+describe('mots-clés « ghost » des titres', () => {
+  const bare = (word: string) => word.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '').toLocaleLowerCase('fr');
+  const sections = Object.values(LANDING).flatMap((section) =>
+    'titleGhost' in section ? [section as { title: string; titleGhost: readonly string[] }] : [],
+  );
+
+  it('chaque mot ghost est un mot de son titre (aucune faute de frappe) et jamais le titre entier', () => {
+    expect(sections.length).toBeGreaterThanOrEqual(10);
+    for (const { title, titleGhost } of sections) {
+      const words = title.split(/\s+/).map(bare);
+      for (const ghost of titleGhost) expect(words, `« ${ghost} » est absent de « ${title} »`).toContain(bare(ghost));
+      expect(titleGhost.length).toBeLessThan(words.length);
+    }
+  });
+});
+
 describe('règles de paiement : source unique (RM-41)', () => {
   it('le rappel est la somme des trois phrases validées', () => {
     expect(paymentReminder(2000)).toBe(`${paymentAbidjan(2000)} ${PAYMENT_OUTSIDE} ${PAYMENT_FOLLOW_UP}`);

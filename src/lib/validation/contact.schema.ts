@@ -25,7 +25,8 @@ export const contactInputSchema = z
       .max(CONTACT_LIMITS.name, tooLong(CONTACT_LIMITS.name))
       .refine((value) => !CONTROL_CHARACTERS.test(value), FORBIDDEN_CHARACTERS),
     replyChannel: z.enum(REPLY_CHANNELS, { errorMap: () => ({ message: 'Choisissez comment recevoir notre réponse.' }) }),
-    dialCode: z.preprocess(blankToUndefined, z.string().trim().max(5).optional()),
+    // Absent : on suppose 225. Vide (le client l'a effacé) : on le lui demande, sans deviner un pays à sa place.
+    dialCode: z.string().trim().max(5).optional(),
     phone: z.preprocess(blankToUndefined, z.string().trim().max(30).optional()),
     email: z.preprocess(blankToUndefined, z.string().trim().toLowerCase().max(CONTACT_LIMITS.email, tooLong(CONTACT_LIMITS.email)).email('Adresse e-mail invalide.').optional()),
     orderReference: z.preprocess(blankToUndefined, z.string().trim().toUpperCase().optional()),

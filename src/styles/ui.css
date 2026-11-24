@@ -3,8 +3,20 @@
    Palette : 40 % orange · 50 % beige · 10 % marron (voir tokens.css). Polices : Poppins, Great Vibes (charte). */
 
 /* ---------- Échelle typographique : 4 héros · 1 contenu · 2 titres de sections · 3 descriptions ---------- */
-.section h2, .section-head h2, .category-title { font-size: var(--text-section); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em; }
-.section .lead { font-size: var(--text-content); line-height: 1.25; font-weight: 400; }
+.section h2, .section-head h2 { font-size: var(--text-title); line-height: 0.98; font-weight: 800; letter-spacing: -0.03em; }
+.category-title { font-size: var(--text-section); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em; }
+.focus-grid h2, .about-block h2 { font-size: var(--text-section); line-height: 1.05; letter-spacing: -0.02em; }
+.section .lead { font-size: var(--text-content); line-height: 1.2; font-weight: 400; }
+
+/* ---------- Marges (réf. capture : bloc de texte centré, grandes marges latérales et verticales) ---------- */
+.section { padding-block: clamp(3.5rem, 11vw, 8rem); }
+.section > .container > :is(.eyebrow, h2, .lead), .section-head :is(.eyebrow, h2, .lead) { text-align: center; margin-inline: auto; }
+.section > .container > h2, .section-head h2 { max-width: 20ch; margin-bottom: var(--space-4); text-wrap: balance; }
+.section > .container > .lead, .section-head > .lead { max-width: 52rem; margin-bottom: clamp(2rem, 5vw, 3.5rem); text-wrap: balance; }
+
+/* ---------- Mots-clés « ghost » des titres : contour sans remplissage (réf. capture « The BBQ sauce… ») ---------- */
+.is-ghost { -webkit-text-fill-color: transparent; -webkit-text-stroke: clamp(1.25px, 0.028em, 3px) currentColor; paint-order: stroke fill; letter-spacing: 0.015em; }
+@media print { .is-ghost { -webkit-text-fill-color: currentColor; -webkit-text-stroke: 0; } }
 .section p, .collection-card p, .feature-info p, .product-description, .product-description p { font-size: var(--text-desc); line-height: 1.45; }
 .section-brand .container { text-align: center; }
 .section-brand .lead, .section-brand .help-text { max-width: 40rem; margin-inline: auto; }
@@ -48,7 +60,7 @@ html.is-intro { overflow: hidden; }
 /* ---------- Modals « rideaux » : menu, panier, commande, confirmation ----------
    UN SEUL mécanisme (CurtainModal) : deux rideaux de couleur glissent depuis la droite, puis le panneau beige ; ensuite
    les liens (ou les lignes du panier, les champs) montent un à un. Ordinateur : le panneau reste collé à droite, largeur
-   fixe. Téléphone : il laisse une bande du site, dimmée, à gauche : on voit d'où il vient, un toucher dessus le referme. */
+   fixe. Téléphone : il occupe tout l'écran (voir la requête max-width: 699px plus bas) ; seul le bouton ✕ ou Retour le referme. */
 .curtain-dialog { --drawer-w: calc(100% - 3.5rem); border: 0; padding: 0; margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: transparent; overflow: hidden; color: var(--color-brown); }
 .curtain-dialog:not([open]) { display: none; }
 .curtain-dialog::backdrop { background: rgb(127 63 32 / 0.55); }
@@ -63,6 +75,13 @@ html.is-intro { overflow: hidden; }
 @media (min-width: 700px) {
   .curtain-dialog { --drawer-w: min(34rem, calc(100% - 2rem)); }
   .curtain-dialog.modal-checkout, .curtain-dialog.modal-confirmation { --drawer-w: min(38rem, calc(100% - 2rem)); }
+}
+/* Téléphone : menu, panier, commande et confirmation s'ouvrent en PLEIN ÉCRAN (plus de bande du site à gauche, plus de marges
+   ni de coins arrondis). Les rideaux de couleur gardent leur glissement depuis la droite, mais couvrent tout l'écran. */
+@media (max-width: 699px) {
+  .curtain-dialog { --drawer-w: 100%; height: 100vh; height: 100dvh; }
+  .curtain-layer, .curtain-panel { top: 0; right: 0; bottom: 0; left: auto; border-radius: 0; }
+  .curtain-layer-1, .curtain-layer-2 { width: 100%; }
 }
 .curtain-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 1rem 1.25rem 0.5rem; }
 .curtain-title { margin: 0; font-size: clamp(1.375rem, 5.5vw, 1.75rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.01em; }
@@ -121,16 +140,26 @@ html.is-intro { overflow: hidden; }
   .hero-actions { justify-content: flex-start; }
 }
 
-/* ---------- Pourquoi nous : accordéons (1 = contenu · 2 = titre · 3 = description) ---------- */
-.why-grid { display: grid; gap: var(--space-3); max-width: 46rem; margin: var(--space-8) auto 0; padding: 0; text-align: left; }
-.why-item { overflow: hidden; border: 2px solid var(--color-brown); border-radius: 1.1rem; background: var(--color-beige); color: var(--color-brown); }
-.why-item summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 1.1rem 1.25rem; font-size: clamp(1.375rem, 5.8vw, 2rem); font-weight: 800; line-height: 1.1; cursor: pointer; list-style: none; }
-.why-item summary::-webkit-details-marker { display: none; }
-.why-dot { flex: none; width: 1rem; height: 1rem; border-radius: 50%; background: var(--color-brown); transition: transform 0.25s ease, background 0.25s ease; }
-.why-item[open] .why-dot { background: var(--color-orange); transform: scale(1.35); }
-.why-body { display: grid; justify-items: center; gap: var(--space-3); padding: 0.75rem 1.25rem 1.5rem; border-top: 1px dashed color-mix(in srgb, var(--color-brown) 40%, transparent); text-align: center; }
-.why-number { font-family: var(--font-brand); font-size: 4.5rem; line-height: 1; color: var(--color-terracotta); }
-.why-body p { margin: 0; }
+/* ---------- Le soin en toute simplicité : étapes en cartes sticky qui se chevauchent (réf. capture « No corn syrup / No seed oils ») ----------
+   Chaque étape = un onglet (titre entre deux points) + une carte. En défilant, la carte suivante se pose sur la précédente :
+   seuls les onglets des étapes passées restent visibles, empilés sous l'en-tête. L'empilement ne s'active que si l'écran est
+   assez haut et si le mouvement n'est pas réduit ; sinon les étapes se suivent simplement. */
+.why-steps { --why-top: 5.25rem; --why-tab: 3.5rem; list-style: none; display: grid; gap: var(--space-6); max-width: 46rem; margin: var(--space-8) auto 0; padding: 0; text-align: left; }
+@media (min-width: 900px) { .why-steps { --why-top: 6.25rem; } }
+.why-step { --tab-bg: var(--color-peach); --tab-fg: var(--color-brown); --tilt: -1deg; transform: rotate(var(--tilt)); }
+.why-step:nth-child(4n + 2) { --tab-bg: var(--color-beige); --tilt: 1.2deg; }
+.why-step:nth-child(4n + 3) { --tab-bg: var(--color-brown); --tab-fg: var(--color-beige); --tilt: -0.8deg; }
+.why-step:nth-child(4n + 4) { --tab-bg: var(--color-surface); --tilt: 1deg; }
+.why-step-tab { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); height: var(--why-tab); margin: 0; padding: 0 1.25rem; border: 2px solid var(--color-brown); border-radius: 1rem 1rem 0.4rem 0.4rem; background: var(--tab-bg); color: var(--tab-fg); font-size: clamp(0.9rem, 3.8vw, 1.6rem); font-weight: 800; line-height: 1.05; letter-spacing: 0.01em; text-align: center; text-transform: uppercase; }
+.why-step-title { flex: 1; min-width: 0; }
+.why-step-dot { flex: none; width: 0.7rem; height: 0.7rem; border-radius: 50%; background: currentColor; }
+.why-step-card { display: grid; justify-items: center; gap: var(--space-3); margin-top: 0.3rem; padding: 1.5rem 1.25rem 1.75rem; border: 2px solid var(--color-brown); border-radius: 0.4rem 0.4rem 1.4rem 1.4rem; background: var(--color-beige); color: var(--color-brown); text-align: center; }
+.why-number { display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border: 2px solid var(--color-brown); border-radius: 50%; font-family: var(--font-brand); font-size: 2.5rem; line-height: 1; color: var(--color-terracotta); }
+.why-step-card p { margin: 0; }
+@media (min-height: 640px) and (prefers-reduced-motion: no-preference) {
+  .why-steps { gap: clamp(3rem, 22svh, 11rem); }
+  .why-step { position: sticky; top: calc(var(--why-top) + var(--i, 0) * var(--why-tab)); }
+}
 
 /* ---------- Sections catégorie : cartes sticky empilées + slider (My Frida) ---------- */
 .category-section { border-radius: 2.25rem 2.25rem 0 0; margin-top: -2.25rem; box-shadow: 0 -0.75rem 2rem rgb(127 63 32 / 0.16); overflow: hidden; }
@@ -249,17 +278,37 @@ li:nth-child(5n + 5) > .product-card { --card-bg: var(--color-terracotta); --car
 .sticky-buy-name { font-size: 0.875rem; font-weight: 600; opacity: 1; }
 .sticky-buy-add { background: var(--color-orange); color: var(--color-brown); }
 
-/* ---------- Contact : formulaire intelligent ---------- */
-.contact-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); width: 100%; max-width: 38rem; margin-top: var(--space-8); padding: clamp(1.25rem, 4vw, 2rem); border-radius: 1.25rem; background: var(--color-beige); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brown) 12%, transparent); text-align: left; }
-.contact-form .field { grid-template-columns: minmax(0, 1fr); }
-.contact-form .phone-row input[type='tel'] { width: 100%; }
-.contact-form .phone-row select { flex: 0 0 9.5rem; }
-.contact-form .field, .contact-form select, .contact-form input, .contact-form textarea { min-width: 0; max-width: 100%; }
-.contact-form-title { margin: 0 0 var(--space-1); font-size: 1.375rem; }
-.contact-form fieldset { min-width: 0; margin: 0 0 var(--space-4); padding: 0; border: 0; }
-.contact-form legend { padding: 0; margin-bottom: var(--space-1); font-weight: 600; }
+/* ---------- Contact : formulaire intelligent (réf. capture : champs à bordure pointillée, grand bouton plein) ---------- */
+.contact-form { --form-line: color-mix(in srgb, var(--color-brown) 55%, transparent); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); width: 100%; max-width: 46rem; margin: var(--space-8) auto 0; padding: 0; background: none; text-align: left; }
+@media (min-width: 640px) { .contact-form { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+.contact-form > .contact-form-title, .contact-form > .help-text, .contact-form > .field-full, .contact-form > .checkout-alert, .contact-form > .btn { grid-column: 1 / -1; }
+.contact-form-title { margin: 0; font-size: 1.375rem; text-align: center; }
+.contact-form > .help-text { text-align: center; }
+.contact-form .field { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); margin: 0; }
+.contact-form .field > label:not(.radio-row, .check-row), .contact-form legend { font-size: 0.875rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.contact-form :is(input:not([type='radio'], [type='checkbox']), select, textarea) { width: 100%; min-width: 0; max-width: 100%; min-height: 3.75rem; padding: 0 1.5rem; border: 1px dashed var(--form-line); border-radius: 1.1rem; background: transparent; color: inherit; font: inherit; font-size: 1.0625rem; }
+.contact-form textarea { min-height: 11rem; padding: 1.25rem 1.5rem; resize: vertical; }
+.contact-form ::placeholder { color: color-mix(in srgb, var(--color-brown) 88%, var(--color-bg)); opacity: 1; }
+.contact-form :is(input, select, textarea):focus-visible { border-style: solid; border-color: var(--color-brown); }
+.contact-form .field [aria-invalid='true'] { border-style: solid; border-color: var(--color-danger); }
+.contact-form .phone-row { gap: var(--space-2); }
+.contact-form .phone-row input[type='tel'] { flex: 1 1 auto; width: 100%; }
+.contact-form fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.contact-form legend { padding: 0; margin-bottom: var(--space-1); }
+.contact-form .btn-block { min-height: 4.25rem; border-radius: 1.1rem; background: var(--color-brown); color: var(--color-beige); font-size: 1.375rem; font-weight: 800; letter-spacing: 0.02em; text-transform: uppercase; }
+/* Champ « Contact » (select WhatsApp / E-mail + valeur) et numéro à indicatif libre, habillés comme les autres champs du formulaire. */
+.contact-input { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--space-2); }
+.contact-form .field .contact-input > select { width: auto; flex: 0 0 auto; min-width: 10rem; padding-inline: 1.25rem; }
+.contact-input .contact-value { flex: 1 1 16rem; min-width: 0; }
+.contact-form .contact-input .contact-value > input { width: 100%; }
+@media (max-width: 479px) { .contact-form .field .contact-input > select { flex: 1 1 100%; width: 100%; } }
+.contact-form .dial-group { border: 1px dashed var(--form-line); border-radius: 1.1rem; background: transparent; }
+.contact-form .dial-group:focus-within { border-style: solid; border-color: var(--color-brown); outline: none; }
+.contact-form .dial-group > span { padding-left: 1.1rem; }
+.contact-form .field .dial-group .dial-input { width: 4.5rem; min-height: 3.6rem; padding: 0 0.75rem 0 0.2rem; border: 0; border-radius: 0 1.1rem 1.1rem 0; }
+.contact-form .phone-row input[type='tel'] { min-width: 0; }
 .contact-count { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
-.contact-done { display: grid; justify-items: start; gap: var(--space-3); max-width: 38rem; margin-top: var(--space-8); padding: var(--space-6); border-radius: 1.25rem; background: var(--color-beige); }
+.contact-done { display: grid; justify-items: start; gap: var(--space-3); max-width: 46rem; margin: var(--space-8) auto 0; padding: var(--space-6); border-radius: 1.25rem; background: var(--color-beige); }
 .contact-done p { margin: 0; font-weight: 600; }
 
 /* ---------- Page À propos ---------- */

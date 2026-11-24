@@ -6,7 +6,7 @@ Ce document résume la mise à jour demandée sur `boutique-1.zip`. Il **remplac
 - Composant commun : `src/components/shop/CurtainModal.tsx` (`<dialog>` natif porté par l'ancre : `#menu`, `#panier`, `#commande`, `#confirmation`).
 - Entrée : deux rideaux de couleur (terracotta, orange) glissent depuis la **droite**, puis le panneau beige ; ensuite les liens du menu (et les lignes du panier, via `data-rise`) montent **un à un**. Sortie : tout repart vers la droite.
 - **Ordinateur** : panneau collé à droite, largeur fixe (34 rem ; 38 rem pour commande et confirmation).
-- **Téléphone** : le panneau laisse une bande du site à gauche (`--drawer-w` dans `ui.css`) : on voit d'où il vient, un toucher dessus le referme. Les bords des rideaux dépassent un peu et restent visibles en bandes de couleur.
+- **Téléphone** : le panneau occupe TOUT l'écran (`--drawer-w: 100%` et rideaux pleine largeur, requête `max-width: 699px` dans `ui.css`) ; on le referme avec ✕ ou Retour.
 - Mouvement réduit : ouverture et fermeture instantanées.
 - `Modal.tsx` et `HistoryModal.tsx` sont supprimés.
 - **Confirmation en modal** : après l'envoi, la commande (réponse du serveur) est gardée dans l'onglet (`lib/shop/confirmed-order.ts`, sessionStorage) et `#confirmation` s'ouvre à droite (`ConfirmationModal.tsx`). Le reçu « imprimé » ne se monte qu'à l'ouverture. Fermer la confirmation retire l'ancre sur place (elle ne rouvre pas le panier). La page `/commande/confirmation?ref=…` reste disponible pour un lien direct.

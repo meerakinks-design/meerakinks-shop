@@ -22,7 +22,7 @@ interface MenuModalProps {
 /**
  * Menu en modal : même mécanisme que le panier, la commande et la confirmation (CurtainModal) : deux rideaux de
  * couleur glissent depuis la droite, puis le panneau beige ; les liens montent un à un. Le panneau reste collé à droite
- * sur ordinateur, et laisse une bande du site visible à gauche sur téléphone.
+ * sur ordinateur, et occupe tout l'écran sur téléphone.
  */
 export function MenuModal({ storeName, showCollections, showContact, socials }: MenuModalProps) {
   const { close } = useModal(MODAL_HASHES.menu);

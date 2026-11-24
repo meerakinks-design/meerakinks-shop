@@ -1,6 +1,6 @@
 import { type ZoneTypeValue } from '@/lib/constants/order';
 import { computeTotal, computeUpfrontAmount } from '@/lib/shop/order-amounts';
-import { DEFAULT_DIAL_CODE, OTHER_DIAL_CODE } from '@/lib/shop/phone';
+import { DEFAULT_DIAL_CODE } from '@/lib/shop/phone';
 import type { PublicZone } from '@/lib/shop/zones';
 import type { OrderPayload } from '@/lib/validation/order.schema';
 
@@ -10,10 +10,8 @@ import type { OrderPayload } from '@/lib/validation/order.schema';
 export interface CheckoutValues {
   /** « Nom complet » : nom et prénom. */
   fullName: string;
-  /** Indicatif choisi dans la liste, ou OTHER_DIAL_CODE. */
+  /** Indicatif du pays, TAPÉ librement par le client (chiffres seulement ; 225 par défaut). */
   dialCode: string;
-  /** Indicatif saisi quand « Autre pays » est choisi. */
-  otherDialCode: string;
   phone: string;
   email: string;
   zoneType: ZoneTypeValue;
@@ -49,7 +47,6 @@ export type CheckoutErrors = Partial<Record<CheckoutField, string>>;
 export const emptyCheckoutValues = (): CheckoutValues => ({
   fullName: '',
   dialCode: DEFAULT_DIAL_CODE,
-  otherDialCode: '',
   phone: '',
   email: '',
   zoneType: 'ABIDJAN',
@@ -87,7 +84,7 @@ export function buildOrderPayload(values: CheckoutValues, items: readonly Payloa
     idempotencyKey,
     items: items.map(({ productId, quantity }) => ({ productId, quantity })),
     fullName: values.fullName,
-    phoneDialCode: values.dialCode === OTHER_DIAL_CODE ? values.otherDialCode : values.dialCode,
+    phoneDialCode: values.dialCode,
     phone: values.phone,
     email: values.email,
     zoneType: values.zoneType,

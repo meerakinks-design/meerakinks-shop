@@ -27,8 +27,8 @@ interface CurtainModalProps {
  * Deux rideaux de couleur glissent depuis la DROITE, puis le panneau beige ; ensuite les éléments marqués
  * `data-rise` (et les libellés de lien du menu) montent un à un. À la fermeture, tout repart vers la droite.
  *
- * Sur téléphone, le panneau laisse une bande du site visible à gauche (voir `--drawer-w` dans ui.css) : on voit
- * d'où il vient et on peut le refermer d'un toucher. Sur ordinateur, il reste collé à droite, largeur fixe.
+ * Sur téléphone, le panneau occupe TOUT l'écran (voir `--drawer-w` et la requête max-width: 699px dans ui.css) ; on le
+ * referme avec ✕ ou Retour. Sur ordinateur, il reste collé à droite, largeur fixe, avec le site dimmé derrière.
  *
  * C'est un <dialog> natif porté par l'ancre : focus piégé, fond inerte, Échap et bouton Retour du téléphone.
  * Le contenu reste dans le HTML même fermé. Mouvement réduit : ouverture et fermeture instantanées.
@@ -95,7 +95,7 @@ export function CurtainModal({ hash, title, ariaLabel, closeLabel = 'Fermer', br
         close();
       }}
       onClick={(event) => {
-        if (event.target === dialogRef.current) close(); // toucher la bande du site, à gauche : referme
+        if (event.target === dialogRef.current) close(); // toucher le site dimmé (ordinateur : à gauche du panneau) referme
       }}
     >
       <div className="curtain-layer curtain-layer-1" aria-hidden="true" />

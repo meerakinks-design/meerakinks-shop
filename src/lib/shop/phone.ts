@@ -6,8 +6,8 @@ export interface DialCode {
 }
 
 export const DEFAULT_DIAL_CODE = '225';
-/** Valeur du sélecteur quand le pays n'est pas dans la liste : le client saisit l'indicatif. */
-export const OTHER_DIAL_CODE = 'other';
+/** Nombre maximal de chiffres d'un indicatif pays (ex. « 1 242 » = 4 chiffres). */
+export const MAX_DIAL_CODE_LENGTH = 4;
 
 export const DIAL_CODES: readonly DialCode[] = [
   { code: '225', label: 'Côte d’Ivoire (+225)' },
@@ -37,6 +37,20 @@ export const DIAL_CODES: readonly DialCode[] = [
   { code: '44', label: 'Royaume-Uni (+44)' },
   { code: '1', label: 'Canada, États-Unis (+1)' },
 ];
+
+/**
+ * L'indicatif est TAPÉ librement par le client (pas de liste fermée) : on ne garde que les chiffres, « + » et espaces
+ * collés par le navigateur ou par le client disparaissent.
+ */
+export function sanitizeDialCode(input: string): string {
+  return input.replace(/\D/g, '').slice(0, MAX_DIAL_CODE_LENGTH);
+}
+
+/** Nom du pays quand l'indicatif est connu (« 225 » → « Côte d’Ivoire »), sinon null : un indicatif inconnu reste accepté. */
+export function dialCountryName(dialCode: string): string | null {
+  const known = DIAL_CODES.find((dial) => dial.code === sanitizeDialCode(dialCode));
+  return known ? known.label.replace(/\s*\(\+\d+\)$/, '') : null;
+}
 
 const IVORY_COAST_CODE = '225';
 /** Depuis le 31 janvier 2021, un numéro ivoirien compte 10 chiffres ; le 0 initial FAIT PARTIE du numéro. */

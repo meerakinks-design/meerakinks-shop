@@ -1,0 +1,9 @@
+
+git add .
+git commit -m "v6"
+git branch -M main
+git remote add origin https://github.com/meerakinks-design/meerakinks-shop.git
+git push -u origin main
+
+
+npm run media:sync

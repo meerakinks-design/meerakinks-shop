@@ -51,7 +51,7 @@ export default async function HomePage() {
             <div className="container section">
               <div className="section-head">
                 <Spaghetti as="p" className="eyebrow">{LANDING.shop.eyebrow}</Spaghetti>
-                <Spaghetti as="h2">{LANDING.shop.title}</Spaghetti>
+                <Spaghetti as="h2" ghost={LANDING.shop.titleGhost}>{LANDING.shop.title}</Spaghetti>
                 <p className="lead">{LANDING.shop.text}</p>
               </div>
               <ShopGrid products={layout.products} />

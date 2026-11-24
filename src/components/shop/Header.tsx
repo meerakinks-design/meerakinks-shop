@@ -26,7 +26,7 @@ function CartIcon() {
 }
 
 /**
- * En-tête (référence Bucks Sauce) : logo à gauche, bouton « Boutique », icône du panier avec le nombre d'articles
+ * En-tête (référence Bucks Sauce) : logo à gauche, bouton « Commander » (mène au catalogue), icône du panier avec le nombre d'articles
  * en badge, et bouton menu. Même disposition sur téléphone et sur ordinateur. Le menu et le panier sont des modals.
  * Le total est une estimation : le montant officiel est calculé par le serveur à l'ouverture du panier.
  */
@@ -49,7 +49,7 @@ export function Header({ storeName }: HeaderProps) {
 
         <div className="header-actions">
           <Link className="header-shop" href={PUBLIC_ROUTES.shop}>
-            Boutique
+            Commander
           </Link>
 
           <ModalLink hash={MODAL_HASHES.cart} className="header-icon-btn cart-button" aria-label={cartLabel}>

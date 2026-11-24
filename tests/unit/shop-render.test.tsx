@@ -127,7 +127,7 @@ describe('carte produit', () => {
 
 describe('en-tête et panier', () => {
   const html = wrap(<Header storeName="Awa Beauty" />);
-  it('affiche le logo à gauche, le bouton Boutique, le panier (nom accessible complet) et le bouton menu', () => {
+  it('affiche le logo à gauche, le bouton Commander, le panier (nom accessible complet) et le bouton menu', () => {
     expect(html).toContain('Awa Beauty');
     expect(html).toContain('href="/boutique"');
     expect(html).toContain('href="#panier"');

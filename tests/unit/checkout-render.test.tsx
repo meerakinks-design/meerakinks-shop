@@ -90,10 +90,18 @@ describe('formulaire de commande — champs', () => {
     expect(html).toContain('type="email"');
   });
 
-  it('propose les indicatifs avec la Côte d’Ivoire d’abord et « Autre pays »', () => {
-    expect(html).toContain('aria-label="Indicatif du pays"');
-    expect(html.indexOf('Côte d’Ivoire (+225)')).toBeLessThan(html.indexOf('Burkina Faso (+226)'));
-    expect(html).toContain('Autre pays</option>');
+  it('laisse le client TAPER son indicatif (225 par défaut), sans liste fermée', () => {
+    expect(html).toContain('aria-label="Indicatif de votre pays, chiffres seulement"');
+    expect(html).toMatch(/class="dial-input"[^>]*value="225"/);
+    expect(html).toContain('Pays : Côte d’Ivoire');
+    expect(html).not.toContain('Autre pays');
+    expect(html).not.toContain('<option value="225"');
+  });
+
+  it('accepte un indicatif absent de la liste', () => {
+    const other = form({}, { dialCode: '971' });
+    expect(other).toMatch(/class="dial-input"[^>]*value="971"/);
+    expect(other).toContain('Pays non listé');
   });
 
   it('cache le champ piège aux humains et aux lecteurs d’écran, hors du parcours clavier', () => {

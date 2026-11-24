@@ -66,7 +66,7 @@ export interface PublicSettings {
 }
 
 const DEFAULT_SETTINGS: PublicSettings = {
-  storeName: 'Ma boutique',
+  storeName: 'MEËRA KINKS',
   whatsappNumber: null,
   whatsappLink: null,
   contactEmail: null,

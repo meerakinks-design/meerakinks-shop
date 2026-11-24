@@ -65,7 +65,7 @@ async function seedSettings(notificationEmail: string) {
     update: {},
     create: {
       id: 'singleton',
-      storeName: process.env.SEED_STORE_NAME?.trim() || 'Ma boutique',
+      storeName: process.env.SEED_STORE_NAME?.trim() || 'MEËRA KINKS',
       sellerWhatsApp: process.env.SEED_SELLER_WHATSAPP?.trim() || PLACEHOLDER_WHATSAPP,
       notificationEmail,
       contactEmail: process.env.SEED_CONTACT_EMAIL?.trim() || null,

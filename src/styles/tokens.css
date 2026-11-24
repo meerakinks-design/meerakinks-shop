@@ -4,7 +4,8 @@
    - Beige (#F8EEDC)  : fonds, espaces de respiration, sections.
    - Marron (#7F3F20) : textes, titres, pied de page, détails.
    Contrastes (WCAG) : marron sur beige 6,9:1 · marron sur orange 2,9:1 · beige sur orange 2,3:1.
-   Sur l'orange : titres en grand et gras seulement ; tout texte courant ou petit se pose sur une carte beige ou un fond marron. */
+   Sur l'orange : titres et descriptions posés directement sur l'aplat, sans carte derrière. Les descriptions y prennent le marron
+   profond (--color-brown-deep, 5,1:1) ; le marron de la charte (2,9:1) reste réservé aux titres en grand et gras. */
 @font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiEyp8kv8JHgFVrFJA.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 @font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiByp8kv8JHgFVrLGT9V1s.ttf') format('truetype'); font-weight: 500; font-display: swap; }
 @font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiByp8kv8JHgFVrLEj6V1s.ttf') format('truetype'); font-weight: 600; font-display: swap; }
@@ -13,7 +14,7 @@
 @font-face { font-family: 'Great Vibes'; src: url('/fonts/great-vibes.ttf') format('truetype'); font-weight: 400; font-display: swap; }
 :root {
   --color-beige: #F8EEDC; --color-orange: #F47C26; --color-brown: #7F3F20;
-  --color-gold-orange: #FF9500; --color-terracotta: #D95525; --color-peach: #F2B590;
+  --color-brown-deep: #4A2210; /* texte courant posé sur l'orange */ --color-gold-orange: #FF9500; --color-terracotta: #D95525; --color-peach: #F2B590;
   --color-bg: var(--color-beige); --color-surface: #FFF9F0; --color-text: var(--color-brown);
   --color-text-muted: #96664D; --color-border: #E8C8AD; --color-primary: var(--color-orange);
   --color-primary-contrast: var(--color-brown); /* texte posé sur l'orange */ --color-danger: var(--color-terracotta); --color-success: #6E8B45; --color-focus: var(--color-gold-orange);
@@ -24,6 +25,7 @@
   --text-hero-script: clamp(3.25rem, 15vw, 8.25rem);
   --text-content: clamp(1.5rem, 5.6vw, 2.5rem);
   --text-section: clamp(1.875rem, 7.4vw, 3.5rem);
+  --text-title: clamp(2.25rem, 8vw, 4.75rem); /* titres de section de la landing (grands, mots-clés en ghost) */
   --text-desc: clamp(1.0625rem, 4.3vw, 1.375rem);
   --radius: 12px;
   --space-1: 0.25rem;

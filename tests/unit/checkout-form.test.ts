@@ -9,7 +9,6 @@ import {
   firstInvalidField,
   toFieldErrors,
 } from '@/lib/shop/checkout-form';
-import { OTHER_DIAL_CODE } from '@/lib/shop/phone';
 import { orderInputSchema } from '@/lib/validation/order.schema';
 
 describe('valeurs initiales', () => {
@@ -51,8 +50,8 @@ describe('buildOrderPayload', () => {
     expect(unchecked.success).toBe(false);
   });
 
-  it('utilise l’indicatif saisi quand « Autre pays » est choisi', () => {
-    const payload = buildOrderPayload({ ...values, dialCode: OTHER_DIAL_CODE, otherDialCode: '971', phone: '50 123 4567' }, items, createIdempotencyKey());
+  it('utilise tel quel l’indicatif tapé par le client, même absent de la liste', () => {
+    const payload = buildOrderPayload({ ...values, dialCode: '971', phone: '50 123 4567' }, items, createIdempotencyKey());
     expect(payload.phoneDialCode).toBe('971');
     expect(orderInputSchema.parse(payload).phoneE164).toBe('+971501234567');
   });

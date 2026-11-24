@@ -249,9 +249,8 @@ main:focus { outline: none; }
 .focus-grid { display: grid; gap: var(--space-8); align-items: center; }
 @media (min-width: 900px) { .focus-grid { grid-template-columns: 1fr 1fr; } }
 .focus-media img, .focus-media .img-placeholder { width: 100%; border-radius: var(--radius); }
-.why-grid, .review-cards { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
-.why-grid li, .review-cards li { padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }
-.why-grid h3 { margin-top: 0; }
+.review-cards { list-style: none; margin: var(--space-6) 0 0; padding: 0; display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); }
+.review-cards li { padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius); }
 .review-cards blockquote { margin: 0; display: grid; gap: var(--space-3); }
 .instagram-grid { list-style: none; margin: var(--space-6) 0; padding: 0; display: grid; gap: var(--space-3); grid-template-columns: repeat(2, 1fr); }
 @media (min-width: 700px) { .instagram-grid { grid-template-columns: repeat(3, 1fr); } }
@@ -324,10 +323,15 @@ body:has(dialog[open]) { overflow: hidden; }
 .checkout-group > legend { font-weight: 700; padding: 0; margin-bottom: var(--space-2); }
 .checkout-row { display: grid; gap: var(--space-4); }
 .checkout-zones { display: grid; gap: var(--space-1); }
+/* Numéro à indicatif libre : « + [225] [numéro] » (formulaires de commande et de contact, composant PhoneInput). */
+.phone-input { display: grid; gap: var(--space-1); min-width: 0; }
 .phone-row { display: flex; gap: var(--space-2); }
-.phone-row select { flex: 0 1 11rem; min-width: 0; }
 .phone-row input[type='tel'] { flex: 1 1 auto; min-width: 0; }
-.phone-row .dial-input { flex: 0 0 5.5rem; }
+.dial-group { display: flex; flex: 0 0 auto; align-items: center; border: 1px solid var(--color-border); border-radius: var(--radius); background: var(--color-surface); }
+.dial-group:focus-within { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.dial-group > span { padding-left: var(--space-3); font-weight: 700; }
+.field .dial-group .dial-input { width: 4.25rem; min-width: 0; padding: 0 var(--space-2) 0 var(--space-1); border: 0; border-radius: 0 var(--radius) var(--radius) 0; background: transparent; outline: none; }
+.dial-hint { margin: 0; }
 .field-optional { color: var(--color-text-muted); font-weight: 400; }
 .hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .order-totals { display: grid; gap: var(--space-2); margin: 0; }
@@ -409,12 +413,12 @@ body:has(dialog[open]) { overflow: hidden; }
 }
 
 /* ---------- Répartition 40 % orange · 50 % beige · 10 % marron ----------
-   Les sections « marque » posent l'orange en grand aplat. Le texte courant ne reste jamais directement sur l'orange
-   (marron/orange 2,9:1) : titres en grand et gras, le reste sur une carte beige (6,9:1) ou dans une pastille marron. */
+   Les sections « marque » posent l'orange en grand aplat. Titres et descriptions sont posés directement dessus, sans carte :
+   titres en marron de la charte, descriptions en marron profond (5,1:1 sur l'orange). Le surtitre garde sa pastille marron. */
 .section-brand { background: var(--color-primary); color: var(--color-brown); }
 .section-brand h2, .section-brand h3 { font-weight: 800; }
 .section-brand .eyebrow { display: inline-block; padding: var(--space-1) var(--space-3); border-radius: 999px; background: var(--color-brown); color: var(--color-beige); }
-.section-brand .lead, .section-brand .help-text { padding: var(--space-3) var(--space-4); border-radius: var(--radius); background: var(--color-bg); color: var(--color-text); }
+.section-brand .lead, .section-brand .help-text { padding: 0; background: none; color: var(--color-brown-deep); }
 .section-brand .btn:not(.btn-quiet) { background: var(--color-brown); color: var(--color-beige); }
 .section-brand .btn-quiet { background: var(--color-bg); border-color: var(--color-brown); color: var(--color-brown); }
 .section-brand a { color: inherit; }
