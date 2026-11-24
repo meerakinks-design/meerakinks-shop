@@ -11,7 +11,22 @@ import { ReceiptPrinter } from './ReceiptPrinter';
  * commande en base : le client n'a plus qu'à l'envoyer (action manuelle, RM-36). Aucun paiement n'est présenté comme
  * reçu : seule la vendeuse enregistre un paiement (RM-10).
  */
-export function OrderConfirmation({ order, depositAmount, storeName }: { order: OrderCreated; depositAmount: number; storeName?: string }) {
+export function OrderConfirmation({
+  order,
+  depositAmount,
+  storeName,
+  variant = 'page',
+  onContinue,
+}: {
+  order: OrderCreated;
+  depositAmount: number;
+  storeName?: string;
+  /** `page` : page /commande/confirmation (titre h1). `modal` : même contenu dans le modal de droite (titre porté par l'en-tête du modal). */
+  variant?: 'page' | 'modal';
+  /** Modal : appelé par « Continuer mes achats » pour fermer avant de changer de page. */
+  onContinue?: () => void;
+}) {
+  const inModal = variant === 'modal';
   // Le reçu n'a besoin que du récapitulatif : le lien WhatsApp (nom, téléphone) ne part pas vers le composant client.
   const receipt: OrderRecap = {
     reference: order.reference,
@@ -24,9 +39,9 @@ export function OrderConfirmation({ order, depositAmount, storeName }: { order: 
     upfrontAmount: order.upfrontAmount,
   };
   return (
-    <article className="container order-confirmation">
+    <article className={inModal ? 'order-confirmation is-modal' : 'container order-confirmation'}>
       <p className="eyebrow">Commande enregistrée</p>
-      <h1>{ORDER_THANKS}</h1>
+      {inModal ? null : <h1>{ORDER_THANKS}</h1>}
       <p>
         Votre référence : <strong className="order-reference">{order.reference}</strong>. Gardez-la, elle vous sera utile pour toute question.
       </p>
@@ -65,7 +80,7 @@ export function OrderConfirmation({ order, depositAmount, storeName }: { order: 
       </section>
 
       <p>
-        <Link className="btn btn-quiet" href={PUBLIC_ROUTES.shop}>
+        <Link className="btn btn-quiet" href={PUBLIC_ROUTES.shop} {...(onContinue ? { onClick: onContinue } : {})}>
           Continuer mes achats
         </Link>
       </p>

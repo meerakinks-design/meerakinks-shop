@@ -1,7 +1,6 @@
 import {
   ANONYMIZED_ADDRESS,
-  ANONYMIZED_FIRST_NAME,
-  ANONYMIZED_LAST_NAME,
+  ANONYMIZED_FULL_NAME,
   anonymizedPhone,
 } from '@/lib/constants/retention';
 
@@ -32,8 +31,7 @@ export function retentionCutoff(now: Date, months: number): Date {
 /** Champs d'une fiche client une fois anonymisée. */
 export function anonymizedCustomerFields(customerId: string, now: Date) {
   return {
-    firstName: ANONYMIZED_FIRST_NAME,
-    lastName: ANONYMIZED_LAST_NAME,
+    fullName: ANONYMIZED_FULL_NAME,
     phone: anonymizedPhone(customerId),
     email: null,
     anonymizedAt: now,
@@ -52,7 +50,7 @@ export function anonymizeReceiptData(value: unknown): Record<string, unknown> | 
   const delivery = typeof receipt.delivery === 'object' && receipt.delivery !== null && !Array.isArray(receipt.delivery) ? (receipt.delivery as Record<string, unknown>) : {};
   return {
     ...receipt,
-    customer: { firstName: ANONYMIZED_FIRST_NAME, lastName: ANONYMIZED_LAST_NAME, phone: '', email: null },
+    customer: { fullName: ANONYMIZED_FULL_NAME, phone: '', email: null },
     delivery: { ...delivery, address: ANONYMIZED_ADDRESS },
   };
 }

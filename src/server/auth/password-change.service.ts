@@ -6,10 +6,14 @@ import {
 import type { ChangePasswordInput } from '@/lib/validation/auth.schema';
 import { prisma } from '@/server/db';
 import { HttpError } from '@/server/http';
+import { isEnvManagedEmail } from '@/server/auth/env-admin';
 import { hashPassword, verifyPassword } from '@/server/auth/password';
 import { generateSessionToken, hashToken } from '@/server/auth/tokens';
 import { auditEntry } from '@/server/services/audit.service';
 import { consumeRateLimit, resetRateLimit } from '@/server/services/rate-limit';
+
+export const ENV_MANAGED_PASSWORD_MESSAGE =
+  'Le mot de passe de ce compte est défini par la variable ADMIN_PASSWORD du serveur. Modifie-la dans les réglages d’hébergement, puis redéploie.';
 
 export interface PasswordChangeResult {
   /** Jeton de la NOUVELLE session de cet appareil (les autres sont révoquées). À poser dans le cookie. */
@@ -40,8 +44,10 @@ export async function changeAdminPassword(input: ChangePasswordInput & { adminId
     });
   }
 
-  const user = await prisma.adminUser.findUnique({ where: { id: input.adminId }, select: { id: true, isActive: true, passwordHash: true } });
+  const user = await prisma.adminUser.findUnique({ where: { id: input.adminId }, select: { id: true, email: true, isActive: true, passwordHash: true } });
   if (!user || !user.isActive) throw new HttpError(401, 'UNAUTHENTICATED', 'Connexion requise.');
+  // Mot de passe défini par ADMIN_PASSWORD : le changer ici serait annulé au prochain démarrage du serveur.
+  if (isEnvManagedEmail(user.email)) throw new HttpError(409, 'CONFLICT', ENV_MANAGED_PASSWORD_MESSAGE);
 
   if (!(await verifyPassword(input.currentPassword, user.passwordHash))) {
     throw new HttpError(422, 'VALIDATION_ERROR', 'Certaines informations sont invalides.', {

@@ -45,19 +45,35 @@ html.is-intro { overflow: hidden; }
 /* ---------- Transition de page (vortex WebGL, variante 05) ---------- */
 .page-transition { position: fixed; inset: 0; z-index: 9998; width: 100%; height: 100%; pointer-events: none; visibility: hidden; }
 
-/* ---------- Menu en modal (panneaux décalés) ---------- */
-.menu-dialog { border: 0; padding: 0; margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: transparent; overflow: hidden; color: var(--color-brown); }
-.menu-dialog:not([open]) { display: none; }
-.menu-dialog::backdrop { background: rgb(127 63 32 / 0.55); }
-.menu-layer, .menu-panel { position: absolute; top: 0.5rem; right: 0.5rem; bottom: 0.5rem; width: calc(100% - 1rem); border-radius: 1.25rem; }
-.menu-layer-1 { background: var(--color-terracotta); }
-.menu-layer-2 { background: var(--color-orange); }
-.menu-panel { display: flex; flex-direction: column; overflow-y: auto; padding: 1rem 1.25rem 1.25rem; background: var(--color-beige); overscroll-behavior: contain; }
-@media (min-width: 700px) { .menu-layer, .menu-panel { width: min(34rem, calc(100% - 1rem)); } }
-.menu-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
-.menu-brand { font-family: var(--font-brand); font-size: 2.25rem; line-height: 1; color: var(--color-terracotta); }
-.menu-close { display: inline-grid; place-items: center; width: 3.25rem; height: 3.25rem; padding: 0; border: 2px solid var(--color-brown); border-radius: 12px; background: transparent; color: var(--color-brown); cursor: pointer; }
-.menu-close:hover { background: var(--color-brown); color: var(--color-beige); }
+/* ---------- Modals « rideaux » : menu, panier, commande, confirmation ----------
+   UN SEUL mécanisme (CurtainModal) : deux rideaux de couleur glissent depuis la droite, puis le panneau beige ; ensuite
+   les liens (ou les lignes du panier, les champs) montent un à un. Ordinateur : le panneau reste collé à droite, largeur
+   fixe. Téléphone : il laisse une bande du site, dimmée, à gauche : on voit d'où il vient, un toucher dessus le referme. */
+.curtain-dialog { --drawer-w: calc(100% - 3.5rem); border: 0; padding: 0; margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: transparent; overflow: hidden; color: var(--color-brown); }
+.curtain-dialog:not([open]) { display: none; }
+.curtain-dialog::backdrop { background: rgb(127 63 32 / 0.55); }
+.curtain-dialog[open]::backdrop { animation: curtain-fade 0.35s ease-out both; }
+@keyframes curtain-fade { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .curtain-dialog[open]::backdrop { animation: none; } }
+.curtain-layer, .curtain-panel { position: absolute; top: 0.5rem; right: 0.5rem; bottom: 0.5rem; border-radius: 1.25rem; }
+/* Les rideaux dépassent un peu du panneau : leurs bords restent visibles, en bandes de couleur, quand tout est ouvert. */
+.curtain-layer-1 { width: calc(var(--drawer-w) + 0.9rem); background: var(--color-terracotta); }
+.curtain-layer-2 { width: calc(var(--drawer-w) + 0.45rem); background: var(--color-orange); }
+.curtain-panel { display: flex; flex-direction: column; width: var(--drawer-w); overflow: hidden; background: var(--color-beige); }
+@media (min-width: 700px) {
+  .curtain-dialog { --drawer-w: min(34rem, calc(100% - 2rem)); }
+  .curtain-dialog.modal-checkout, .curtain-dialog.modal-confirmation { --drawer-w: min(38rem, calc(100% - 2rem)); }
+}
+.curtain-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: 1rem 1.25rem 0.5rem; }
+.curtain-title { margin: 0; font-size: clamp(1.375rem, 5.5vw, 1.75rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.01em; }
+.curtain-title.is-brand { font-family: var(--font-brand); font-size: 2.25rem; font-weight: 400; letter-spacing: 0; line-height: 1; color: var(--color-terracotta); }
+.curtain-close { display: inline-grid; flex: none; place-items: center; width: 3.25rem; height: 3.25rem; padding: 0; border: 2px solid var(--color-brown); border-radius: 12px; background: transparent; color: var(--color-brown); cursor: pointer; }
+.curtain-close:hover { background: var(--color-brown); color: var(--color-beige); }
+.curtain-body { display: flex; flex: 1; flex-direction: column; min-height: 0; padding: 0.5rem 1.25rem 1.25rem; overflow-y: auto; overscroll-behavior: contain; }
+.curtain-body > .empty-state { margin-top: var(--space-4); }
+.order-confirmation.is-modal { max-width: none; padding-block: 0; gap: var(--space-4); }
+
+/* ---------- Menu ---------- */
 .menu-list { list-style: none; margin: 1.25rem 0 0; padding: 0; counter-reset: menuItem; border-top: 1px dashed color-mix(in srgb, var(--color-brown) 40%, transparent); }
 .menu-item-wrap { overflow: hidden; border-bottom: 1px dashed color-mix(in srgb, var(--color-brown) 40%, transparent); counter-increment: menuItem; }
 .menu-item { display: flex; align-items: baseline; gap: var(--space-3); padding: 0.85rem 0; color: var(--color-brown); font-size: clamp(2.25rem, 11vw, 3.75rem); font-weight: 800; line-height: 1; letter-spacing: -0.02em; text-decoration: none; }
@@ -75,6 +91,8 @@ html.is-intro { overflow: hidden; }
 .hero-title { max-width: none; margin: var(--space-3) 0 0; font-size: var(--text-hero); font-weight: 800; line-height: 0.92; letter-spacing: -0.035em; text-transform: none; }
 .hero-title-main { display: block; }
 .hero-title-script { display: block; margin-top: -0.06em; font-family: var(--font-brand); font-size: var(--text-hero-script); font-weight: 400; line-height: 0.85; letter-spacing: 0; color: var(--color-terracotta); transform: rotate(-4deg); }
+.hero-reassurance { margin: var(--space-2) 0 0; max-width: 30rem; font-size: 0.9375rem; font-weight: 600; }
+.marquee-dot { margin-left: var(--space-8); color: var(--color-terracotta); }
 .hero-lead { max-width: 34rem; margin: var(--space-4) 0 0; font-size: var(--text-desc); line-height: 1.45; }
 .hero-actions { justify-content: center; margin-block: var(--space-6) var(--space-2); }
 .btn-pill { gap: 0.75rem; min-height: 3.75rem; padding: 0 1.75rem; border-radius: 2rem 1.4rem 2.2rem 1.5rem / 1.6rem 2rem 1.4rem 2.2rem; transform: rotate(-2deg); }
@@ -163,27 +181,46 @@ li:nth-child(5n + 5) > .product-card { --card-bg: var(--color-terracotta); --car
   .uniform-grid > li, .shop-grid > li { position: sticky; top: 5rem; }
 }
 
-/* ---------- Pied de page (Palmo) ---------- */
-.site-footer { margin-top: var(--space-8); padding: 0; background: var(--color-brown); color: var(--color-beige); }
+/* ---------- Pied de page (Skarlett) : 1 haut · 2 jeu pleine largeur · 3 filigrane en texte et crédit ---------- */
+.site-footer { margin-top: var(--space-8); padding: 0; overflow: hidden; background: var(--color-brown); color: var(--color-beige); }
+.site-footer a { color: inherit; }
 .footer-scallop { height: 1.45rem; background: radial-gradient(circle at 50% 0, var(--color-bg) 0 1.38rem, transparent 1.42rem) 0 0 / 2.8rem 1.45rem repeat-x; }
-.footer-inner { display: grid; justify-items: center; gap: var(--space-4); padding-block: var(--space-6) var(--space-8); text-align: center; }
-.footer-brandline { margin: 0; font-family: var(--font-brand); font-size: 2.5rem; line-height: 1; color: var(--color-peach); }
-.footer-tagline { max-width: 32rem; margin: 0; font-size: var(--text-desc); line-height: 1.4; }
-.footer-nav ul, .footer-socials, .footer-pill ul { list-style: none; margin: 0; padding: 0; }
-.footer-nav ul { display: grid; gap: 0.15rem; }
-.footer-nav a { display: inline-flex; align-items: center; min-height: 3rem; color: var(--color-beige); font-size: clamp(1.375rem, 5.4vw, 1.75rem); font-weight: 500; text-decoration: none; }
-.footer-nav a:hover { color: var(--color-peach); }
-.footer-socials { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-6); }
-.footer-socials a { color: var(--color-peach); font-size: 1.125rem; font-weight: 600; }
-.footer-logo { display: block; width: min(100%, 46rem); margin-top: var(--space-4); }
+
+/* Partie 1 : logo, signature, contact · informations · navigation */
+.footer-top { display: grid; gap: 2rem; padding-block: var(--space-8) var(--space-6); }
+.footer-brand { display: grid; justify-items: start; align-content: start; gap: var(--space-4); }
+.footer-logo { display: block; width: min(100%, 13rem); }
 .footer-logo img { display: block; width: 100%; height: auto; }
-.footer-game { width: 100%; padding: 0; background: transparent; }
-.footer-game > * { width: 100%; max-width: 40rem; margin-inline: auto; }
-.footer-payment { max-width: 36rem; margin: 0; padding: 0; border: 0; font-size: 0.9375rem; }
-.footer-pill { width: 100%; max-width: 40rem; padding: 1.1rem 1.25rem; border-radius: 1.4rem; background: var(--color-beige); color: var(--color-brown); }
-.footer-pill p { margin: 0; font-size: 1rem; }
-.footer-pill ul { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.25rem 1rem; margin-top: var(--space-2); }
-.footer-pill a { display: inline; min-height: 0; color: var(--color-brown); font-size: 0.875rem; text-decoration: underline; text-underline-offset: 3px; }
+.footer-signature { margin: 0; font-family: var(--font-brand); font-size: 2.25rem; line-height: 1; color: var(--color-peach); }
+.footer-icons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.footer-icons a { display: inline-grid; place-items: center; width: 2.75rem; height: 2.75rem; border: 1.5px solid color-mix(in srgb, var(--color-beige) 55%, transparent); border-radius: 50%; color: var(--color-beige); }
+.footer-icons a:hover { border-color: var(--color-beige); background: var(--color-beige); color: var(--color-brown); }
+.footer-heading { margin: 0 0 var(--space-2); font-family: var(--font-brand); font-size: 1.75rem; font-weight: 400; line-height: 1; color: var(--color-peach); }
+.footer-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.1rem; }
+.footer-col a { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--color-beige); font-size: 1rem; text-decoration: none; }
+.footer-col a:hover { color: var(--color-peach); text-decoration: underline; text-underline-offset: 4px; }
+@media (min-width: 560px) and (max-width: 899px) { .footer-top { grid-template-columns: 1fr 1fr; } .footer-brand { grid-column: 1 / -1; } }
+@media (min-width: 900px) { .footer-top { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr) minmax(0, 0.8fr); gap: var(--space-8); } }
+
+/* Partie 2 : le jeu occupe toute la largeur du pied de page (son style : smash.css) */
+.footer-game { padding-block: var(--space-4) var(--space-8); }
+
+/* Partie 3 : nom de la marque en grand (texte, jamais un logo) puis copyright et crédit */
+.footer-bottom { position: relative; }
+.footer-watermark { margin: 0; overflow: hidden; color: var(--color-peach); opacity: 0.4; font-size: clamp(2.2rem, 14.5vw, 10.25rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.02; text-align: center; white-space: nowrap; -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); user-select: none; pointer-events: none; }
+.footer-credit-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.25rem 1.5rem; padding-block: var(--space-3) var(--space-6); border-top: 1px solid rgb(255 255 255 / 0.18); font-size: 0.875rem; }
+.footer-credit-row p { margin: 0; }
+
+/* Crédit : « AKATech Studio » révèle son logo près du pointeur (souris, doigt) ou au-dessus du lien (clavier). */
+.credit-reveal { position: relative; display: inline-block; }
+.site-footer .credit-reveal__link { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--color-peach); font-weight: 700; text-decoration: underline; text-decoration-color: var(--color-orange); text-decoration-thickness: 2px; text-underline-offset: 4px; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+.site-footer .credit-reveal__link:hover { color: var(--color-beige); }
+.credit-reveal__card { position: fixed; top: 0; left: 0; z-index: 80; width: clamp(128px, 34vw, 176px); aspect-ratio: 1; pointer-events: none; will-change: transform; }
+.credit-reveal__frame { position: absolute; inset: 0; display: grid; place-items: center; padding: 12px; border: 1px solid rgb(127 63 32 / 0.12); border-radius: 26px; background: var(--color-beige); box-shadow: 0 22px 44px -18px rgb(0 0 0 / 0.45); opacity: 0; scale: 0.6; rotate: var(--credit-tilt, 0deg); clip-path: inset(100% 0 0 0 round 26px); transition: opacity 0.2s ease, scale 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), clip-path 0.45s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.credit-reveal__card[data-open='true'] .credit-reveal__frame { opacity: 1; scale: 1; clip-path: inset(0 round 26px); }
+.credit-reveal__frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.credit-reveal__fallback { color: var(--color-brown); font-size: 1.125rem; font-weight: 800; line-height: 1.15; text-align: center; }
+@media (prefers-reduced-motion: reduce) { .credit-reveal__frame { scale: 1; clip-path: none; transition: opacity 0.15s linear; } }
 
 /* ---------- Fiche produit (Bucks) ---------- */
 .product-title { font-size: var(--text-section); line-height: 1.02; text-transform: none; letter-spacing: -0.02em; }
@@ -211,3 +248,23 @@ li:nth-child(5n + 5) > .product-card { --card-bg: var(--color-terracotta); --car
 .sticky-buy { background: var(--color-brown); color: var(--color-beige); }
 .sticky-buy-name { font-size: 0.875rem; font-weight: 600; opacity: 1; }
 .sticky-buy-add { background: var(--color-orange); color: var(--color-brown); }
+
+/* ---------- Contact : formulaire intelligent ---------- */
+.contact-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); width: 100%; max-width: 38rem; margin-top: var(--space-8); padding: clamp(1.25rem, 4vw, 2rem); border-radius: 1.25rem; background: var(--color-beige); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brown) 12%, transparent); text-align: left; }
+.contact-form .field { grid-template-columns: minmax(0, 1fr); }
+.contact-form .phone-row input[type='tel'] { width: 100%; }
+.contact-form .phone-row select { flex: 0 0 9.5rem; }
+.contact-form .field, .contact-form select, .contact-form input, .contact-form textarea { min-width: 0; max-width: 100%; }
+.contact-form-title { margin: 0 0 var(--space-1); font-size: 1.375rem; }
+.contact-form fieldset { min-width: 0; margin: 0 0 var(--space-4); padding: 0; border: 0; }
+.contact-form legend { padding: 0; margin-bottom: var(--space-1); font-weight: 600; }
+.contact-count { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.contact-done { display: grid; justify-items: start; gap: var(--space-3); max-width: 38rem; margin-top: var(--space-8); padding: var(--space-6); border-radius: 1.25rem; background: var(--color-beige); }
+.contact-done p { margin: 0; font-weight: 600; }
+
+/* ---------- Page À propos ---------- */
+.about-page { padding-bottom: var(--space-8); }
+.about-block { margin-top: var(--space-8); padding-top: var(--space-4); border-top: 2px dashed color-mix(in srgb, var(--color-brown) 30%, transparent); }
+.about-block h2 { margin-top: 0; }
+.about-cta { margin-top: var(--space-8); }
+.order-reference { white-space: nowrap; }

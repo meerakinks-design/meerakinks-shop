@@ -1,4 +1,6 @@
-# Boutique e-commerce WhatsApp — v0.10
+# Boutique e-commerce WhatsApp — boutique-3 (v0.10 + lot v0.11 + refonte du 23 novembre)
+
+> **Référence : `Cahier_des_charges_MAJ_v3_0.md`** (§16 bis : ce qui est fait et ce qui reste). **Depuis la v0.11 et la refonte du 23 novembre** : traitement des commandes dans le back-office ; menu, panier, commande et confirmation en modals « rideaux » qui entrent par la droite (`CurtainModal`) ; pied de page en trois parties avec crédit AKATech (logo au survol) ; pages `/a-propos` et `/credits` ; formulaire de contact relié à Resend (`POST /api/v1/contact`) ; champ « Nom complet » et case « J'ai vérifié les informations de ma commande » (migration `20261123000000_customer_full_name`) ; textes du document v1.0. Détail : `docs/REFONTE-RIDEAUX-FOOTER-CONTACT.md`. **`npm ci`, `npm run typecheck`, `npm test` et `npm run build` n'ont pas été relancés après cette fusion** : à faire en premier.
 
 Livré : back-office (produits, catégories, photos), vitrine (landing, boutique, catégories, fiche produit, panier en modal avec devis du serveur) **et, depuis la v0.6, la commande** : formulaire en modal, `POST /api/v1/orders`, enregistrement des commandes, page de confirmation et message WhatsApp.
 **Depuis la v0.7** : chaque commande déclenche l'envoi des emails (alerte à la vendeuse avec le **reçu PDF**, accusé au client) avec reprise automatique ; le reçu PDF est aussi servi au back-office.
@@ -37,13 +39,13 @@ Les écrans de gestion des commandes (statuts, paiements, annulation) arrivent �
    npx prisma migrate dev --name init
    ```
    Si Prisma se plaint de la base « shadow », utilise `DIRECT_URL` et vérifie que le rôle Neon peut créer une base.
-5. **Seed** : renseigne dans `.env.local` `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` (12 caractères minimum), puis :
+5. **Compte propriétaire** : renseigne dans `.env.local` (copie de `.env.example`) `ADMIN_EMAIL` et `ADMIN_PASSWORD` (12 caractères minimum ; génère-en un avec `openssl rand -base64 24`), et `ADMIN_NAME` si tu veux un autre nom que « Propriétaire ». Puis :
    ```bash
    npm run db:seed
    ```
-   Ensuite **supprime `SEED_ADMIN_PASSWORD`** de `.env.local` : le mot de passe n'existe qu'en haché, en base.
-   Options : `SEED_DEMO=1` (3 produits de démo, refusé en production), `SEED_RESET_PASSWORD=1` (réinitialise un compte existant et révoque ses sessions).
-6. `npm run dev`, puis ouvre `/admin/login`.
+   Le compte se crée aussi tout seul à la première connexion si les variables sont renseignées (c'est ce qui se passe sur Vercel). L'**environnement fait foi** : changer `ADMIN_PASSWORD` puis relancer le seed ou redéployer remplace le mot de passe et ferme les sessions ouvertes. La base ne garde que le hash bcrypt. Pour cette raison, le mot de passe d'un compte piloté par l'environnement ne se change pas depuis l'écran « Mot de passe ».
+   Options : `SEED_DEMO=1` (3 produits de démo, refusé en production). Les anciens noms `SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD` sont encore lus par le seed.
+6. `npm run dev`, puis ouvre `/admin/login` : le portail mène au tableau de bord « à traiter aujourd'hui ».
 
 ## Vitrine (v0.5)
 
@@ -84,7 +86,7 @@ Statuts de livraison et de paiement séparés (7 statuts de paiement), produit a
 curl -s -X POST http://localhost:3000/api/v1/orders -H 'Content-Type: application/json' -d '{
   "idempotencyKey": "essai-0123456789abcdef",
   "items": [{ "productId": "<id d'un produit publié>", "quantity": 1 }],
-  "firstName": "Awa", "lastName": "Koné", "phoneDialCode": "225", "phone": "07 00 00 00 00",
+  "fullName": "Awa Koné", "infoConfirmed": true, "phoneDialCode": "225", "phone": "07 00 00 00 00",
   "zoneType": "ABIDJAN", "placeName": "Cocody", "address": "Riviera Palmeraie, rue des jardins"
 }'
 ```
@@ -204,7 +206,7 @@ Limite connue : un média envoyé puis retiré **avant** d'enregistrer le produi
 20. Mets une fausse clé Resend et passe une commande : la commande réussit quand même, la ligne reste `PENDING` avec une `lastError` (403) ; remets la bonne clé et lance le `curl` du cron : les emails partent.
 21. Retire `RESEND_API_KEY` : aucun envoi, lignes `PENDING` intactes, le `curl` du cron répond `configured: false`.
 22. Cron : sans en-tête → 401 ; avec le secret → 200 et un bilan ; sans `CRON_SECRET` configuré → 503.
-23. Passe une commande de test dont le prénom contient `<b>essai</b>` : l'email de la vendeuse l'affiche comme du texte.
+23. Passe une commande de test dont le nom complet contient `<b>essai</b>` : l'email de la vendeuse l'affiche comme du texte.
 24. Ajoute un paiement à la main (table `Payment`, `kind` DEPOSIT) : le PDF de `/api/v1/admin/orders/<référence>/receipt` affiche le paiement, le total encaissé et le reste à payer.
 25. Vérifie que ton plan Vercel accepte la fréquence du cron choisie (le déploiement est refusé sinon).
 26. **Le jeu sur un vrai téléphone** (iPhone Safari et Android Chrome) : fluidité, taille des pots, facilité à toucher un petit pot, un geste vertical qui défile bien la page, rotation de l'écran en pleine partie.
@@ -225,8 +227,18 @@ Limite connue : un média envoyé puis retiré **avant** d'enregistrer le produi
 ## Déploiement Vercel
 
 - **Migrations automatiques en production** : `vercel.json` lance `npm run build:vercel` uniquement quand `VERCEL_ENV=production` ; les aperçus utilisent `npm run build` et ne migrent donc pas la base de production. `build:vercel` exécute `prisma generate`, `prisma migrate deploy`, puis `next build`.
-- Variables d'environnement Vercel : `DATABASE_URL`, `DIRECT_URL` (indispensable pour `migrate deploy`). **Pas** de `SEED_*` en production.
-- Crée le compte propriétaire en production en lançant le seed **une seule fois depuis ta machine**, avec `DATABASE_URL` pointant vers la base de production, puis supprime `SEED_ADMIN_PASSWORD`.
+- Variables d'environnement Vercel : `DATABASE_URL`, `DIRECT_URL` (indispensable pour `migrate deploy`), et **`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`** (Settings > Environment Variables, environnement Production). **Pas** de `SEED_*` en production.
+- Le compte propriétaire se crée à la première connexion sur `/admin/login` avec ces variables. Pour changer le mot de passe : modifie `ADMIN_PASSWORD` sur Vercel puis redéploie. Pour changer l'adresse : modifie `ADMIN_EMAIL` ; l'ancien compte reste en base, à désactiver à la main.
+
+## Traitement des commandes (code 0.11) : à essayer à la main
+
+Les tests unitaires couvrent les règles et les services avec une base simulée ; ceci se vérifie avec une vraie base :
+1. Passe une commande de test (Abidjan, un produit à stock suivi). Dans `/admin`, elle apparaît dans « À confirmer » et « Paiement à encaisser ».
+2. Ouvre-la : « Confirmer la commande », puis enregistre l'acompte de 2 000 FCFA (Wave). Le statut de paiement devient « Acompte reçu ».
+3. Enregistre le solde : « Paiement intégral reçu ». Annule le solde « pour erreur de saisie » : la ligne reste barrée avec son motif.
+4. Annule la commande : le stock du produit remonte de la quantité commandée (une seule fois), un message annonce le montant à rembourser, la commande apparaît dans « À rembourser ». Enregistre le remboursement : « Remboursé ».
+5. Commande hors Abidjan : le total est « à confirmer » ; fixe les frais, puis enregistre le paiement intégral. Le reçu PDF affiche alors le total.
+6. Ouvre la commande dans deux onglets, fais avancer le statut dans l'un puis dans l'autre : le second reçoit « modifiée ailleurs ».
 - Vercel Hobby est réservé à un usage non commercial : une boutique réelle demande le plan Pro.
 
 ## Sécurité en place

@@ -37,7 +37,7 @@ const NOW = new Date('2026-11-20T10:00:00Z');
 const RECEIPT = {
   version: 1,
   issuedAt: '2026-01-01T10:00:00.000Z',
-  customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' },
+  customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' },
   delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: 'Riviera 3, villa 12' },
   amounts: { currency: 'XOF', subtotal: 10000, deliveryFee: 1500, total: 11500, upfrontAmount: 2000 },
 };
@@ -91,14 +91,14 @@ describe('anonymizeCustomerByPhone — effacement sur demande', () => {
     });
     const receiptCall = m.tx.receipt.update.mock.calls[0]![0] as { where: unknown; data: { data: Record<string, any> } };
     expect(receiptCall.where).toEqual({ id: 'rec_1' });
-    expect(receiptCall.data.data.customer).toEqual({ firstName: 'Client', lastName: 'anonymisé', phone: '', email: null });
+    expect(receiptCall.data.data.customer).toEqual({ fullName: 'Client anonymisé', phone: '', email: null });
     expect(receiptCall.data.data.delivery.address).toBe('Adresse supprimée');
     expect(receiptCall.data.data.amounts).toEqual(RECEIPT.amounts);
     expect(m.tx.payment.updateMany).toHaveBeenCalledWith({ where: { orderId: { in: ['ord_1', 'ord_2'] } }, data: { note: null } });
     expect(m.tx.orderStatusHistory.updateMany).toHaveBeenCalledWith({ where: { orderId: { in: ['ord_1', 'ord_2'] } }, data: { note: null } });
     expect(m.tx.customer.update).toHaveBeenCalledWith({
       where: { id: 'cus_1' },
-      data: { firstName: 'Client', lastName: 'anonymisé', phone: 'anon-cus_1', email: null, anonymizedAt: NOW },
+      data: { fullName: 'Client anonymisé', phone: 'anon-cus_1', email: null, anonymizedAt: NOW },
     });
   });
 

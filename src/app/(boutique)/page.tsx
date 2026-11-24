@@ -5,6 +5,7 @@ import { ShopGrid } from '@/components/shop/ShopGrid';
 import Spaghetti from '@/components/shop/Spaghetti';
 import { BestSellers, Collections, Contact, Faq, FinalCta, Focus, Hero, Instagram, Marquee, Reviews, StoryTeaser, Why } from '@/components/shop/LandingSections';
 import { LANDING } from '@/content/landing';
+import { SEO } from '@/content/seo';
 import { cld } from '@/lib/cloudinary-static';
 import { hasPromotion } from '@/lib/shop/product-display';
 import { buildShopLayout } from '@/lib/shop/sections';
@@ -14,7 +15,7 @@ import { getFeaturedProducts, getFocusProduct, getPublicSettings, getShopData } 
 // Page statique régénérée toutes les heures, et immédiatement après chaque modification du back-office.
 export const revalidate = 3600;
 
-export const metadata: Metadata = { alternates: { canonical: '/' } };
+export const metadata: Metadata = { title: { absolute: SEO.home.title }, description: SEO.home.description, alternates: { canonical: '/' } };
 
 export default async function HomePage() {
   const settings = await getPublicSettings();
@@ -29,7 +30,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Hero showBestSellers={featured.length > 0} products={featured} iconSrc={cld('/brand/favicon-icon.png')} />
+      <Hero showCollections={layout.mode === 'categories'} products={featured} iconSrc={cld('/brand/favicon-icon.png')} />
       <Marquee />
       {layout.mode === 'categories' && <Collections sections={layout.sections} hasOffers={products.some(hasPromotion)} />}
 
@@ -51,6 +52,7 @@ export default async function HomePage() {
               <div className="section-head">
                 <Spaghetti as="p" className="eyebrow">{LANDING.shop.eyebrow}</Spaghetti>
                 <Spaghetti as="h2">{LANDING.shop.title}</Spaghetti>
+                <p className="lead">{LANDING.shop.text}</p>
               </div>
               <ShopGrid products={layout.products} />
             </div>
@@ -61,7 +63,7 @@ export default async function HomePage() {
       {featured.length > 0 && <BestSellers products={featured} />}
       <StoryTeaser storeName={settings.storeName} />
       {focus && <Focus product={focus} />}
-      <Why />
+      <Why storeName={settings.storeName} />
       <Reviews settings={settings} />
       <Instagram settings={settings} />
       <Faq settings={settings} />

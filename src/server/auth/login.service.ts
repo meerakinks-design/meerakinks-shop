@@ -6,6 +6,7 @@ import {
 import type { LoginInput } from '@/lib/validation/auth.schema';
 import { prisma } from '@/server/db';
 import { HttpError } from '@/server/http';
+import { ensureEnvAdmin } from '@/server/auth/env-admin';
 import { spendTimeLikeARealCheck, verifyPassword } from '@/server/auth/password';
 import { createSession, purgeExpiredSessions } from '@/server/auth/session';
 import { hashIdentifier } from '@/server/auth/tokens';
@@ -41,7 +42,11 @@ export async function authenticateAdmin(
   const emailLimit = await consumeRateLimit(emailKey, LOGIN_MAX_ATTEMPTS_PER_EMAIL, LOGIN_WINDOW_SECONDS);
   if (!emailLimit.allowed) throw tooManyAttempts(emailLimit.retryAfterSeconds);
 
-  // 2. Vérification du mot de passe, à temps constant que le compte existe ou non.
+  // 2. Compte piloté par l'environnement (ADMIN_EMAIL / ADMIN_PASSWORD) : créé ou réaligné avant la vérification.
+  //    Après les limites de tentatives : un visiteur qui martèle la page ne déclenche pas de hash. Sans variables : rien.
+  await ensureEnvAdmin(prisma);
+
+  //    Vérification du mot de passe, à temps constant que le compte existe ou non.
   const user = await prisma.adminUser.findUnique({
     where: { email: input.email },
     select: { id: true, name: true, role: true, isActive: true, passwordHash: true },

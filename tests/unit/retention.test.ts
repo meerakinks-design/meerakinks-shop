@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ANONYMIZED_ADDRESS, ANONYMIZED_FIRST_NAME, ANONYMIZED_LAST_NAME, anonymizedPhone } from '@/lib/constants/retention';
+import { ANONYMIZED_ADDRESS, ANONYMIZED_FULL_NAME, anonymizedPhone } from '@/lib/constants/retention';
 import { anonymizeReceiptData, anonymizedCustomerFields, retentionCutoff } from '@/lib/retention';
 import { buildReceiptData, parseReceiptData } from '@/server/services/receipt.service';
 
@@ -26,8 +26,7 @@ describe('anonymizedCustomerFields', () => {
   it('remplace nom, téléphone et email, et date l’opération', () => {
     const now = new Date('2026-11-20T10:00:00Z');
     expect(anonymizedCustomerFields('cus_1', now)).toEqual({
-      firstName: ANONYMIZED_FIRST_NAME,
-      lastName: ANONYMIZED_LAST_NAME,
+      fullName: ANONYMIZED_FULL_NAME,
       phone: 'anon-cus_1',
       email: null,
       anonymizedAt: now,
@@ -45,7 +44,7 @@ describe('anonymizeReceiptData', () => {
     issuedAt: new Date('2026-10-01T10:00:00Z'),
     shop: { name: 'Awa Beauty', legalName: null, address: null, contactPhone: null, contactEmail: null },
     depositAmount: 2000,
-    customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' },
+    customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' },
     delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: 'Riviera 3, rue des Jardins, villa 12' },
     lines: [{ name: 'Gel définition', unitPrice: 5000, quantity: 2, lineTotal: 10000 }],
     subtotal: 10000,
@@ -56,7 +55,7 @@ describe('anonymizeReceiptData', () => {
 
   it('efface le client et l’adresse, et rien d’autre : le reçu garde ses montants, ses lignes et ses dates', () => {
     const result = anonymizeReceiptData(receipt)!;
-    expect(result.customer).toEqual({ firstName: ANONYMIZED_FIRST_NAME, lastName: ANONYMIZED_LAST_NAME, phone: '', email: null });
+    expect(result.customer).toEqual({ fullName: ANONYMIZED_FULL_NAME, phone: '', email: null });
     expect(result.delivery).toEqual({ zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: ANONYMIZED_ADDRESS });
     expect(result.lines).toEqual(receipt.lines);
     expect(result.amounts).toEqual(receipt.amounts);
@@ -78,7 +77,7 @@ describe('anonymizeReceiptData', () => {
 
   it('ne modifie pas l’objet d’origine', () => {
     anonymizeReceiptData(receipt);
-    expect(receipt.customer.lastName).toBe('Koné');
+    expect(receipt.customer.fullName).toBe('Awa Koné');
   });
 
   it('renvoie null pour un contenu illisible plutôt que de le laisser tel quel', () => {

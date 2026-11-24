@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}${PUBLIC_ROUTES.home}` },
     { url: `${base}${PUBLIC_ROUTES.shop}` },
     { url: `${base}${PUBLIC_ROUTES.categories}` },
+    { url: `${base}${PUBLIC_ROUTES.about}` },
     ...categories.map((category) => ({ url: `${base}${categoryPath(category.slug)}` })),
     ...products.map((product) => ({ url: `${base}${productPath(product.slug)}`, lastModified: product.updatedAt })),
   ];

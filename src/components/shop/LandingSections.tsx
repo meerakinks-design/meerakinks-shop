@@ -3,15 +3,15 @@ import { INSTAGRAM_POSTS, MAX_INSTAGRAM_POSTS, MIN_INSTAGRAM_POSTS } from '@/con
 import { faqItems } from '@/content/faq';
 import { LANDING } from '@/content/landing';
 import { REVIEWS } from '@/content/avis';
-import { categoryPath, MODAL_HASHES, productPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
+import { categoryPath, productPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { fill } from '@/lib/shop/template';
-import { hasContactChannels } from '@/lib/shop/contact';
+import { hasContactChannels, hasContactSection } from '@/lib/shop/contact';
 import { whatsappLink } from '@/lib/shop/whatsapp';
 import { cloudinaryTransform } from '@/lib/cloudinary-url';
 import type { CategorySection, ShopProduct } from '@/lib/shop/sections';
 import type { FocusProduct, PublicSettings } from '@/server/services/catalog.queries';
 import { JsonLd } from './JsonLd';
-import { ModalLink } from './ModalLink';
+import { ContactForm } from './ContactForm';
 import { ProductCard } from './ProductCard';
 import { ProductImage } from './ProductImage';
 import { ProductPurchase } from './ProductPurchase';
@@ -20,21 +20,21 @@ import { effectivePrice } from '@/lib/shop/product-display';
 import { summarize } from '@/lib/shop/seo';
 
 /**
- * Héros (référence My Frida + Bucks) : gros titre (taille 4) dont le dernier mot passe en cursive, bouton pastille
- * incliné, badge circulaire qui tourne, disque orange derrière les produits qui flottent. Les produits viennent
- * du catalogue ; sans photo, la tête aux deux puffs de la marque tient la scène.
+ * Héros (référence My Frida + Bucks) : gros titre en deux temps (la fin passe en cursive), bouton pastille incliné,
+ * badge circulaire qui tourne, disque orange derrière les produits qui flottent. Le surtitre et le titre jouent l'effet
+ * élastique dès l'affichage ; la description reste fixe. Les produits viennent du catalogue ; sans photo, la tête aux
+ * deux puffs de la marque tient la scène.
  */
-export function Hero({ showBestSellers, products = [], iconSrc }: { showBestSellers: boolean; products?: readonly ShopProduct[]; iconSrc: string }) {
+export function Hero({ showCollections, products = [], iconSrc }: { showCollections: boolean; products?: readonly ShopProduct[]; iconSrc: string }) {
   const hero = LANDING.hero;
   const [main, ...floating] = products.filter((product) => product.image).slice(0, 4);
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="container hero-inner">
-        <p className="eyebrow hero-eyebrow">{hero.eyebrow}</p>
-        <h1 id="hero-title" className="hero-title">
-          <span className="hero-title-main">{hero.titleMain}</span>
-          <span className="hero-title-script">{hero.titleScript}</span>
-          <span className="visually-hidden"> — {hero.title}</span>
+        <Spaghetti as="p" trigger="mount" className="eyebrow hero-eyebrow">{hero.eyebrow}</Spaghetti>
+        <h1 id="hero-title" className="hero-title" aria-label={hero.title}>
+          <Spaghetti as="span" mode="chars" trigger="mount" className="hero-title-main">{hero.titleMain}</Spaghetti>{' '}
+          <Spaghetti as="span" mode="chars" trigger="mount" className="hero-title-script">{hero.titleScript}</Spaghetti>
         </h1>
         <p className="lead hero-lead">{hero.text}</p>
         <div className="hero-actions">
@@ -42,12 +42,13 @@ export function Hero({ showBestSellers, products = [], iconSrc }: { showBestSell
             {hero.primaryCta}
             <span aria-hidden="true">›</span>
           </Link>
-          {showBestSellers && (
-            <Link className="btn btn-quiet" href="/#best-sellers">
+          {showCollections && (
+            <Link className="btn btn-quiet" href="/#collections">
               {hero.secondaryCta}
             </Link>
           )}
         </div>
+        <p className="hero-reassurance">{hero.reassurance}</p>
 
         <div className="hero-stage" aria-hidden={main ? undefined : 'true'}>
           <div className="hero-disc" />
@@ -92,7 +93,9 @@ export function Marquee() {
     <div className="marquee" aria-hidden="true">
       <div className="marquee-track">
         {words.map((word, index) => (
-          <span key={`${word}-${index}`}>{word}</span>
+          <span key={`${word}-${index}`}>
+            {word} <span className="marquee-dot">•</span>
+          </span>
         ))}
       </div>
     </div>
@@ -106,7 +109,7 @@ export function Collections({ sections, hasOffers }: { sections: readonly Catego
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="collections-title">{copy.title}</Spaghetti>
-        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
+        <p className="lead">{copy.text}</p>
         <ul className="collection-cards">
           {sections.map((section) => (
             <li key={section.category.id} className="collection-card" style={{ background: section.background, color: section.textColor }}>
@@ -135,7 +138,7 @@ export function BestSellers({ products }: { products: readonly ShopProduct[] }) 
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="best-sellers-title">{copy.title}</Spaghetti>
-        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
+        <p className="lead">{copy.text}</p>
         <ul className="row-scroll">
           {products.map((product, index) => (
             <li key={product.id}>
@@ -160,10 +163,10 @@ export function StoryTeaser({ storeName }: { storeName: string }) {
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="story-title">{copy.title}</Spaghetti>
-        <Spaghetti as="p" className="lead">{fill(copy.intro[0], { storeName })}</Spaghetti>
-        <ModalLink hash={MODAL_HASHES.story} className="btn btn-quiet">
+        <p className="lead">{fill(copy.intro[0], { storeName })}</p>
+        <Link href={PUBLIC_ROUTES.about} className="btn btn-quiet">
           {copy.openCta}
-        </ModalLink>
+        </Link>
       </div>
     </section>
   );
@@ -180,8 +183,9 @@ export function Focus({ product }: { product: FocusProduct }) {
         <div>
           <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
           <Spaghetti as="h2" id="focus-title">{copy.title}</Spaghetti>
+          <p className="lead">{copy.text}</p>
           <Spaghetti as="h3">{product.name}</Spaghetti>
-          <Spaghetti as="p">{summarize(product.description, 240)}</Spaghetti>
+          <p>{summarize(product.description, 240)}</p>
           {product.characteristics.length > 0 && (
             <ul className="check-list">
               {product.characteristics.slice(0, 3).map((item) => (
@@ -201,14 +205,14 @@ export function Focus({ product }: { product: FocusProduct }) {
   );
 }
 
-export function Why() {
+export function Why({ storeName }: { storeName: string }) {
   const copy = LANDING.why;
   return (
     <section id="pourquoi-nous" className="section section-brand" aria-labelledby="why-title">
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="why-title">{copy.title}</Spaghetti>
-        <Spaghetti as="p" className="lead">{copy.intro}</Spaghetti>
+        <p className="lead">{fill(copy.intro, { storeName })}</p>
         <div className="why-grid">
           {copy.items.map((item, index) => (
             <details key={item.title} className="why-item" name="why" open={index === 0}>
@@ -234,7 +238,7 @@ export function Why() {
  */
 export function Reviews({ settings }: { settings: PublicSettings }) {
   const copy = LANDING.reviews;
-  const shareLink = whatsappLink(settings.whatsappNumber, copy.shareMessage);
+  const shareLink = whatsappLink(settings.whatsappNumber, fill(copy.shareMessage, { storeName: settings.storeName }));
   const reviews = REVIEWS.slice(0, 6);
   return (
     <section id="avis" className="section" aria-labelledby="reviews-title">
@@ -243,7 +247,7 @@ export function Reviews({ settings }: { settings: PublicSettings }) {
         <Spaghetti as="h2" id="reviews-title">{copy.title}</Spaghetti>
         {reviews.length > 0 ? (
           <>
-            <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
+            <p className="lead">{fill(copy.text, { storeName: settings.storeName })}</p>
             <ul className="review-cards">
               {reviews.map((review) => (
                 <li key={`${review.displayName}-${review.consent.grantedOn}`}>
@@ -259,7 +263,7 @@ export function Reviews({ settings }: { settings: PublicSettings }) {
             </ul>
           </>
         ) : (
-          <Spaghetti as="p" className="lead">{copy.emptyText}</Spaghetti>
+          <p className="lead">{fill(copy.emptyText, { storeName: settings.storeName })}</p>
         )}
         {shareLink && (
           <p>
@@ -281,7 +285,7 @@ export function Instagram({ settings }: { settings: PublicSettings }) {
       <div className="container">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="instagram-title">{copy.title}</Spaghetti>
-        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
+        <p className="lead">{fill(copy.text, { storeName: settings.storeName })}</p>
         <ul className="instagram-grid">
           {INSTAGRAM_POSTS.slice(0, MAX_INSTAGRAM_POSTS).map((post) => (
             <li key={post.href}>
@@ -295,7 +299,7 @@ export function Instagram({ settings }: { settings: PublicSettings }) {
         {settings.instagramUrl && (
           <p>
             <a className="btn btn-quiet" href={settings.instagramUrl} target="_blank" rel="noopener noreferrer">
-              {copy.cta}
+              {fill(copy.cta, { storeName: settings.storeName })}
             </a>
           </p>
         )}
@@ -306,14 +310,14 @@ export function Instagram({ settings }: { settings: PublicSettings }) {
 
 export function Faq({ settings }: { settings: PublicSettings }) {
   const copy = LANDING.faq;
-  const items = faqItems(settings.depositAmount);
-  const askLink = whatsappLink(settings.whatsappNumber, LANDING.contact.whatsappMessage);
+  const items = faqItems(settings.depositAmount, settings.storeName);
+  const askLink = whatsappLink(settings.whatsappNumber, fill(LANDING.contact.whatsappMessage, { storeName: settings.storeName }));
   return (
     <section id="faq" className="section" aria-labelledby="faq-title">
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="faq-title">{copy.title}</Spaghetti>
-        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
+        <p className="lead">{copy.text}</p>
         <div className="faq-list">
           {items.map((item) => (
             <details key={item.question}>
@@ -341,40 +345,47 @@ export function Faq({ settings }: { settings: PublicSettings }) {
   );
 }
 
-/** Seules les coordonnées présentes dans les paramètres s'affichent ; sans aucune, la section n'est pas affichée. */
+/**
+ * Contact : le formulaire intelligent (envoi par Resend vers la vendeuse) et, en plus, seulement les coordonnées présentes
+ * dans les paramètres. Sans formulaire (interrupteur) ni coordonnée, la section n'est pas affichée.
+ */
 export function Contact({ settings }: { settings: PublicSettings }) {
   const copy = LANDING.contact;
-  const whatsapp = whatsappLink(settings.whatsappNumber, copy.whatsappMessage);
+  const whatsapp = whatsappLink(settings.whatsappNumber, fill(copy.whatsappMessage, { storeName: settings.storeName }));
   const socials = [
     { label: 'Instagram', href: settings.instagramUrl },
     { label: 'TikTok', href: settings.tiktokUrl },
     { label: 'Facebook', href: settings.facebookUrl },
   ].filter((social): social is { label: string; href: string } => Boolean(social.href));
-  if (!hasContactChannels({ ...settings, whatsappLink: whatsapp })) return null;
+  if (!hasContactSection({ ...settings, whatsappLink: whatsapp })) return null;
+  const hasChannels = hasContactChannels({ ...settings, whatsappLink: whatsapp });
 
   return (
     <section id="contact" className="section section-tinted" aria-labelledby="contact-title">
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="contact-title">{copy.title}</Spaghetti>
-        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
-        <div className="hero-actions">
-          {whatsapp && (
-            <a className="btn" href={whatsapp} target="_blank" rel="noopener noreferrer">
-              {copy.cta}
-            </a>
-          )}
-          {settings.contactEmail && (
-            <a className="btn btn-quiet" href={`mailto:${settings.contactEmail}`}>
-              {settings.contactEmail}
-            </a>
-          )}
-          {socials.map((social) => (
-            <a key={social.label} className="btn btn-quiet" href={social.href} target="_blank" rel="noopener noreferrer">
-              {social.label}
-            </a>
-          ))}
-        </div>
+        <p className="lead">{copy.text}</p>
+        {hasChannels && (
+          <div className="hero-actions">
+            {whatsapp && (
+              <a className="btn" href={whatsapp} target="_blank" rel="noopener noreferrer">
+                {copy.cta}
+              </a>
+            )}
+            {settings.contactEmail && (
+              <a className="btn btn-quiet" href={`mailto:${settings.contactEmail}`}>
+                {settings.contactEmail}
+              </a>
+            )}
+            {socials.map((social) => (
+              <a key={social.label} className="btn btn-quiet" href={social.href} target="_blank" rel="noopener noreferrer">
+                {social.label}
+              </a>
+            ))}
+          </div>
+        )}
+        <ContactForm whatsappHref={whatsapp} />
       </div>
     </section>
   );
@@ -387,7 +398,7 @@ export function FinalCta() {
       <div className="container page-narrow">
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="final-title">{copy.title}</Spaghetti>
-        <Spaghetti as="p" className="lead">{copy.text}</Spaghetti>
+        <p className="lead">{copy.text}</p>
         <div className="hero-actions">
           <Link className="btn" href={PUBLIC_ROUTES.shop}>
             {copy.primaryCta}

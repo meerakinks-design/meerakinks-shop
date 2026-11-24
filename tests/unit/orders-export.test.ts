@@ -33,7 +33,7 @@ const order = (overrides: Partial<ExportOrder> = {}): ExportOrder => ({
   deliveryFee: 1500,
   total: 26500,
   upfrontAmount: 5000,
-  customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' },
+  customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' },
   items: [
     { productNameSnapshot: 'Huile', quantity: 2 },
     { productNameSnapshot: 'Beurre', quantity: 1 },
@@ -70,7 +70,7 @@ describe('colonnes (cahier P-55)', () => {
 
   it('chaque ligne a autant de cellules que d’en-têtes', () => {
     expect(buildExportRow(order())).toHaveLength(ORDERS_EXPORT_COLUMNS.length);
-    expect(buildExportRow(order({ customerNote: null, customer: { firstName: 'A', lastName: 'B', phone: '+1', email: null } }))).toHaveLength(ORDERS_EXPORT_COLUMNS.length);
+    expect(buildExportRow(order({ customerNote: null, customer: { fullName: 'A B', phone: '+1', email: null } }))).toHaveLength(ORDERS_EXPORT_COLUMNS.length);
   });
 
   it('couvre tous les statuts et toutes les zones sans libellé manquant', () => {
@@ -95,7 +95,7 @@ describe('neutralizeFormula (protection des tableurs, P-55)', () => {
   it('s’applique aux cellules de texte d’une commande, jamais aux montants', () => {
     const row = buildExportRow(
       order({
-        customer: { firstName: '=cmd|calc', lastName: '+Koné', phone: '+2250700000000', email: '@pirate.example' },
+        customer: { fullName: '=cmd|calc +Koné', phone: '+2250700000000', email: '@pirate.example' },
         shippingAddress: '-2+3',
         customerNote: '=HYPERLINK("http://x")',
         items: [{ productNameSnapshot: '=1+1', quantity: 1 }],
@@ -151,13 +151,13 @@ describe('contenu d’une ligne', () => {
     expect(buildExportRow(order())[column('Destination')]).toBe('Cocody (Abidjan)');
     expect(buildExportRow(order({ zoneType: 'INTERIOR', shippingCity: 'Bouaké' }))[column('Destination')]).toBe('Bouaké, Côte d’Ivoire');
     expect(buildExportRow(order({ zoneType: 'INTERNATIONAL', shippingCity: 'Lyon', shippingCountry: 'France' }))[column('Destination')]).toBe('Lyon, France');
-    const row = buildExportRow(order({ customerNote: null, customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: null } }));
+    const row = buildExportRow(order({ customerNote: null, customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: null } }));
     expect(row[column('Email')]).toBe('');
     expect(row[column('Note du client')]).toBe('');
   });
 
   it('client effacé : le fichier ne montre que « Client anonymisé »', () => {
-    const row = buildExportRow(order({ customer: { firstName: 'Client', lastName: 'anonymisé', phone: 'anon-cus_1', email: null }, shippingAddress: 'Adresse supprimée', customerNote: null }));
+    const row = buildExportRow(order({ customer: { fullName: 'Client anonymisé', phone: 'anon-cus_1', email: null }, shippingAddress: 'Adresse supprimée', customerNote: null }));
     expect(row[column('Nom')]).toBe('Client anonymisé');
     expect(row[column('Adresse')]).toBe('Adresse supprimée');
   });
@@ -216,7 +216,7 @@ describe('CSV (UTF-8 avec BOM, séparateur « ; »)', () => {
   });
 
   it('formules neutralisées dans le CSV, y compris quand la cellule est entre guillemets', () => {
-    const hostile = toCsv(buildExportTable([order({ customer: { firstName: '=1+1', lastName: 'X;Y', phone: '+2250700000000', email: null }, customerNote: '@SUM(A1)\nligne 2' })]));
+    const hostile = toCsv(buildExportTable([order({ customer: { fullName: '=1+1 X;Y', phone: '+2250700000000', email: null }, customerNote: '@SUM(A1)\nligne 2' })]));
     expect(hostile).toContain("'=1+1 X;Y");
     expect(hostile).not.toMatch(/(^|;)=1\+1/m);
     expect(hostile).toContain("\"'@SUM(A1)\nligne 2\"");
@@ -255,7 +255,7 @@ describe('Excel (.xlsx)', () => {
   });
 
   it('aucune formule dans le fichier : une cellule hostile reste du texte, avec l’apostrophe de protection', async () => {
-    const { sheet, strings } = await read([order({ customer: { firstName: '=HYPERLINK("http://x")', lastName: 'Koné', phone: '+2250700000000', email: null }, customerNote: '@SUM(A1)' })]);
+    const { sheet, strings } = await read([order({ customer: { fullName: '=HYPERLINK("http://x") Koné', phone: '+2250700000000', email: null }, customerNote: '@SUM(A1)' })]);
     expect(sheet).not.toContain('<f>');
     expect(sheet).not.toMatch(/<f[ >]/);
     expect(strings).toContain('\'=HYPERLINK("http://x") Koné');

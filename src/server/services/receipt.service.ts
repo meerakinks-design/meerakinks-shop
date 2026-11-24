@@ -11,7 +11,7 @@ export type ReceiptData = {
   version: 1;
   issuedAt: string;
   shop: { name: string; legalName: string | null; address: string | null; contactPhone: string | null; contactEmail: string | null };
-  customer: { firstName: string; lastName: string; phone: string; email: string | null };
+  customer: { fullName: string; phone: string; email: string | null };
   delivery: { zoneType: ZoneTypeValue; country: string; city: string; address: string };
   lines: { name: string; unitPrice: number; quantity: number; lineTotal: number }[];
   amounts: { currency: 'XOF'; subtotal: number; deliveryFee: number | null; total: number | null; upfrontAmount: number | null };
@@ -53,7 +53,16 @@ export function buildReceiptData(input: ReceiptInput): ReceiptData {
 // Les données figées sont lues depuis une colonne JSON : on les revalide avant de les utiliser (PDF, email). Un reçu
 // illisible ne doit jamais produire un document faux.
 const money = z.number().int();
-const receiptDataSchema: z.ZodType<ReceiptData> = z.object({
+// Les reçus déjà enregistrés portent encore « firstName » et « lastName » (avant le champ « Nom complet ») : on les relit
+// sans rien modifier en base ; ils deviennent un nom complet à la lecture.
+const customerSchema = z.union([
+  z.object({ fullName: z.string(), phone: z.string(), email: z.string().nullable() }),
+  z
+    .object({ firstName: z.string(), lastName: z.string(), phone: z.string(), email: z.string().nullable() })
+    .transform(({ firstName, lastName, phone, email }) => ({ fullName: `${firstName} ${lastName}`.trim(), phone, email })),
+]);
+
+const receiptDataSchema: z.ZodType<ReceiptData, z.ZodTypeDef, unknown> = z.object({
   version: z.literal(1),
   issuedAt: z.string(),
   shop: z.object({
@@ -63,7 +72,7 @@ const receiptDataSchema: z.ZodType<ReceiptData> = z.object({
     contactPhone: z.string().nullable(),
     contactEmail: z.string().nullable(),
   }),
-  customer: z.object({ firstName: z.string(), lastName: z.string(), phone: z.string(), email: z.string().nullable() }),
+  customer: customerSchema,
   delivery: z.object({ zoneType: z.enum(ZONE_TYPES), country: z.string(), city: z.string(), address: z.string() }),
   lines: z.array(z.object({ name: z.string(), unitPrice: money, quantity: money, lineTotal: money })),
   amounts: z.object({ currency: z.literal('XOF'), subtotal: money, deliveryFee: money.nullable(), total: money.nullable(), upfrontAmount: money.nullable() }),

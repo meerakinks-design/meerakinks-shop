@@ -1,4 +1,4 @@
-// État des modals (panier, commande, histoire) porté par l'ADRESSE : #panier, #commande, #notre-histoire.
+// État des modals (menu, panier, commande, confirmation) porté par l'ADRESSE : #menu, #panier, #commande, #confirmation.
 // Ouvrir ajoute une entrée d'historique, donc le bouton Retour du téléphone ferme le modal
 // au lieu de quitter le site. Ce module ne touche à `window` que dans des fonctions appelées par le navigateur.
 
@@ -38,6 +38,19 @@ export function closeModal(hash: string): void {
     return;
   }
   // Page ouverte directement sur #panier : on retire simplement l'ancre.
+  window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+  window.dispatchEvent(new Event(EVENT));
+}
+
+/** Remplace le modal ouvert par un autre SANS ajouter d'entrée d'historique (ex. #commande → #confirmation). */
+export function replaceModal(hash: string): void {
+  window.history.replaceState({ modal: hash }, '', `${window.location.pathname}${window.location.search}${hash}`);
+  window.dispatchEvent(new Event(EVENT));
+}
+
+/** Ferme le modal en retirant l'ancre sur place, sans reculer dans l'historique (la confirmation ne doit pas rouvrir le panier). */
+export function dismissModal(hash: string): void {
+  if (window.location.hash !== hash) return;
   window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
   window.dispatchEvent(new Event(EVENT));
 }

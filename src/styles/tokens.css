@@ -20,8 +20,8 @@
   --font-body: 'Poppins', system-ui, sans-serif; --font-brand: 'Great Vibes', cursive;
   /* Échelle typographique (repères des captures) — polices de la charte : Poppins (textes), Great Vibes (touches manuscrites).
      4 = héros · 1 = contenu des sections · 2 = titres de sections · 3 = descriptions */
-  --text-hero: clamp(3.5rem, 17vw, 9rem);
-  --text-hero-script: clamp(3.75rem, 18.5vw, 10rem);
+  --text-hero: clamp(2.5rem, 11.5vw, 6.5rem);
+  --text-hero-script: clamp(3.25rem, 15vw, 8.25rem);
   --text-content: clamp(1.5rem, 5.6vw, 2.5rem);
   --text-section: clamp(1.875rem, 7.4vw, 3.5rem);
   --text-desc: clamp(1.0625rem, 4.3vw, 1.375rem);

@@ -82,12 +82,13 @@ describe('<Spaghetti /> — rendu serveur', () => {
 });
 
 describe('landing — l’effet est branché sur les titres, sans rien perdre du texte', () => {
-  it('Hero : titre composé à la main (graisse très forte + cursive), texte complet et titre complet pour les lecteurs d’écran', () => {
-    const html = renderToStaticMarkup(<Hero showBestSellers iconSrc="/brand/favicon-icon.png" />);
+  it('Hero : titre composé à la main (graisse très forte + cursive) animé dès l’affichage ; la description reste un texte fixe', () => {
+    const html = renderToStaticMarkup(<Hero showCollections iconSrc="/brand/favicon-icon.png" />);
     expect(html).toContain('id="hero-title"');
     expect(plain(html)).toContain(`${LANDING.hero.titleMain} ${LANDING.hero.titleScript}`);
     expect(plain(html)).toContain(LANDING.hero.title);
     expect(plain(html)).toContain(LANDING.hero.text);
+    expect(html).toContain(`<p class="lead hero-lead">${LANDING.hero.text}</p>`); // description : pas d’effet élastique
   });
 
   it('une section garde son titre accessible (aria-labelledby → titre nommé) et son texte lisible', () => {
@@ -99,8 +100,8 @@ describe('landing — l’effet est branché sur les titres, sans rien perdre du
     expect(html).not.toContain('data-sp');
   });
 
-  it('Pourquoi nous : sous-titres et descriptions animés par mot, texte intact', () => {
-    const html = renderToStaticMarkup(<Why />);
+  it('Pourquoi nous : les sous-titres sont animés par mot, les descriptions restent fixes, texte intact', () => {
+    const html = renderToStaticMarkup(<Why storeName="Awa Beauty" />);
     for (const item of LANDING.why.items) {
       expect(plain(html)).toContain(item.title);
       expect(plain(html)).toContain(item.text);
@@ -114,9 +115,15 @@ describe('landing — l’effet est branché sur les titres, sans rien perdre du
     for (const answer of answers) expect(answer).not.toContain('sp-u');
   });
 
+  it('les descriptions de la landing n’ont plus l’effet élastique (titres et surtitres seulement)', () => {
+    const source = readFileSync(path.resolve(__dirname, '../../src/components/shop/LandingSections.tsx'), 'utf-8');
+    expect(source).not.toMatch(/<Spaghetti as="p"(?![^>]*eyebrow)[^>]*>/);
+    expect(source).not.toMatch(/<Spaghetti as="p" className="lead"/);
+  });
+
   it('aucun titre h1 ou h2 de la landing n’échappe à l’effet', () => {
     const source = readFileSync(path.resolve(__dirname, '../../src/components/shop/LandingSections.tsx'), 'utf-8');
-    // Seule exception : le h1 du héros, composé en deux polices (« Embrassez » + « vos kinks ! » en cursive).
+    // Seule exception : le h1 du héros, composé en deux polices (graisse très forte + cursive), dont chaque ligne reçoit l’effet.
     expect(source.match(/<h1[ >]/g) ?? []).toHaveLength(1);
     expect(source).not.toMatch(/<h2[ >]/);
   });

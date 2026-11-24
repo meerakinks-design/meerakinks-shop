@@ -124,7 +124,7 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
   };
 
   return (
-    <section ref={sectionRef} className="container smash" aria-labelledby={titleId} data-smash={open ? hud.status : 'idle'} data-code={code}>
+    <section ref={sectionRef} className="smash" aria-labelledby={titleId} data-smash={open ? hud.status : 'idle'} data-code={code}>
       <Spaghetti as="h2" id={titleId} className="smash-title">
         {text.title}
       </Spaghetti>

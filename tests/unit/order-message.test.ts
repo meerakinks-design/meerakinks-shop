@@ -72,7 +72,7 @@ const receiptInput = (): ReceiptInput => ({
   issuedAt: new Date('2026-11-17T10:00:00.000Z'),
   shop: { name: 'Awa Beauty', legalName: 'Awa Beauty SARL', address: 'Abidjan', contactPhone: null, contactEmail: null },
   depositAmount: 2000,
-  customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: null },
+  customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: null },
   delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: 'Riviera Palmeraie' },
   lines: [{ name: 'Sérum éclat', unitPrice: 10000, quantity: 2, lineTotal: 20000 }],
   subtotal: 20000,
@@ -93,10 +93,10 @@ describe('données du reçu (RM-24)', () => {
   it('est une copie : modifier ensuite les données sources ne change pas le reçu', () => {
     const input = receiptInput();
     const receipt = buildReceiptData(input);
-    input.customer.firstName = 'Autre';
+    input.customer.fullName = 'Autre';
     input.lines[0]!.name = 'Produit renommé';
     input.shop.name = 'Autre boutique';
-    expect(receipt.customer.firstName).toBe('Awa');
+    expect(receipt.customer.fullName).toBe('Awa Koné');
     expect(receipt.lines[0]?.name).toBe('Sérum éclat');
     expect(receipt.shop.name).toBe('Awa Beauty');
   });

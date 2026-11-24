@@ -322,8 +322,8 @@ model DeliveryZone {
 // Dédoublonnage par numéro (format international normalisé, ex. +2250700000000).
 model Customer {
   id        String   @id @default(cuid())
-  firstName String
-  lastName  String
+  // Nom et prénom dans un seul champ (formulaire de commande : « Nom complet »).
+  fullName  String
   phone     String   @unique
   email     String? // facultatif tant que WhatsApp est le canal principal
   anonymizedAt DateTime?

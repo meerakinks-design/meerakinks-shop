@@ -156,7 +156,7 @@ describe('menu en modal', () => {
     expect(html).toContain('<dialog');
     expect(html).toContain('aria-label="Menu"');
     expect(html).toContain('href="/boutique"');
-    expect(html).toContain('href="#notre-histoire"');
+    expect(html).toContain('href="/a-propos"'); // « Notre histoire » est une page dédiée, plus un modal
     expect(html).toContain('href="#panier"');
     expect(html).toContain('aria-label="Fermer le menu"');
   });
@@ -177,18 +177,19 @@ describe('menu en modal', () => {
 });
 
 describe('sections de la landing', () => {
-  it('Hero : le lien « best-sellers » n’existe que si la section existe', () => {
-    expect(renderToStaticMarkup(<Hero showBestSellers iconSrc="/brand/favicon-icon.png" />)).toContain('href="/#best-sellers"');
-    const without = renderToStaticMarkup(<Hero showBestSellers={false} iconSrc="/brand/favicon-icon.png" />);
-    expect(without).not.toContain('best-sellers');
+  it('Hero : le lien vers les collections n’existe que si la section existe', () => {
+    expect(renderToStaticMarkup(<Hero showCollections iconSrc="/brand/favicon-icon.png" />)).toContain('href="/#collections"');
+    const without = renderToStaticMarkup(<Hero showCollections={false} iconSrc="/brand/favicon-icon.png" />);
+    expect(without).not.toContain('/#collections');
     expect(without).toContain('href="/boutique"');
   });
 
   it('Hero : titre en deux temps (slogan de la charte), badge qui tourne, et la tête de la marque tant qu’aucun produit n’a de photo', () => {
-    const html = renderToStaticMarkup(<Hero showBestSellers={false} iconSrc="/brand/favicon-icon.png" />);
-    expect(html).toContain('class="hero-title-main">Embrassez<');
-    expect(html).toContain('class="hero-title-script">vos kinks !<');
-    expect(html).toContain('Embrassez vos kinks !'); // titre complet pour les lecteurs d'écran et le référencement
+    const html = renderToStaticMarkup(<Hero showCollections={false} iconSrc="/brand/favicon-icon.png" />);
+    expect(html).toContain('hero-title-main');
+    expect(html).toContain('hero-title-script');
+    expect(html).toContain('aria-label="Vos kinks méritent le meilleur de votre routine."'); // titre complet pour les lecteurs d'écran et le référencement
+    expect(html).toContain('Un besoin, une couleur.'); // phrase de réassurance, sous les boutons
     expect(html).toContain('class="hero-badge"');
     expect(html).toContain('class="hero-icon"');
     expect(html).not.toContain('hero-main');
@@ -196,7 +197,7 @@ describe('sections de la landing', () => {
 
   it('Hero : les produits avec photo prennent la scène (un principal, trois qui flottent au plus) ; sans photo, ils sont ignorés', () => {
     const products = [product('1'), product('2'), product('3'), product('4'), product('5'), product('6', { image: null })];
-    const html = renderToStaticMarkup(<Hero showBestSellers products={products} iconSrc="/brand/favicon-icon.png" />);
+    const html = renderToStaticMarkup(<Hero showCollections products={products} iconSrc="/brand/favicon-icon.png" />);
     expect(html).toContain('href="/produit/slug-1"');
     expect(html.match(/class="hero-float hero-float-\d"/g)).toHaveLength(3);
     expect(html).not.toContain('slug-5');
@@ -214,8 +215,8 @@ describe('sections de la landing', () => {
 
   it('Avis : au lancement, seulement l’invitation (aucune carte, aucune étoile)', () => {
     const html = renderToStaticMarkup(<Reviews settings={settings({ whatsappNumber: '+2250700000000', whatsappLink: 'https://wa.me/2250700000000' })} />);
-    expect(html).toContain('Vos expériences donnent vie');
-    expect(plain(html)).toContain('Vous avez déjà commandé chez nous'); // texte découpé mot par mot (effet « spaghetti »)
+    expect(html).toContain('Vos retours nous font avancer.');
+    expect(plain(html)).toContain('Vous avez déjà commandé chez Awa Beauty'); // la description reste un texte fixe, avec le nom de la boutique
     expect(html).not.toContain('review-cards');
     expect(html).not.toContain('★');
     expect(html).toContain('https://wa.me/2250700000000?text=');
@@ -229,8 +230,11 @@ describe('sections de la landing', () => {
     expect(renderToStaticMarkup(<Instagram settings={settings()} />)).toBe('');
   });
 
-  it('Contact : section non affichée sans aucune coordonnée, sinon seulement celles qui existent', () => {
-    expect(renderToStaticMarkup(<Contact settings={settings()} />)).toBe('');
+  it('Contact : le formulaire est toujours là (Resend) ; seules les coordonnées qui existent s’y ajoutent', () => {
+    const bare = renderToStaticMarkup(<Contact settings={settings()} />);
+    expect(bare).toContain('id="contact"');
+    expect(bare).toContain('contact-form');
+    expect(bare).not.toContain('mailto:');
     const html = renderToStaticMarkup(<Contact settings={settings({ whatsappNumber: '+2250700000000', whatsappLink: 'https://wa.me/2250700000000', contactEmail: 'bonjour@awa.ci', instagramUrl: 'https://instagram.com/awa' })} />);
     expect(html).toContain('id="contact"');
     expect(html).toContain('mailto:bonjour@awa.ci');
@@ -239,9 +243,9 @@ describe('sections de la landing', () => {
     expect(html).not.toContain('Facebook');
   });
 
-  it('FAQ : six questions repliables, données structurées échappées et acompte venu des paramètres', () => {
+  it('FAQ : neuf questions repliables, données structurées échappées et acompte venu des paramètres', () => {
     const html = renderToStaticMarkup(<Faq settings={settings({ depositAmount: 3500 })} />);
-    expect(html.match(/<details/g)).toHaveLength(6);
+    expect(html.match(/<details/g)).toHaveLength(9);
     expect(html).toContain('id="faq"');
     expect(html).toContain('FAQPage');
     expect(html.replace(/[\s\u202f\u00a0]/g, ' ')).toContain('3 500 FCFA');

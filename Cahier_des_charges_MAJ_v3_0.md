@@ -2,27 +2,30 @@
 
 | | |
 |---|---|
-| **Version** | 2.7 (remplace la v2.6) — mise à jour d'après le code v0.10 et la charte graphique Meëra Kinks v1.2 |
-| **Date** | 21 novembre 2026 (v2.6 : 19 novembre) |
+| **Version** | 3.0 (remplace la v2.9) — état réel du code **boutique-3** : boutique-1 + variantes (v0.10) + **lot v0.11 (traitement des commandes)** + **refonte du 23 novembre** (modals « rideaux », pied de page, À propos, contact, nom complet), relu dans le code le 23 novembre 2026 |
+| **Date** | 23 novembre 2026 (v2.9 : 22 novembre ; v2.8 : 21 novembre ; v2.6 : 19 novembre) |
 | **Projet** | Boutique en ligne de la marque **Meëra Kinks** (soins capillaires pour cheveux crépus, d'après la charte v1.2 ; périmètre exact du catalogue à confirmer, question 29), commandes enregistrées sur le site, récapitulatif transmis à la vendeuse via WhatsApp, gestion depuis un back-office |
 | **Réalisation** | AKATech Studio (Aka), Abidjan |
-| **Code livré** | `boutique-v0_10-mise-a-jour.zip` (`package.json` en 0.10.0) : base v0.10 + conservation des modules v0.8 absents de la v0.10 (sécurité, export commandes, consentement/cookies, conservation-restauration et SEO) ; fusion documentée dans `docs/FUSION-V08-V10.md` |
+| **Code livré** | `boutique-3.zip` = `boutique-fusion-v0_10.zip` (v2.9) **+ lot v0.11 + refonte du 23 novembre** (voir « Nouveautés de la v3.0 » ; `package.json` reste en 0.10.0 ; détail de la refonte : `docs/REFONTE-RIDEAUX-FOOTER-CONTACT.md`). Rappel de la v2.9 : `boutique-fusion-v0_10.zip` (`package.json` en 0.10.0) : **boutique-1** (dernière version) + variantes de produit de `boutique-v0_10-variantes.zip` ; la sécurité du lot v0.8.1 y était déjà ; le code parallèle de la v0.9.1 n'est pas repris. Fusions documentées dans `docs/FUSION-V08-V10.md` et `docs/FUSION-V10-VARIANTES.md` |
 | **Sources** | Cahier v1.0 (`cahier_cadrage_boutique_ecommerce_akatech.md`), cahier WhatsApp initial (`cahier_cadrage_ecommerce_whatsapp.md`), questionnaire cliente (`e_commerce.html`), document de la landing (`landing_page_structure_et_writing_boutique_v1_4.md`), échanges de conception, projet v0.4, projets de référence d'Aka : **Rabbit Shop** (`rabbit-shop_1.zip`, effets typographiques ; code des titres relu dans `rabbit-shop.zip` le 19 nov.) et **site AKATech Studio** (`akatech-nextjs-11-cumul_1.zip`, back-office et analytique), **charte graphique Meëra Kinks v1.2** (`Charte_graphique_Meera_Kinks_v1_2.pdf`, 21 nov. 2026), **logo simple** (`logo_simple_meera_PDF.pdf`) et **capture de référence du pied de page de Palmo** (`palmo.co.in/story`, annotée par Aka : zones 1, 2 et 3) |
 
 **Légende.**
-✅ livré et vérifié dans le code (jusqu'à la v0.10) · 🔶 à construire · ❓ à confirmer avec la cliente · 🟡 proposé, à valider par Aka
+✅ présent dans le code (relu le 23 nov. ; **`npm test`, `tsc` et `build` non relancés après la fusion et la refonte**, voir §12) · 🔶 à construire · ❓ à confirmer avec la cliente · 🟡 proposé, à valider par Aka
 
 > **Ce que ce document est.** C'est la référence du projet : ce qui est décidé, ce qui est déjà construit, les règles que le code doit respecter, et ce qui reste ouvert. Toute décision nouvelle s'ajoute au registre du §2 et au journal du §17.
 > **Ce qu'il n'est pas.** Un avis juridique ou fiscal. Les pages légales et la nature du reçu (§3, §14) doivent être validées par la cliente et, si besoin, par un professionnel.
 
+> **Nouveautés de la v3.0 (23 novembre 2026).** **1. Un seul mécanisme de modal** (D-36, §4.4) : menu, panier, commande et **confirmation** s'ouvrent **par la droite** (deux rideaux de couleur, puis le panneau, puis les liens qui montent un à un) ; sur téléphone, une bande du site reste visible à gauche. La confirmation de commande est un modal (`#confirmation`) ; la page `/commande/confirmation` reste pour un lien direct. **« Notre histoire » n'est plus un modal** : c'est la page **`/a-propos`** (D-38) ; une page minimale `/credits` s'ajoute. **2. Pied de page refait en trois parties** (D-37, §4.8, référence Skarlett) : logo, signature et icônes de contact · informations (légal, crédits, à propos) · navigation ; **mini-jeu pleine largeur, carré sur téléphone** ; **filigrane « MEËRA KINKS » écrit en texte** et crédit « Créé par AKATech Studio » avec logo au survol (logo fourni, lien `https://akatech.vercel.app/` confirmé). **3. Effet élastique** (D-39) : titres et surtitres de toutes les sections, **descriptions fixes**. **4. Formulaire de contact « intelligent »** relié à **Resend** (D-40, RM-62, §6.5). **5. Commande : champ « Nom complet » et case « J'ai vérifié les informations de ma commande »** (D-41, RM-60, RM-61) ; colonne `Customer.fullName` (migration `20261123000000_customer_full_name`, reprise des données, reçus anciens relus : RM-63). **6. Textes du document v1.0** appliqués à la landing, la FAQ (9 questions), le panier, la commande, les erreurs et le SEO (D-42). **7. Lot v0.11 fusionné** (traitement des commandes, paiements, clients, tableau « à traiter aujourd'hui », identifiants d'environnement : D-34, D-35) et adapté au nom complet. **Contrôles du 23 nov.** : rendu serveur des composants et captures Chromium (menu, panier, confirmation, footer, héros, contact) ; **une vingtaine de fichiers de tests lancés avec un exécuteur de remplacement, tous verts** ; la route de contact a été exercée avec un faux service ; **`npm test`, `tsc` et `next build` restent à lancer** (aucune dépendance installée dans l'environnement de travail), ainsi que les tests qui simulent Prisma ou des bibliothèques absentes (PDF, Excel).
+>
+> **Nouveautés de la v2.9 (22 novembre 2026).** **1. Variantes de produit livrées dans le code** (D-24, RM-43 à RM-46, étape 9 bis) : formulaire d'options du back-office, feuille de choix sur les cartes et la fiche, lignes « produit + option » dans le panier, le devis et la commande, prix « à partir de », données structurées par option ; `ProductVariant` et le libellé d'option facultatif sont dans le schéma (§9). **2. Habillage Meëra Kinks, pied de page avec le jeu et jeu au slash relus dans le code** : logos, polices et favicon sont là ; le moteur du jeu coupe les pots en deux moitiés (§4.6 à §4.8). **3. Sécurité, export Excel/CSV, consentement, conservation et SEO** (lot v0.8.1) sont présents (§10). **4. Toujours à construire : l'exploitation des commandes dans le back-office, l'écran Paramètres, les zones de livraison éditables, l'analytique maison, l'assistant IA et le déploiement** (§16 bis). **5. Les chiffres de tests de ce document viennent du dernier essai réel (818, avant la fusion des variantes) ; ils sont à relancer.**
+>
 > **Nouveautés de la v2.7 (21 novembre 2026).** **1. Mise à jour d'après le code v0.10** : l'effet « spaghetti » (v0.9) et le **mini-jeu Cosmetic Smash** (v0.10) sont **livrés** ; un **contrôle visuel dans Chromium** (179 vérifications, téléphone et ordinateur) a fait corriger quatre défauts (barre d'achat collée sur la landing et sur le pied de page, erreur de typage, éclats du jeu trop pâles) ; **587 tests** (§12, §13, §17). **2. Charte graphique Meëra Kinks v1.2 reçue** (D-30) : nom, ton de voix, palette de six couleurs, polices, logos et icônes deviennent la référence (§4.7, RM-49 à RM-52, P-59 à P-61, P-64 à P-66). **3. Logo** (D-31) : logo combiné dans le header et le footer, icône seule pour le favicon `.ico`. **4. Pied de page fusionné avec l'aire de jeu** (D-32) : liens en haut (zones 1 et 2), aire de jeu au milieu, zone 3 en bas (filigrane « Meëra Kinks », © 2026, crédit), d'après la capture de Palmo annotée par Aka (§4.8, P-62). **5. Mini-jeu au « slash »** (D-33) : on tranche les pots du doigt, chaque pot est **coupé en deux** (§4.6, P-63). **Rien de ce qui touche à la charte, au logo, au pied de page et au slash (points 2 à 5) n'est encore construit : c'est l'étape 13 bis (§13).**
 >
 > **Nouveautés de la v2.6 (19 novembre 2026).** Décisions d'Aka sur le retour de la cliente (annexe D) : analytique = **Vercel Web Analytics + analytique maison**, pas de Google Analytics (D-22) · **acompte à Abidjan seulement**, paiement intégral ailleurs, expédition par la vendeuse (D-23) · **variantes de produit** dans le MVP (D-24, P-53, P-54, §9) · **export des commandes** dans le MVP (D-25, P-55) · **délais indicatifs selon la zone** (D-26, P-56) · **reçu, pas de facture** (D-27) · **public neutre** (D-28) · **effet « spaghetti » = code de Rabbit Shop** (D-29, P-41). **À cette date le code était en v0.8 ; depuis, l'effet « spaghetti » (v0.9) et le mini-jeu (v0.10) sont livrés, le reste de cette liste n'est pas construit.**
 
 > **Mise à jour de fusion — 21 novembre 2026.** La v0.8 a été mise à niveau sur la base de la v0.10. Les fichiers communs utilisent la v0.10 (mini-jeu Cosmetic Smash, effet spaghetti, commande, emails, reçu PDF, contrôle Chromium) ; les fichiers présents uniquement en v0.8 ont été ajoutés et conservés (sécurité, export Excel/CSV, consentement/cookies, conservation des données, restauration, SEO et tests associés). Aucun fichier v0.8 n’a été supprimé.
 >
-> **État à retenir dans le code fusionné.** ✅ Déjà livré : vitrine, catalogue, panier, commande WhatsApp, emails/reçus, sécurité de base, export des commandes, consentement/cookies, SEO, effet spaghetti, mini-jeu et contrôles automatisés v0.10 ; la fusion finale passe 818 tests unitaires. 🔶 Reste à construire ou finaliser : variantes de produits, gestion opérationnelle des commandes/paiements/livraisons dans le back-office, analytique propriétaire et alerte « nouveau visiteur », paramètres, habillage final conforme à la charte (logo, couleurs, polices), footer fusionné avec le jeu, interaction slash des pots, assistant IA, tests sur vrais appareils/navigateurs et branchement des services réels (Neon, Cloudinary, Resend, Vercel). ❓ Restent à confirmer avec la cliente : catalogue/catégories, options de variantes, zones/frais et délais, modalités de paiement, textes légaux et contenus de marque.
-
+> **État à retenir dans le code fusionné (mis à jour le 22 novembre 2026).** ✅ **Présent dans le code** : vitrine, catalogue, **variantes de produit**, panier, commande WhatsApp, emails/reçus (PDF et ticket PNG), sécurité de base, **export des commandes**, consentement/cookies, conservation et effacement des données clients, SEO, effet spaghetti, mini-jeu au slash (moteur et rendu des deux moitiés), logos, polices et favicon de la charte, pied de page avec le jeu, Vercel Web Analytics derrière le consentement. 🔶 **Reste à construire** : traitement des commandes dans le back-office (statuts, paiements, annulation, remboursement, clients, tableau « à traiter aujourd'hui »), écran Paramètres, zones de livraison et délais éditables, analytique maison et alerte « nouveau visiteur », assistant IA, son de coupe et traînée du jeu, déploiement et branchement des services réels (Neon, Cloudinary, Resend, Vercel). ❓ **À confirmer avec la cliente** : catalogue et catégories, options de variantes, zones/frais et délais, modalités de paiement, textes légaux, contenus de marque. **Sans le traitement des commandes, la boutique ne peut pas ouvrir à la vente** (D-20, §13).
 ---
 
 ## 1. Contexte et objectifs
@@ -64,18 +67,18 @@ Un site e-commerce où le visiteur consulte les produits, remplit un panier et e
 | D-04 | À chaque nouvelle commande, la vendeuse reçoit un **email Resend**, avec le reçu en PDF. L'email est le canal d'alerte fiable. | Aka |
 | D-05 | **Paiements hors site** pour l'instant : la vendeuse met à jour la commande dans le back-office une fois le paiement reçu. Un **webhook de paiement en ligne** viendra plus tard. | Aka |
 | D-06 | **L'acompte est toujours payé par Wave.** | Aka |
-| D-07 | **Panier, commande et « Notre histoire » sont des modals** sur la landing. Il n'y a **pas** de pages `/panier`, `/commander`, `/notre-histoire`. | Aka |
-| D-08 | **Contact et FAQ restent des sections de la landing** : pas de pages `/contact` ni `/faq`. | Aka |
+| D-07 | **Panier, commande et « Notre histoire » sont des modals** sur la landing. Il n'y a **pas** de pages `/panier`, `/commander`, `/notre-histoire`. *Modifiée par **D-36** et **D-38** (v3.0) : le menu et la confirmation sont aussi des modals qui entrent par la droite ; « Notre histoire » est la page `/a-propos`, plus un modal.* | Aka |
+| D-08 | **Contact et FAQ restent des sections de la landing** : pas de pages `/contact` ni `/faq`. *Précisée par **D-40** (v3.0) : la section Contact porte un formulaire relié à Resend.* | Aka |
 | D-09 | Pages légales : **CGV, CGU, mentions légales**. | Aka |
 | D-10 | Le **prix est calculé par le serveur** ; le total affiché dans le navigateur n'est qu'indicatif. | Aka |
 | D-11 | Header : **icône panier avec badge** (nombre de produits et prix). Cartes produit : **bouton « + »** d'ajout au panier ; le nom ou la photo mène à la fiche (`/produit/[slug]`). | Aka |
 | D-12 | **DA de la boutique** : s'il y a des catégories, une **section sticky par catégorie** avec un **carrousel** de ses produits (réf. MyFrida) ; sinon, les produits sont **disposés en grille aléatoire** dans la section boutique (réf. Hello Hello). Le bouton « Ajouter » s'affiche au survol ou au toucher. Détail produit sur une page slug. Voir §4. | Aka |
 | D-13 | Le **domaine** sera acheté depuis Vercel. | Aka |
 | D-14 | **Assistant commercial IA** plus tard, une fois le site prêt, même architecture que celui d'AKATech Studio. | Aka |
-| D-15 | Authentification du back-office : **compte en base** (mot de passe haché, créé par un seed), et non des identifiants en variables d'environnement. | Aka, validé |
+| D-15 | Authentification du back-office : **compte en base** (mot de passe haché, créé par un seed). *Précisé par **D-34** : l'email et le mot de passe du propriétaire viennent désormais des variables d'environnement ; la base ne garde que le hash.* | Aka, validé |
 | D-16 | **Back-office dans l'esprit de celui du site AKATech Studio** : une page à onglets, une vue d'ensemble « à traiter aujourd'hui », un thème clair ou sombre mémorisé, des cartes sur mobile, des graphiques et une carte des visiteurs. On reprend l'organisation et les schémas d'interaction, pas le code ; la mise en forme reste en CSS à variables (T-10), donc la charte de la cliente se branche toujours en un seul fichier. **Remplace le style de D-02** (son périmètre reste). Détail : §7.1 et §7.6. | Aka, 19 nov. |
 | D-17 | **Analytique propriétaire dans le périmètre, avec consentement** : provenance du visiteur (pays, région ou province, ville), pages vues, **tous les boutons touchés**, durée sur le site, parcours d'un visiteur ; lue dans l'onglet Analytics du back-office, **et alerte email « Nouvelle visite » envoyée à la vendeuse à chaque nouveau visiteur** (pays, province, provenance, sans adresse IP ; comme sur le site AKATech Studio). **Remplace P-08 et P-18.** Détail : §7.6, P-43, P-44, P-45. | Aka, 19 nov. |
-| D-18 | **Titres de section et textes en effet « spaghetti »** (référence Rabbit Shop) sur toute la landing. Détail, limites et exceptions : P-41, §4.5, document de la landing §26. | Aka, 19 nov. |
+| D-18 | **Titres de section et textes en effet « spaghetti »** (référence Rabbit Shop) sur toute la landing. Détail, limites et exceptions : P-41, §4.5, document de la landing §26. *Modifiée par **D-39** (v3.0) : les descriptions n'ont plus l'effet.* | Aka, 19 nov. |
 | D-19 | **Mini-jeu : pots réalistes et bien faits** (pas des pictogrammes) : volumes, reflets, ombres, éclatement crédible. Détail : §4.6, P-42. **Livré en v0.10** (pots dessinés en canvas) ; évolution « slash » : D-33. | Aka, 19 nov. |
 | D-20 | **L'étape 13 (animations avancées, mini-jeu) est traitée avant l'étape 10.** ⚠ Voir la note du §13. | Aka, 19 nov. |
 | D-21 | **L'assistant IA est préparé dès maintenant**, sur le modèle de celui d'AKATech Studio mais **plus robuste** : spécification complète proposée au §15.1 (P-47 à P-52) ; construction après l'étape 10 (étape 15). Précise D-14. | Aka, 19 nov. |
@@ -89,8 +92,17 @@ Un site e-commerce où le visiteur consulte les produits, remplit un panier et e
 | D-29 | **Effet « spaghetti » = l'animation des titres de la landing de Rabbit Shop**, relue dans son code (`.elastic-title`, `lib/useGsapLenis.ts`) : ce n'est plus une interprétation mais une **reprise**. Détail : P-41, §4.5, landing §26. | Aka, 19 nov. |
 | D-30 | **La charte graphique Meëra Kinks v1.2 est la référence de l'identité du site** : nom (« Meëra Kinks », avec le tréma), ton de voix (vouvoiement), palette de **six couleurs et seulement six**, polices **Poppins et Great Vibes**, logos L1 à L5 et icônes I1 à I5. Elle remplace les couleurs et polices provisoires du code. Détail : §4.7, RM-49 à RM-52. | Aka, 21 nov. (charte transmise ; réponse F0b) |
 | D-31 | **Logo combiné (nom + icône aux deux puffs) dans le header et dans le footer ; l'icône seule pour le favicon (`.ico`).** La variante du logo suit le fond (charte §4 et §5) : détail et fichiers à fournir en P-60. | Aka, 21 nov. |
-| D-32 | **Pied de page et aire de jeu fusionnés**, en trois zones d'après la capture de Palmo annotée par Aka : **zones 1 et 2 en haut** (logo, liens de navigation, d'aide et pages légales) ; **l'aire de jeu** au milieu ; **zone 3 en bas** (filigrane « Meëra Kinks », « © 2026 Meëra Kinks », crédit). Remplace le bloc de jeu posé au-dessus du footer en v0.10. Détail : §4.8, P-62. | Aka, 21 nov. |
+| D-34 | **Identifiants du back-office dans les variables d'environnement** (`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`) : l'environnement fait foi, le serveur crée le compte propriétaire à la première connexion (ou au seed) et réaligne son mot de passe s'il change. La base ne garde que le **hash bcrypt**. **Remplace D-15** sur ce point. Conséquence : le mot de passe d'un compte piloté par l'environnement ne se change pas depuis l'écran du back-office. | Aka, demande du 22 novembre 2026 |
+| D-35 | **Traitement des commandes dans le back-office** : liste filtrée, détail, avancement du statut de livraison, registre des paiements (encaissement, remboursement, annulation d'une erreur), frais de livraison fixés par la vendeuse, annulation avec retour du stock, note interne, tableau « à traiter aujourd'hui » et vue Clients. Écrans dans le style existant (palette de la charte, statuts distingués par libellé, bordure et intensité). | Aka, demande du 22 novembre 2026 |
+| D-32 | **Pied de page et aire de jeu fusionnés**, en trois zones d'après la capture de Palmo annotée par Aka : **zones 1 et 2 en haut** (logo, liens de navigation, d'aide et pages légales) ; **l'aire de jeu** au milieu ; **zone 3 en bas** (filigrane « Meëra Kinks », « © 2026 Meëra Kinks », crédit). Remplace le bloc de jeu posé au-dessus du footer en v0.10. Détail : §4.8, P-62. *Disposition remplacée par **D-37** (23 nov.) ; reste vrai : un seul pied de page qui contient le jeu.* | Aka, 21 nov. |
 | D-33 | **Mini-jeu au « slash »** : on tranche les pots avec le doigt (ou la souris) et **chaque pot touché est coupé en deux**. Remplace le « toucher pour faire éclater » de la v0.10. D-19 (pots réalistes) est maintenu. Détail : §4.6, P-63. | Aka, 21 nov. |
+| D-36 | **Menu, panier, commande et confirmation : un seul mécanisme de modal « rideaux », qui entre par la droite** (`CurtainModal`, `<dialog>` natif porté par l'ancre `#menu`, `#panier`, `#commande`, `#confirmation`). Deux rideaux de couleur (Terracotta, Orange) glissent, puis le panneau Beige, puis les liens (ou les lignes du panier) montent un à un ; la sortie fait le chemin inverse. **Ordinateur** : panneau collé à droite, largeur fixe (34 rem ; 38 rem pour la commande et la confirmation). **Téléphone** : une bande du site reste visible à gauche (on voit d'où il vient, un toucher dessus le referme). Mouvement réduit : ouverture et fermeture instantanées. **Remplace** la feuille collée en bas du panier (v0.8) et le modal de commande centré. La confirmation de commande devient un modal (P-68). Détail : §4.4. | Aka, 23 nov. |
+| D-37 | **Pied de page en trois parties (référence Skarlett).** **1. Haut** : logo, signature et **icônes de contact** (WhatsApp, e-mail, Instagram, TikTok, Facebook ; seulement celles dont le lien existe) à gauche · **Informations** (À propos, Crédits, CGV, CGU, mentions légales, confidentialité, cookies) au milieu · **Navigation** à droite. **2. Milieu** : le **mini-jeu sur toute la largeur** du pied de page, **carré sur téléphone**. **3. Bas** : **« MEËRA KINKS » écrit en texte** (filigrane décoratif, jamais un logo) puis copyright et « **Créé par AKATech Studio** » (logo en révélation au survol). **Retirés** : le texte de présentation (« Ma boutique vous propose… ») et le rappel de paiement ; ces informations restent dans la FAQ, le panier et la commande (RM-41). **Remplace la disposition de D-32** (zones d'après Palmo). Détail : §4.8. | Aka, 23 nov. |
+| D-38 | **« Notre histoire » devient la page `/a-propos`** (présentation de la marque, vision, engagement) : **modifie D-07**. Page indexée (sitemap), contenu dans le HTML (P-11) ; le menu, l'aperçu de l'accueil et le pied de page y mènent. Page minimale **`/credits`** (non indexée, hors sitemap). | Aka, 23 nov. |
+| D-39 | **Effet élastique sur les titres et surtitres de toutes les sections de l'accueil** (héros compris, joué dès l'affichage) ; **les descriptions n'ont plus l'effet** (texte fixe). **Modifie D-18**, qui animait aussi les textes courants. Un test le garde. | Aka, 23 nov. |
+| D-40 | **Contact : formulaire « intelligent » relié à Resend.** La section Contact de la landing reste (D-08) mais porte un formulaire : sujet (question sur un soin, ma commande, disponibilité, autre), canal de réponse (WhatsApp → numéro avec indicatif ; e-mail → adresse), **référence de commande obligatoire** pour « Ma commande », message de 10 à 1 200 caractères, consentement. Le message part par **Resend** vers l'adresse de notification des paramètres (`POST /api/v1/contact`). Détail : RM-62, §6.5. | Aka, 23 nov. |
+| D-41 | **Formulaire de commande : un seul champ « Nom complet » et une case « J'ai vérifié les informations de ma commande »** (obligatoire, contrôlée par le serveur). **Modifie §6.2.** Schéma : `Customer.fullName` remplace `firstName` et `lastName` (migration avec reprise des données). RM-60, RM-61, RM-63. | Aka, 23 nov. |
+| D-42 | **Les textes de la boutique suivent le document « Meëra Kinks — Textes du site e-commerce v1.0 »** (`MEERA_KINKS_TEXTES_SITE_V1.md`), appliqué à la landing, la FAQ (9 questions), le panier, la commande, les erreurs et le SEO (`src/content/`). La section « Best-sellers » devient « **À découvrir en ce moment** » : aucune vente réelle ne fonde un classement (RM-39, RM-42). Les passages marqués « à valider » du document restent à valider avec la cliente (RM-38). **Complète P-66.** | Aka, 23 nov. |
 
 ### 2.2 Choix techniques retenus (livrés en v0.4)
 
@@ -112,7 +124,7 @@ Un site e-commerce où le visiteur consulte les produits, remplit un panier et e
 | ID | Proposition | Pourquoi |
 |---|---|---|
 | P-01 | Menu du back-office à **7 entrées** (Tableau de bord, Commandes, Produits, Clients, **Analytics**, Livraison, Paramètres) au lieu de 9 *(6 en v2.4 : Analytics revient avec D-17)* | Les reçus se téléchargent depuis la commande, les échecs d'envoi s'affichent sur la commande ; l'analytique maison est de nouveau dans le périmètre (D-17). |
-| P-02 | Modals en **`<dialog>` natif** montés dans le layout public, avec une **ancre** (`#panier`, `#commande`, `#notre-histoire`) | Le bouton Retour du téléphone ferme le modal ; l'icône panier marche sur toutes les pages ; focus et Échap gratuits. |
+| P-02 | Modals en **`<dialog>` natif** montés dans le layout public, avec une **ancre** (`#panier`, `#commande`, `#notre-histoire`) *Mise à jour (D-36) : ancres `#menu`, `#panier`, `#commande`, `#confirmation` ; `#notre-histoire` n'existe plus.* | Le bouton Retour du téléphone ferme le modal ; l'icône panier marche sur toutes les pages ; focus et Échap gratuits. |
 | P-03 | Confirmation en **`/commande/confirmation?ref=CMD-…`** | Sans référence, la page ne sait pas quelle commande montrer. |
 | P-04 | Bouton « + » **toujours visible sur écran tactile** ; au survol et au focus clavier sur ordinateur | Sur téléphone il n'y a pas de survol ; « toucher pour révéler puis retoucher » casse « toucher = ouvrir la fiche ». |
 | P-05 | Disposition « aléatoire » **stable** (calculée à partir de l'identifiant du produit) | Une disposition recalculée à chaque chargement fait sauter la page. |
@@ -121,7 +133,7 @@ Un site e-commerce où le visiteur consulte les produits, remplit un panier et e
 | P-08 | ~~Statistiques de visite par un **outil externe sans cookies** (Vercel Web Analytics ou Plausible) au MVP~~ — **remplacée par D-17** (analytique maison avec consentement), puis **partiellement rétablie par D-22** : Vercel Web Analytics s'ajoute à l'analytique maison (Plausible écarté) | ~~L'analytique maison est lourde et demande consentement et durée de conservation.~~ Ces contraintes sont désormais acceptées : P-43 et P-44 les traitent. |
 | P-09 | Page **`/politique-de-confidentialite`** en plus de CGV, CGU, mentions légales | On collecte noms, téléphones et adresses. |
 | P-10 | **Création manuelle de commande** dans le back-office après le MVP | Des clients commanderont encore par WhatsApp ; `Order.source = MANUAL` est déjà prévu. |
-| P-11 | Contenu de « Notre histoire » **présent dans le HTML dès le chargement** (pas chargé au clic) | Pour rester indexable. |
+| P-11 | Contenu de « Notre histoire » **présent dans le HTML dès le chargement** (pas chargé au clic) *Mise à jour (D-38) : le contenu est celui de la page `/a-propos`, rendue côté serveur ; l'aperçu de l'accueil renvoie vers elle.* | Pour rester indexable. |
 | P-12 | **« Offres & nouveautés » n'est pas une catégorie** : ce sont des raccourcis de la boutique (`/boutique?filtre=offres`, `/boutique?tri=nouveautes`) | Un produit n'appartient qu'à une seule catégorie. |
 | P-13 | **Best-sellers** = produits **« mis en avant »** par la vendeuse ; badge « Nouveau » **calculé** (publié depuis 30 jours ou moins) ; **pas de badge « Best-seller »** avant d'avoir de vraies ventes | Au lancement, aucune vente ne justifie « Best-seller » (règle : jamais de promesse non justifiée). |
 | P-14 | **Focus produit** choisi dans les paramètres ; section masquée s'il n'y en a pas | Pas de produit inventé ni de section à trous. |
@@ -172,11 +184,14 @@ Un site e-commerce où le visiteur consulte les produits, remplit un panier et e
 | P-59 | **Palette et variables CSS.** Les six couleurs de la charte deviennent les variables de `src/styles/tokens.css` (T-10) : Beige `#F8EEDC` fond (60 %), Marron `#7F3F20` texte (30 %), Orange `#F48128` logo et boutons d'action (10 %), Jaune-orangé `#FF9500`, Terracotta `#D95525`, Pêche `#F2B590` détails. **Aucune autre couleur** : ni blanc pur, ni noir, ni gris, ni couleur métallique (RM-51) — ce qui oblige à remplacer les noirs, blancs et gris provisoires du code, y compris dans le mini-jeu (texte des points, ombres, fond de l'aire de jeu). Tableau complet : §4.7. | La charte l'impose ; un seul fichier la porte (T-10). Les contrastes publiés par la charte servent de garde-fou. |
 | P-60 | **Logos et favicon.** *Header* : **L1** (logo original simple, fond Beige), 120 px de large au minimum. *Footer* : **L1** si le fond du pied de page est Beige (proposé, P-62) ; **L5** (jaune-orangé) ou **L3** (beige) si le fond est Marron — **L1 est interdit sur Marron** (« le Meëra disparaît »). *Page d'accueil et image de partage* : **L2** (avec slogan), 200 px minimum, fond Beige. *Favicon* : **I1** (icône aux couleurs d'origine) **posée sur une tuile Beige**, car la charte n'autorise I1 que sur Beige ou Pêche et qu'un onglet de navigateur peut être sombre ; `favicon.ico` contenant 32 et 48 px (la charte fixe 32 px pour un favicon), `apple-touch-icon` 180 px, icônes 192 et 512 px. Zone de protection : une marge de x (hauteur d'un puff) autour du logo. Jamais déformé, pivoté, recoloré, ombré ni recomposé dans une autre police. Texte alternatif « Meëra Kinks ». **Fichiers reçus** : le logo L1 **sur fond Beige, en PDF** (non transparent). **À fournir** : PNG transparents ou SVG de L1, de L5 (ou L3) et de L2, et de l'icône I1. *En attendant*, le nom écrit en Poppins Medium (« entête de marque », charte §7). | Charte §4 et §5 ; demande d'Aka du 21 nov. (D-31). |
 | P-61 | **Typographie.** **Poppins** (graisses 100, 400, 500, 600 et 800) et **Great Vibes**, **auto-hébergées** (`next/font` ou `@fontsource`), jamais depuis un CDN tiers ; **Choret Fudyng Bubble** n'est pas chargée (réservée aux fichiers du logo). Hiérarchie de la charte : titre Poppins ExtraBold, sous-titre Regular, entête de section SemiBold, corps Regular, légende Thin, cursive Great Vibes (slogan, citations). Les tailles de la charte sont en points : équivalent web = pt × 4/3 (tableau §4.7), à rendre fluides sur téléphone. **Fin des majuscules intégrales** (la charte les interdit dans les titres) : à retirer des titres et des boutons du code actuel. Titres de 8 mots au plus ; un seul titre principal par page ; Great Vibes en une ou deux lignes, jamais pour une information pratique (prix, mode d'emploi, ingrédients). | Charte §7. La licence SIL OFL de Poppins et Great Vibes autorise l'usage commercial. |
-| P-62 | **Pied de page en trois zones fusionné avec l'aire de jeu** (D-32). *Fond Beige* (proposé : le logo L1 est alors le même que dans le header, et les pots Marron restent visibles) ; **variante Marron** possible, comme sur la capture, avec L5 et texte Beige, mais les pots de la sous-gamme Nutrition (Marron) y disparaîtraient. *Bord supérieur en arches* (« formes arrondies », charte §3), en Orange. *Zone 1* : logo combiné et signature « Embrassez vos kinks ! » en Great Vibes. *Zone 2* : trois groupes de liens (Navigation, Besoin d'aide ?, Informations légales), plus « Suivez-nous » conservé (non cité par Aka) et le rappel paiement et livraison (RM-41). *Aire de jeu* : voir §4.8. *Zone 3* : filigrane « Meëra Kinks » **écrit en Poppins ExtraBold, en Pêche** (décoratif, `aria-hidden`) — **pas** le logo recomposé (charte §4) —, puis « © 2026 Meëra Kinks » et le crédit **« Site réalisé par AKATech Studio »** *(formulation et lien à valider)*. | Capture de Palmo annotée par Aka (zones 1, 2, 3) ; charte §3, §4 et §6. |
+| P-62 | **Pied de page en trois zones fusionné avec l'aire de jeu** (D-32). *Fond Beige* (proposé : le logo L1 est alors le même que dans le header, et les pots Marron restent visibles) ; **variante Marron** possible, comme sur la capture, avec L5 et texte Beige, mais les pots de la sous-gamme Nutrition (Marron) y disparaîtraient. *Bord supérieur en arches* (« formes arrondies », charte §3), en Orange. *Zone 1* : logo combiné et signature « Embrassez vos kinks ! » en Great Vibes. *Zone 2* : trois groupes de liens (Navigation, Besoin d'aide ?, Informations légales), plus « Suivez-nous » conservé (non cité par Aka) et le rappel paiement et livraison (RM-41). *Aire de jeu* : voir §4.8. *Zone 3* : filigrane « Meëra Kinks » **écrit en Poppins ExtraBold, en Pêche** (décoratif, `aria-hidden`) — **pas** le logo recomposé (charte §4) —, puis « © 2026 Meëra Kinks » et le crédit **« Site réalisé par AKATech Studio »** *(formulation et lien à valider)*. *Disposition remplacée par **D-37** (23 nov.) ; le code garde le fond Marron, le logo beige (L3) et le filigrane en Pêche.* | Capture de Palmo annotée par Aka (zones 1, 2, 3) ; charte §3, §4 et §6. |
 | P-63 | **Slash : règles du geste et des pots** (D-33). Détail au §4.6. En bref : un **geste** (doigt ou souris) laisse une **traînée** dans la palette ; **tout pot croisé par la traînée est coupé en deux** le long de la direction du geste, les deux moitiés s'écartent et tombent, la **tranche est crème** ; le **score est inchangé** (10, 20 ou 30 points selon la taille 🟡) ; un simple toucher coupe verticalement ; **`touch-action: pan-y` conservé** : les gestes horizontaux et peu inclinés coupent, un geste vertical fait défiler la page (le défilement n'est jamais bloqué). *Contenants adaptés à la gamme* : pot de chantilly ou de masque, flacon pompe (lait capillaire), **flacon spray** (spray hydratant, antipelliculaire — il remplace le compte-gouttes, absent de la gamme), bouteille (shampoing), tube. *Couleurs* : celles des sous-gammes (Orange, Jaune-orangé, Marron). | Demande d'Aka (slash, coupe en deux) ; gamme de la charte. Le choix de `pan-y` préserve la règle « le défilement n'est jamais bloqué » ; l'option `touch-action: none` pendant la partie permettrait des gestes verticaux mais bloquerait le défilement sous le doigt : écartée. |
 | P-64 | **Catégories et sous-gammes.** La charte organise la gamme **par besoin, un besoin = une couleur** : **Hydratation** (Orange : spray hydratant, lait capillaire), **Nettoyage** et **Pousse et croissance** (Jaune-orangé : shampoing, spray antipelliculaire, produits dédiés), **Nutrition** (Marron : chantilly capillaire, masque « bientôt »). La **couleur d'accent d'une catégorie** (`accentColor`) est donc l'une de ces trois couleurs, jamais une autre ; elle désigne un besoin et ne sert pas de décor (Pêche et Terracotta ne désignent jamais un besoin). Les **six catégories** annoncées par la cliente (A2) restent à rattacher à une sous-gamme (question 29). | Charte §6 « Le code couleur des sous-gammes ». Les couleurs provisoires du code sont remplacées. |
 | P-65 | **Boutons, contrastes et états.** *Boutons d'action* : fond **Orange**, libellé **Marron** en Poppins SemiBold d'au moins **19 px** (14 pt gras, seuil « grand texte » : 3,0:1) — la charte donne 3,0:1 pour Marron sur Orange et l'autorise à partir de 18 pt ; **alternative plus sûre** : fond Marron, libellé Beige (6,9:1). Texte courant : Marron sur Beige (6,9:1). Jamais de texte Orange, Jaune-orangé ou Pêche. *Focus visible* : anneau Marron. *Erreurs* : la palette n'a **pas de rouge** ; proposé : texte Marron + icône et liseré Terracotta, jamais une couleur hors palette (RM-51) — **à valider**. | Les contrastes de la charte (p. 23) ; WCAG AA (§4.5). Le 3,0:1 de Marron sur Orange est limité aux grands textes. |
 | P-66 | **Textes et ton.** Vouvoiement partout (site, emails, reçu, message WhatsApp, assistant IA), phrases courtes, on part du besoin (« Vos boucles manquent de souplesse ? »), un ou deux émojis au plus, **aucune promesse médicale** (RM-52). Le **« texte de la gamme »** de la charte (« Trois couleurs, quatre besoins ») est utilisé tel quel sur le site (proposé : introduction des collections). Les textes de la landing rédigés pour une boutique générique (« produits de beauté et d'accessoires », « soins corporels ») sont **à revoir avec la cliente** (RM-38) : liste dans le document de la landing §32. | Charte §2. RM-38 : textes définitifs validés par la cliente. |
+| P-67 | **Textes issus du document v1.0 à valider avec la cliente** (D-42) : « À découvrir en ce moment » à la place de « Best-sellers », les délais indicatifs de la FAQ, le texte de « À propos » (il parle de la marque, **pas de l'histoire de la fondatrice**, qui n'a pas été fournie), la formule « Créé par AKATech Studio ». | RM-38 : rien de définitif sans l'accord de la cliente. |
+| P-68 | **Confirmation de commande en modal** (D-36). La commande vient de la réponse du serveur et reste dans l'**onglet** (`sessionStorage`, rien en base) ; l'ancre `#confirmation` remplace celle de la commande **sans nouvelle entrée d'historique** ; fermer la confirmation **retire l'ancre sur place** (elle ne rouvre pas le panier vide). Le reçu « imprimé » ne se monte qu'à la première ouverture. La page `/commande/confirmation?ref=…` est conservée pour un lien direct. | Évite de revoir un panier vide au retour ; garde le lien direct des courriels et de WhatsApp. |
+| P-69 | **Limites du formulaire de contact** : 5 messages par 10 minutes et par adresse IP (hachée), 3 par heure et par contact (téléphone, e-mail ou nom, haché), champ piège, **pas d'accusé de réception automatique** au client. | Un accusé envoyé à n'importe quelle adresse ferait de la boutique un relais de spam. |
 
 ---
 
@@ -260,20 +275,31 @@ Un site e-commerce où le visiteur consulte les produits, remplit un panier et e
 | RM-36 | Resend n'envoie pas de WhatsApp. Le message prérempli ouvert par le navigateur reste une action manuelle du client. |
 
 ### 3.8 Contenus
-| ID | Règle |
-|---|---|
-| RM-37 | Réassurance et avis clients : **uniquement du vérifiable** (pas de promesse non justifiée, nom d'affichage autorisé, notes seulement si réellement collectées, photos avec autorisation). |
-| RM-38 | Textes définitifs (slogan, histoire, FAQ, conditions) **validés par la cliente**. |
-| RM-39 | **Badges** : « Nouveau » est calculé (publié depuis 30 jours ou moins) ; un prix promotionnel s'affiche barré ; « Best-seller » n'apparaît qu'avec des ventes réelles qui le justifient. |
-| RM-40 | **Avis** : un avis ne s'affiche que s'il est réel **et** que l'autorisation de publication est enregistrée (avec sa preuve). Aucune note moyenne dans les données structurées sans notes réelles et vérifiables. |
-| RM-41 | **Source unique** des modalités de paiement et de livraison (footer, FAQ, formulaire, confirmation, email). |
-| RM-42 | **Rien n'est inventé** : avis, caractéristique produit, promotion, zone, délai, tarif ou promesse. Une information absente = section ou coordonnée **non affichée**, jamais un texte à trous. **Exception encadrée** : les **délais indicatifs** fournis par la cliente (RM-47, D-26). |
-| RM-49 | **Nom de la marque** : toujours « **Meëra Kinks** » — tréma sur le « e », deux mots, deux majuscules. « Meera » et « Meerakinks » sont proscrits, sauf là où le tréma est impossible (adresses web, pseudos : `@meerakinks`). S'applique au nom de la boutique (paramètres), aux titres de page, aux emails, au reçu et au message WhatsApp. |
-| RM-50 | **Vouvoiement** sur tous les textes destinés aux clients ; jamais de « tu », même sur les réseaux sociaux. |
-| RM-51 | **Palette fermée** : aucune couleur hors des six de la charte (pas de blanc pur, de noir, de gris ni de métal). Le logo ne se déforme pas, ne pivote pas, ne change pas de couleur, ne reçoit ni ombre ni contour ni effet, ne se pose pas sur un fond chargé, ne se recompose pas dans une autre police. |
-| RM-52 | **Pas de promesse médicale ni de résultat garanti** (« guérit », « fait repousser à coup sûr ») : la réglementation des cosmétiques l'interdit ; on écrit « accompagne », « aide à », « favorise ». Complète RM-37 et RM-42. |
+| ID | Règle | Code |
+|---|---|---|
+| RM-37 | Réassurance et avis clients : **uniquement du vérifiable** (pas de promesse non justifiée, nom d'affichage autorisé, notes seulement si réellement collectées, photos avec autorisation). |  |
+| RM-38 | Textes définitifs (slogan, histoire, FAQ, conditions) **validés par la cliente**. |  |
+| RM-39 | **Badges** : « Nouveau » est calculé (publié depuis 30 jours ou moins) ; un prix promotionnel s'affiche barré ; « Best-seller » n'apparaît qu'avec des ventes réelles qui le justifient. |  |
+| RM-40 | **Avis** : un avis ne s'affiche que s'il est réel **et** que l'autorisation de publication est enregistrée (avec sa preuve). Aucune note moyenne dans les données structurées sans notes réelles et vérifiables. |  |
+| RM-41 | **Source unique** des modalités de paiement et de livraison (footer, FAQ, formulaire, confirmation, email). |  |
+| RM-42 | **Rien n'est inventé** : avis, caractéristique produit, promotion, zone, délai, tarif ou promesse. Une information absente = section ou coordonnée **non affichée**, jamais un texte à trous. **Exception encadrée** : les **délais indicatifs** fournis par la cliente (RM-47, D-26). |  |
+| RM-49 | **Nom de la marque** : toujours « **Meëra Kinks** » — tréma sur le « e », deux mots, deux majuscules. « Meera » et « Meerakinks » sont proscrits, sauf là où le tréma est impossible (adresses web, pseudos : `@meerakinks`). S'applique au nom de la boutique (paramètres), aux titres de page, aux emails, au reçu et au message WhatsApp. |  |
+| RM-50 | **Vouvoiement** sur tous les textes destinés aux clients ; jamais de « tu », même sur les réseaux sociaux. |  |
+| RM-51 | **Palette fermée** : aucune couleur hors des six de la charte (pas de blanc pur, de noir, de gris ni de métal). Le logo ne se déforme pas, ne pivote pas, ne change pas de couleur, ne reçoit ni ombre ni contour ni effet, ne se pose pas sur un fond chargé, ne se recompose pas dans une autre police. |  |
+| RM-52 | **Pas de promesse médicale ni de résultat garanti** (« guérit », « fait repousser à coup sûr ») : la réglementation des cosmétiques l'interdit ; on écrit « accompagne », « aide à », « favorise ». Complète RM-37 et RM-42. |  |
+| RM-53 | **Statut de paiement calculé** (RM-19) : rien encaissé → acompte attendu (Abidjan) ou à confirmer ; tout le total → intégral ; l'acompte seul à Abidjan → acompte reçu ; sinon partiel ; plus rien d'encaissé après un remboursement → remboursé ; annulée sans paiement → annulé. Une commande annulée mais déjà payée garde son statut jusqu'au remboursement, et figure dans « À rembourser ». | `derivePaymentStatus` |
+| RM-54 | **Saisie d'un paiement** : jamais au-delà du reste à payer ; acompte une seule fois et seulement à Abidjan ; paiement intégral = reste à payer, sur une commande sans encaissement préalable (sinon « Solde ») ; solde et intégral refusés tant que les frais ne sont pas fixés (RM-03) ; plus d'encaissement sur une commande annulée ; remboursement jamais supérieur à l'encaissé, avec motif obligatoire. | `checkNewPayment` |
+| RM-55 | **Annulation d'un paiement** (RM-21) : la ligne reste avec sa date et son motif ; refusée si l'encaissement a déjà été remboursé (total négatif). | `voidPayment` |
+| RM-56 | **Annulation d'une commande** : définitive (RM-16) ; remet le stock suivi sur la variante ou le produit, **une seule fois** (`stockRestoredAt`), jamais sur un stock non suivi (RM-17) ; annonce le montant encaissé à rembourser. | `changeDeliveryStatus` |
+| RM-57 | **Modifications simultanées** : chaque écriture sur une commande est refusée (409) si elle a changé depuis sa lecture (`updatedAt`) : deux onglets ou un double clic ne peuvent ni encaisser deux fois ni restituer deux fois le stock. | `updateOrderGuarded` |
+| RM-58 | **Frais de livraison** : fixés par la vendeuse tant que la commande n'est ni livrée ni annulée ; le total, l'acompte hors Abidjan et le reçu figé (« à confirmer ») sont complétés ; refusés si le total devenait inférieur à l'encaissé. L'acompte annoncé à Abidjan ne change pas. | `setDeliveryFee` |
+| RM-59 | **Emails de changement de statut** au client (s'il a laissé une adresse) : confirmée, en livraison, livrée, annulée ; pas pour « en préparation ». Dédoublonnés par commande et statut. | outbox |
+| RM-60 | **Nom complet** : un seul champ (2 à 120 caractères, sans caractère de contrôle), stocké dans `Customer.fullName` et repris tel quel dans le reçu, les emails (« Bonjour {nom complet}, »), l'export et la fiche client. Une nouvelle commande du même numéro **met à jour** le nom de la fiche. | `orderInputSchema`, `Customer.fullName` |
+| RM-61 | **Case de vérification** : « J'ai vérifié les informations de ma commande. » est **obligatoire** ; le serveur refuse (422, champ `infoConfirmed`) une commande dont la case n'est pas cochée ; la case n'est **jamais cochée d'avance** ; la valeur n'est pas stockée. | `orderInputSchema` (`infoConfirmed`) |
+| RM-62 | **Contact** (`POST /api/v1/contact`) : interrupteur (`NEXT_PUBLIC_CONTACT_FORM_ENABLED`), origine, limite par IP puis par contact (P-69), champ piège (faux succès, rien d'envoyé), validation partagée avec le navigateur, **envoi Resend** à l'adresse de notification ; tout texte saisi est **échappé**, le sujet tient sur une ligne ; **aucune donnée conservée** ; journal sans nom ni contenu ; sans clé Resend ou sans adresse de notification : **503** qui renvoie vers WhatsApp, jamais un faux succès. | `POST /api/v1/contact`, `sendContactMessage` |
+| RM-63 | **Reçus anciens** : un reçu déjà enregistré (données figées) peut porter `firstName` et `lastName` ; il est **relu** comme un nom complet, sans rien modifier en base. Un reçu anonymisé porte « Client anonymisé ». | `parseReceiptData` |
 
-### 3.9 Variantes, délais et export (D-24 à D-26) 🔶
+### 3.9 Variantes, délais et export (D-24 à D-26) — RM-43 à RM-46 ✅ code · RM-47 🔶 (colonnes en base, ni saisie ni affichage) · RM-48 ✅
 | # | Règle |
 |---|---|
 | RM-43 | **Variante** : étiquette (1 à 60 caractères, unique par produit), référence interne facultative et unique, prix facultatif, stock, actif, ordre. Un produit sans variante se vend comme avant. **Publier un produit à variantes exige au moins une variante active.** |
@@ -331,19 +357,20 @@ Ordre des blocs :
 **Barre d'achat collée en bas (téléphone)** : prix et bouton « Ajouter », visible dès que le bouton principal sort de l'écran ; masquée sur ordinateur et pour un produit épuisé (un message remplace alors le bouton). Sur ordinateur : galerie à gauche, colonne d'achat collante à droite. Avec des variantes, la barre d'achat affiche l'option choisie, ou « Choisir une option ». Les pastilles ne reprennent que des règles validées ou des fonctions livrées (P-40). Textes : document de la landing §23. **v0.10** : la barre n'existe **que sur la fiche produit** (le produit mis en avant de la landing n'en a pas : elle s'y affichait dès le haut de la page et recouvrait le footer) et **se range quand le pied de page est à l'écran** (elle masquait ses liens légaux). **À trancher** : sur un téléphone de 390 × 844, le bouton principal est sous la ligne de flottaison au chargement ; la barre s'affiche donc aussitôt (le code l'affiche dès que le bouton n'est pas à l'écran), alors que ce texte dit « dès que le bouton principal sort de l'écran ».
 
 ### 4.4 Header, panier et commande (modals) ✅ header et panier (v0.5) · ✅ formulaire de commande (v0.6)
-- **Header** (D-11, détail dans le document de la landing §1) : **logo combiné L1** (D-31, P-60), liens (Boutique, Collections, Notre histoire, Contact), action « Voir la boutique » (ordinateur), et **panier = icône + badge du nombre d'articles + montant en FCFA**.
+- **Header** (D-11, détail dans le document de la landing §1) : **logo combiné L1** (D-31, P-60), liens (Boutique, Collections, Notre histoire → page `/a-propos`, Contact), action « Voir la boutique » (ordinateur), et **panier = icône + badge du nombre d'articles + montant en FCFA**.
   - Le **montant du header est une estimation** ; le total officiel vient du serveur à l'ouverture du panier.
   - **Mobile** (v0.8) : **logo combiné à gauche (L1, au moins 120 px de large) ; icône du panier (avec badge), puis menu hamburger, à droite**, dans la barre, en boutons carrés arrondis ; le hamburger devient une croix à l'ouverture ; le montant s'affiche dans le panier.
   - Panier vide : pas de montant. Le panier est présent **sur toutes les pages publiques**.
   - Accessibilité : nom accessible complet (« Panier : 3 articles, 15 000 FCFA »), mises à jour annoncées, animation du badge désactivée en mouvement réduit, lien d'évitement « Aller au contenu ».
   - Comportement : sticky ou masqué au défilement ; ne cache jamais l'élément qui a le focus.
-- **Panier (modal, refondu en v0.8)** : **feuille** collée au bord bas de l'écran sur téléphone ; **liste défilante** (miniature, nom en majuscules, **option choisie** s'il y en a une, prix à l'unité, sélecteur « − 1 + », prix de la ligne, « Retirer » ; ancien prix barré en cas de promotion) ; **pied fixe** : ligne « Livraison — À confirmer » (RM-03), **« Sous-total »** officiel (appel serveur à l'ouverture), rappel de paiement et de livraison, bouton **« Passer commande »** ; produits dépubliés ou épuisés signalés. Textes : landing §24.
-- **Commande (modal)** ✅ (v0.6) : voir §6. Elle s'ouvre depuis « Commander » ; « Modifier mon panier » y renvoie au panier ; après un envoi réussi, la page de confirmation remplace le modal.
+- **Panier (modal, refondu en v0.8)** : **modal « rideaux » qui entre par la droite** (D-36 ; c'était une feuille collée en bas jusqu'à la v2.9) ; **liste défilante** (miniature, nom en majuscules, **option choisie** s'il y en a une, prix à l'unité, sélecteur « − 1 + », prix de la ligne, « Retirer » ; ancien prix barré en cas de promotion) ; **pied fixe** : ligne « Livraison — À confirmer » (RM-03), **« Sous-total »** officiel (appel serveur à l'ouverture), rappel de paiement et de livraison, bouton **« Passer commande »** ; produits dépubliés ou épuisés signalés. Textes : landing §24.
+- **Commande (modal)** ✅ (v0.6) : voir §6. Elle s'ouvre depuis « Commander » ; « Modifier mon panier » y renvoie au panier ; après un envoi réussi, le **modal de confirmation** (`#confirmation`, P-68) remplace le formulaire ; la page `/commande/confirmation` reste pour un lien direct.
+- **Mécanisme commun : menu, panier, commande, confirmation (D-36, v3.0)** ✅ — composant `CurtainModal` : `<dialog>` natif (focus piégé, fond inerte, Échap et bouton Retour via l'ancre). **Entrée** : deux rideaux de couleur glissent depuis la droite (Terracotta puis Orange), puis le panneau Beige ; les libellés du menu montent un à un, les lignes du panier, les champs et le récapitulatif montent en fondu (`data-rise`). **Sortie** : le panneau part en premier, puis les rideaux, vers la droite. **Ordinateur** : panneau collé à droite, 34 rem (38 rem pour la commande et la confirmation). **Téléphone** : bande du site visible à gauche (largeur du panneau = écran − 3,5 rem), bords des rideaux visibles en bandes de couleur ; un toucher sur la bande referme. **Mouvement réduit** : instantané. Le menu et le panier gardent leurs contenus ; « Mon panier » du menu ouvre `#panier`.
 - **Mécanique** (P-02) : `<dialog>` natif, ancres `#panier` et `#commande`, fermeture par Échap, par le bouton Retour du téléphone et par clic extérieur, focus rendu au bouton d'origine, défilement de la page bloqué, hauteur adaptée au clavier mobile.
 - Le panier ne conserve que **identifiants (produit et variante) et quantités** (navigateur) ; jamais de prix.
 
 ### 4.4 bis Pages et sections de la landing
-Hero (slogan, promesse, visuel, CTA « Découvrir la boutique », « Nos best-sellers ») · bandeau de marque (marquee) · collections · best-sellers · **Notre histoire (modal)** · focus produit · pourquoi choisir la marque · avis clients · Instagram · **FAQ (accordéon)** · **contact** · CTA final · footer (liens, paiement et livraison, CGV, CGU, mentions légales, confidentialité, copyright).
+Hero (slogan, promesse, visuel, CTA « Découvrir les soins », « Trouver mon essentiel », phrase de réassurance) · bandeau de marque (marquee) · collections · « À découvrir en ce moment » (ancre `#best-sellers`, D-42) · **Notre histoire (aperçu et lien vers `/a-propos`)** · focus produit · pourquoi choisir la marque · avis clients · Instagram · **FAQ (accordéon)** · **contact** · CTA final · **pied de page en trois parties (§4.8)**. Le contact porte son formulaire (§6.5).
 Structure, textes et **liens de chaque section** : `landing_page_structure_et_writing_boutique_v1.2.md` (document de référence pour la rédaction). Questions de la FAQ : comment commander ; moyens de paiement ; fonctionnement de l'acompte à Abidjan ; livraison hors d'Abidjan et à l'étranger ; frais et délais ; contacter la vendeuse. Réponses validées par la cliente.
 
 ### 4.5 Animations, performance, accessibilité
@@ -355,9 +382,9 @@ Structure, textes et **liens de chaque section** : `landing_page_structure_et_wr
 | Mobile | Versions allégées des animations ; zones tactiles d'au moins 44 px (déjà appliqué dans les styles). |
 | Images | Livrées par Cloudinary en format et qualité automatiques ; dimensions déclarées pour éviter les sauts de mise en page. |
 | Objectifs 🟡 | Chargement rapide sur 4G mobile ; WCAG AA (contraste des sections garanti, libellés de formulaires, focus visible, messages d'erreur annoncés). |
-| Effet « spaghetti » (D-18, D-29) | **Reprise du code des titres de Rabbit Shop** (**réalisée en CSS pur en v0.9, sans GSAP**) : départ `y: 60`, `opacity: 0`, `scale: 0.5`, arrivée en **1,3 s**, **0,015 s** entre deux lettres, `elastic.out(0.75, 0.3)`, déclenchement à `top 85%`. **Titres** lettre par lettre, **textes courants par mot** ; mots jamais coupés ; exceptions (prix, boutons, formulaires, erreurs, pages légales) ; mouvement réduit = texte tel quel ; texte complet dans le HTML ; aucune bibliothèque à charger. Détail : P-41 et landing §26. |
+| Effet « spaghetti » (D-18, D-29) | **Reprise du code des titres de Rabbit Shop** (**réalisée en CSS pur en v0.9, sans GSAP**) : départ `y: 60`, `opacity: 0`, `scale: 0.5`, arrivée en **1,3 s**, **0,015 s** entre deux lettres, `elastic.out(0.75, 0.3)`, déclenchement à `top 85%`. **Titres** lettre par lettre, **surtitres** par mot ; **les descriptions et textes courants n'ont plus l'effet (D-39, v3.0)** ; le titre du héros est composé en deux polices et joué dès l'affichage ; mots jamais coupés ; exceptions (prix, boutons, formulaires, erreurs, pages légales) ; mouvement réduit = texte tel quel ; texte complet dans le HTML ; aucune bibliothèque à charger. Détail : P-41 et landing §26. |
 
-### 4.6 Mini-jeu « Cosmetic Smash » ✅ livré en v0.10 (toucher) · 🔶 évolution « slash » décidée le 21 nov. (D-33)
+### 4.6 Mini-jeu « Cosmetic Smash » ✅ livré en v0.10 (toucher) · ✅ slash et pots coupés en deux dans le moteur et le rendu (D-33) · 🔶 traînée de coupe, son et pots 3D (GLB) absents
 Facultatif, dans le footer : des pots sont lancés, le visiteur les touche, ils éclatent, le score augmente, **durée limitée à 30 s (🟡)**. Textes validés : document de la landing §15.
 
 **Livré en v0.10** *(code : `src/lib/smash/`, `src/components/shop/SmashGame.tsx`)* :
@@ -380,7 +407,7 @@ Facultatif, dans le footer : des pots sont lancés, le visiteur les touche, ils 
 8. **Inchangé** : 30 s, pause et « Recommencer », fin de partie (« Bien joué ! Envie de refaire une partie ? » et « Rejouer »), mouvement réduit = message à la place du jeu, chargement à l'approche du footer, démarrage au clic, aucun blocage des liens ni du parcours d'achat.
 9. **À vérifier une fois construit** : fluidité sur un téléphone d'entrée de gamme (les moitiés doublent le nombre d'objets), lisibilité de la traînée sur fond Beige, tests du moteur (découpe, direction, tranche, plusieurs pots d'un geste) et de la géométrie de coupe.
 
-### 4.7 Identité de marque — charte graphique Meëra Kinks v1.2 (D-30) ✅ reçue · 🔶 à appliquer au code
+### 4.7 Identité de marque — charte graphique Meëra Kinks v1.2 (D-30) ✅ reçue · ✅ logos, polices (Poppins, Great Vibes), favicon et icône dans le code · 🔶 fichiers vectoriels définitifs et image de partage
 *Source : `Charte_graphique_Meera_Kinks_v1_2.pdf` (21 novembre 2026, « document de travail modifiable »). La charte fait foi ; ce paragraphe en reprend ce dont le site a besoin. Les propositions d'application sont P-59 à P-66.*
 
 **L'ADN.** Meëra Kinks est une marque de **soins capillaires pour cheveux crépus** (souvent classés 4A, 4B, 4C), à base d'ingrédients naturels, **organisés par besoin**. *Mission* : rendre le soin des cheveux crépus simple, naturel et joyeux. *Vision* : que chaque personne aux cheveux crépus porte ses kinks avec fierté. *Promesse* : « **Un besoin, une couleur.** » *Signature* : « **Embrassez vos kinks !** ». *Valeurs* : Naturel · Joie (pop) · Clarté · Fierté · Respect. *Public* : personnes aux cheveux crépus (femmes et hommes), personnes en transition capillaire ou qui débutent, parents qui soignent les cheveux de leurs enfants — formulations neutres (D-28). *Personnalité* : une amie solaire qui connaît bien les cheveux crépus, qui vouvoie par respect sans être distante.
@@ -440,36 +467,37 @@ Facultatif, dans le footer : des pots sont lancés, le visiteur les touche, ils 
 
 **À compléter par la marque** *(marqué « à compléter » dans la charte)* : âge minimum d'utilisation des produits ; zone géographique, tranche d'âge principale et canaux de vente ; origine et sens du prénom « Meëra » ; nom définitif de la couleur « Pêche » ; références Pantone (pour l'impression) ; fichier et licence de la police Choret Fudyng Bubble (inutile pour le site : les logos sont des images).
 
-### 4.8 Pied de page et aire de jeu fusionnés (D-32) 🔶 à construire
-*Composition d'après la capture du pied de page de Palmo annotée par Aka. On reprend **l'ordre des zones**, pas les éléments graphiques de Palmo (palmiers, fruits, mot « PALMO »).*
+### 4.8 Pied de page en trois parties et aire de jeu (D-37, D-32) ✅ code v3.0 · 🔶 à voir sur appareils réels
+*Référence : capture du pied de page de **Skarlett** annotée par Aka (23 nov.). On reprend l'ordre des parties, pas les éléments graphiques. Remplace la disposition d'après Palmo (v2.7).*
 
 ```
-┌────────────────────────────────────┐
-│  ◠◠◠◠◠◠  bord supérieur en arches   │
-│  ZONE 1   logo combiné              │
-│           « Embrassez vos kinks ! » │
-│  ZONE 2   Navigation                │
-│           Besoin d'aide ?           │
-│           Informations légales      │
-│           Suivez-nous               │
-│  ┌──────────────────────────────┐  │
-│  │  AIRE DE JEU (slash)          │  │
-│  │  carte « Une petite pause     │  │
-│  │  beauté ? … Jouer »           │  │
-│  │  puis : Score · Temps · Pause │  │
-│  └──────────────────────────────┘  │
-│  ZONE 3   filigrane « Meëra Kinks » │
-│           © 2026 Meëra Kinks        │
-│           Site réalisé par …        │
-└────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│ ◠◠◠◠◠◠  bord supérieur en arches                         │
+│ PARTIE 1   logo + signature      Informations   Navigation│
+│            icônes de contact     À propos       Accueil   │
+│            (WhatsApp, e-mail,    Crédits        Boutique  │
+│            Instagram, TikTok,    CGV · CGU      Collections│
+│            Facebook)             Mentions       Questions  │
+│                                  légales        Contact    │
+│                                  Confidentialité           │
+│                                  Gérer mes cookies         │
+│ PARTIE 2  ┌──────────────────────────────────────────┐   │
+│           │ AIRE DE JEU pleine largeur (slash)       │   │
+│           │ carrée sur téléphone                     │   │
+│           └──────────────────────────────────────────┘   │
+│ PARTIE 3        MEËRA KINKS   (texte, filigrane Pêche)    │
+│ © 2026 Meëra Kinks …                Créé par AKATech Studio│
+└──────────────────────────────────────────────────────────┘
 ```
-- **Une seule surface** : plus de bloc de jeu posé au-dessus des liens (v0.10). Le footer est la page d'arrivée du jeu : liens en haut, aire de jeu juste dessous, filigrane et mentions en bas.
-- **Zone 1.** Logo combiné (L1 si fond Beige, P-60) et signature en Great Vibes. Le logo mène à `/`.
-- **Zone 2.** Les groupes de liens du document de la landing §14 : Navigation, Besoin d'aide ?, Informations légales (avec « Gérer mes cookies »), puis Suivez-nous (réseaux enregistrés dans les paramètres ; un réseau sans lien n'est pas affiché) et le rappel paiement et livraison (RM-41). Sur téléphone : une colonne centrée, comme sur la capture ; sur ordinateur : en rangée.
-- **Aire de jeu.** Pleine largeur du conteneur, hauteur fluide. Fond de la palette ; décor discret de **formes rondes** (disques, arches en Pêche) derrière les pots. Avant « Jouer » : une **carte de départ** dans l'aire (titre et texte en effet « spaghetti », bouton « Jouer »). Pendant la partie : une **pastille** Score · Temps · Pause · Recommencer, en bas de l'aire, au-dessus du filigrane. Fin de partie : le message validé et « Rejouer ». **Mouvement réduit** : la carte affiche le message à la place du bouton ; aucun pot. Le code se charge à l'approche du footer ; la partie ne démarre qu'au clic. *(La capture de Palmo montre aussi trois points de vie et un bouton « Freeze » : **non repris**, non demandé.)*
-- **Zone 3.** *Filigrane* « Meëra Kinks » en **Poppins ExtraBold, couleur Pêche**, très grand (sur deux lignes « Meëra » puis « Kinks » sur téléphone, une ligne sur ordinateur), décoratif (`aria-hidden`, non cliquable) : **ce n'est pas le logo** (que la charte interdit de recomposer). Puis `© 2026 Meëra Kinks. Tous droits réservés.` (année calculée) et le **crédit** « Site réalisé par AKATech Studio » *(formulation et lien à valider)*.
-- **Contraintes.** Les liens restent atteignables et jamais recouverts, le jeu ne ralentit pas la page, aucun défilement bloqué ; la barre d'achat collée se range quand le pied de page est à l'écran (v0.10). Contrastes : Marron sur Beige partout dans les zones de texte.
-- **Variante Marron** (P-62) : fond Marron, logo L5 ou L3, texte Beige, filigrane Pêche ; à éviter tant que les pots Nutrition sont Marron.
+
+- **Une seule surface**, fond Marron, texte Beige ; le jeu en est la partie centrale.
+- **Partie 1, à gauche.** Logo beige (L3, charte §4 : fond Marron), signature « Embrassez vos kinks ! » en Great Vibes (Pêche) et **icônes de contact** : WhatsApp, e-mail, Instagram, TikTok, Facebook, **chacune seulement si son lien est enregistré** dans les paramètres (aucun lien fabriqué, RM-42) ; chaque icône est un lien nommé pour les lecteurs d'écran, zone tactile de 44 px.
+- **Partie 1, au milieu — « Informations ».** À propos (`/a-propos`), Crédits (`/credits`), Conditions générales de vente, Conditions générales d'utilisation, Mentions légales, Politique de confidentialité, Gérer mes cookies.
+- **Partie 1, à droite — « Navigation ».** Accueil, Boutique, Collections (si la section existe), Questions fréquentes, Contact (si la section existe, P-21).
+- **Retirés** : le texte de présentation et le rappel de paiement (voir D-37).
+- **Partie 2 — le jeu.** **Toute la largeur** du pied de page (conteneur), **plateau carré sur téléphone**, large sur ordinateur (hauteur 20 à 28 rem). Carte de départ : « Une petite pause beauté ? », texte, bouton « Jouer » ; ensuite Score · Temps · Pause · Recommencer. Règles du jeu, chargement différé, accessibilité : §4.6 (inchangés).
+- **Partie 3 — filigrane et crédit.** « **MEËRA KINKS** » **écrit en texte** (Poppins ExtraBold, Pêche, estompé vers le bas), très grand, décoratif (`aria-hidden`, non cliquable) : **ce n'est pas le logo**, que la charte interdit de recomposer. Puis `© 2026 Meëra Kinks. Tous droits réservés.` (année calculée) et « **Créé par AKATech Studio** » : un vrai lien (nouvel onglet, `https://akatech.vercel.app/`, **confirmé par Aka le 23 nov.**) ; au survol (souris), au doigt posé (mobile) ou au focus clavier, le **logo d'AKATech Studio** apparaît près du pointeur et le suit (reprise du pied de page de Mon E-Carnet ; fichier `public/brand/akatech-studio-logo.webp`, fond transparent). Si le fichier manque, la carte affiche le nom écrit.
+- **Contraintes.** Les liens restent atteignables et jamais recouverts, le jeu ne ralentit pas la page, aucun défilement bloqué ; la barre d'achat collée se range quand le pied de page est à l'écran. Contrastes : Beige sur Marron pour les liens et le texte ; la carte de jeu est un Marron plus foncé, son plateau reste Beige (les pots Marron de la sous-gamme Nutrition y restent lisibles).
 
 ---
 
@@ -482,12 +510,14 @@ Facultatif, dans le footer : des pots sont lancés, le visiteur les touche, ils 
 | Liste des catégories | `/categories` | ✅ |
 | Catégorie | `/categorie/[slug]` (ex. `/categorie/soins-capillaires`) ; un ancien slug redirige (308) | ✅ |
 | Produit | `/produit/[slug]` (ex. `/produit/beurre-de-karite-naturel`) ; un ancien slug redirige (308) ; brouillon et archivé = 404 | ✅ |
-| Confirmation de commande | `/commande/confirmation?ref=CMD-…` | ✅ (v0.6) ; reçu en ticket PNG en v0.8 |
+| Confirmation de commande | **modal `#confirmation`** juste après l'envoi (D-36, P-68) · page `/commande/confirmation?ref=CMD-…` pour un lien direct | ✅ (v0.6) ; reçu en ticket PNG en v0.8 ; modal en v3.0 |
+| À propos (« Notre histoire ») | `/a-propos` | ✅ v3.0 (D-38), indexée, dans le sitemap |
+| Crédits | `/credits` | ✅ v3.0, page minimale, non indexée |
 | CGV · CGU · mentions légales · confidentialité | `/cgv` · `/cgu` · `/mentions-legales` · `/politique-de-confidentialite` | 🟡 pages provisoires, non indexées, en attente des textes |
 | Cookies | `/cookies` (choix modifiable, ce que fait chaque choix, inventaire, droits) | 🟡 étape 10, P-44 |
 | Back-office | `/admin/*` (jamais indexé) | ✅ pour connexion, produits, catégories |
 
-**Supprimées** (décisions D-07, D-08) : `/panier`, `/commander`, `/notre-histoire`, `/contact`, `/faq`. Panier et commande sont des modals ; histoire en modal ; contact et FAQ sont des sections de la landing.
+**Supprimées** (décisions D-07, D-08, D-38) : `/panier`, `/commander`, `/notre-histoire`, `/contact`, `/faq`. Menu, panier, commande et confirmation sont des modals ; « Notre histoire » est la page `/a-propos` ; contact (avec son formulaire) et FAQ sont des sections de la landing.
 
 Règles d'adresses : voir RM-29 à RM-31. Les constantes d'adresses sont centralisées dans `src/lib/constants/routes.ts` (liens, sitemap, rafraîchissement du cache).
 
@@ -496,7 +526,7 @@ Règles d'adresses : voir RM-29 à RM-31. Les constantes d'adresses sont central
 | Élément | Destination |
 |---|---|
 | Sections de la landing | `/#collections` · `/#best-sellers` · `/#focus-produit` · `/#pourquoi-nous` · `/#avis` · `/#instagram` · `/#faq` · `/#contact` |
-| Modals | `#panier` · `#commande` · `#notre-histoire` (ancres simples : le bouton Retour les ferme) |
+| Modals | `#menu` · `#panier` · `#commande` · `#confirmation` (ancres simples : le bouton Retour les ferme ; `#notre-histoire` n'existe plus) |
 | Offres | `/boutique?filtre=offres` (produits avec prix promotionnel) |
 | Nouveautés | `/boutique?tri=nouveautes` |
 | Autres paramètres | `categorie`, `tri=prix-croissant\|prix-decroissant`, `q` (recherche) — adresse canonique : `/boutique` |
@@ -515,13 +545,14 @@ Le visiteur parcourt les catégories, ouvre une fiche, ajoute plusieurs produits
 ### 6.2 Formulaire de commande (modal)
 | Champ | Règle |
 |---|---|
-| Nom, prénom | Obligatoires |
+| **Nom complet** | Obligatoire, un seul champ « Votre nom et prénom » (2 à 120 caractères) — D-41, RM-60 |
 | Téléphone | Obligatoire, **avec indicatif international** (les commandes viennent aussi de l'étranger) ; sert de WhatsApp et d'identifiant client |
 | Zone | **Commune d'Abidjan / intérieur du pays / étranger** : elle décide acompte ou paiement intégral, frais fixes ou à confirmer, et le **délai indicatif** affiché (P-56) |
 | Commune, ville ou pays | Selon la zone, depuis la liste des zones desservies ; **saisie libre** si aucune zone n'est configurée pour ce type (P-23). Pour l'étranger, la ville se saisit en plus du pays |
 | Adresse précise | Obligatoire (5 caractères au moins) ; précisions facultatives |
 | Email | Facultatif (❓) |
 | Note | Facultative |
+| **Vérification** | Case « J'ai vérifié les informations de ma commande. » **obligatoire**, jamais cochée d'avance, juste avant le bouton « Confirmer ma commande » ; le serveur refuse la commande sinon (RM-61) |
 
 Le récapitulatif affiche **sous-total, frais (ou « à confirmer »), total estimé**, le **montant à régler pour confirmer**, et la **note de paiement et de livraison** (annexe B, texte validé, point 1 ou 2 selon la zone, puis point 3) **avant** le bouton d'envoi (RM-11). Les protections : champ piège (honeypot), clé d'idempotence, limitation de débit, validation serveur (la même que dans le navigateur). Si le panier contient un produit retiré, épuisé ou limité, l'envoi est bloqué et le client est renvoyé vers son panier.
 
@@ -541,9 +572,19 @@ Le récapitulatif affiche **sous-total, frais (ou « à confirmer »), total est
 Détails de réalisation (v0.6) : zone choisie dans la liste → frais de la zone, sinon destination saisie et frais « à confirmer » ; `paymentStatus` = `DEPOSIT_DUE` à Abidjan, `TO_CONFIRM` ailleurs (aucun paiement n'est jamais présenté comme reçu, RM-10) ; `upfrontAmount` = acompte plafonné (Abidjan) ou total une fois les frais connus ; l'historique commence à la création (livraison `PENDING`, paiement initial) ; produit non publié, épuisé ou en quantité insuffisante : `409` avec le détail par produit.
 
 ### 6.4 Confirmation et WhatsApp
-Le navigateur ouvre `/commande/confirmation?ref=…` (`router.replace` : le bouton Retour ne revient pas dans le formulaire) : récapitulatif (référence, articles, total ou « à confirmer ») et **bouton WhatsApp** (recliquable si WhatsApp ne s'ouvre pas). Le message prérempli contient : numéro de commande, identité du client, téléphone avec indicatif, adresse et zone, articles (avec l'option choisie), quantités, prix, sous-total, frais si confirmés, total estimatif ou confirmé, modalité de paiement. Une référence invalide ou inconnue ramène à l'accueil. Le bouton WhatsApp reste une **action manuelle du client** (RM-36) ; sans numéro WhatsApp configuré, aucun lien n'est affiché et la page annonce que l'équipe contactera le client. La page ne dit jamais qu'un paiement est reçu.
+Après l'envoi, la **confirmation s'ouvre en modal à droite** (`#confirmation`, D-36, P-68 : la commande vient de la réponse du serveur et reste dans l'onglet ; l'ancre remplace celle de la commande sans nouvelle entrée d'historique ; fermer retire l'ancre sans rouvrir le panier). La page `/commande/confirmation?ref=…` reste disponible pour un lien direct. Contenu identique : récapitulatif (référence, articles, total ou « à confirmer ») et **bouton WhatsApp** (recliquable si WhatsApp ne s'ouvre pas). Le message prérempli contient : numéro de commande, identité du client, téléphone avec indicatif, adresse et zone, articles (avec l'option choisie), quantités, prix, sous-total, frais si confirmés, total estimatif ou confirmé, modalité de paiement. Une référence invalide ou inconnue ramène à l'accueil. Le bouton WhatsApp reste une **action manuelle du client** (RM-36) ; sans numéro WhatsApp configuré, aucun lien n'est affiché et la page annonce que l'équipe contactera le client. La page ne dit jamais qu'un paiement est reçu.
 
 **Reçu de commande en ticket PNG (v0.8, P-39).** Sous le message de remerciement, une **imprimante** affiche l'avancement (« Préparation de votre reçu », « Impression de votre reçu », « Reçu prêt ») et fait sortir le ticket. Le fichier `recu-CMD-….png` se télécharge **dès que l'image est prête**, une seule fois par commande (signal posé à la validation, lu puis effacé par la page de confirmation ; une page rouverte plus tard n'en relance pas). Le bouton « Télécharger mon reçu (PNG) » le télécharge à nouveau. Si le navigateur bloque le téléchargement automatique, le ticket reste affiché et le bouton suffit ; si le dessin échoue, un message le dit et le récapitulatif reste valable. Le ticket ne contient **aucune donnée personnelle** et ne dit jamais qu'un paiement est reçu (tampon « PAIEMENT NON REÇU », frais et total « à confirmer » tant qu'ils ne sont pas fixés). Texte et mise en page : landing §25. Mouvement réduit : le ticket apparaît sans animation.
+
+### 6.5 Formulaire de contact « intelligent » (D-40, RM-62, P-69) ✅ code v3.0 · 🔶 à essayer avec un vrai compte Resend
+Dans la section Contact de la landing (`#contact`), sous la phrase d'accueil et les coordonnées confirmées. Le formulaire **s'adapte** :
+| Choix | Effet |
+|---|---|
+| Sujet : *Une question sur un soin · Ma commande · Une disponibilité · Autre chose* | « Ma commande » fait apparaître la **référence de commande** (`CMD-…`), obligatoire et vérifiée |
+| Réponse **sur WhatsApp** (par défaut) | Champ « Numéro WhatsApp » avec indicatif, normalisé comme à la commande |
+| Réponse **par e-mail** | Champ « Adresse e-mail » ; l'adresse devient l'adresse de réponse du courriel |
+| Message | 10 à 1 200 caractères, compteur visible ; consentement obligatoire (« J'accepte que mes informations servent à répondre à ma demande. ») |
+Erreurs posées **champ par champ** (le focus va au premier champ à corriger) ; informations conservées en cas d'échec ; une clé par tentative (pas de doublon sur un renvoi). **Serveur** : `POST /api/v1/contact` (RM-62) ; le courriel part vers l'adresse de notification des paramètres, **aucune donnée n'est conservée** par la boutique. Interrupteur : `NEXT_PUBLIC_CONTACT_FORM_ENABLED=0`. Sans coordonnée ni formulaire, la section n'est pas affichée (P-21).
 
 ---
 
@@ -565,14 +606,14 @@ Sur téléphone, listes en **cartes** plutôt qu'en tableaux : la vendeuse sera 
 
 | Écran | Contenu | Statut |
 |---|---|---|
-| Connexion / déconnexion | Voir §10 | ✅ |
-| Produits | Liste (Tous · Publiés · Brouillons · Archivés), recherche par nom ou référence, création, modification, suppression, photos, **variantes** (D-24) | ✅ sauf variantes 🔶 |
+| Connexion / déconnexion | Voir §10 | ✅ (v0.11 : identifiants d'environnement D-34, page « Mot de passe ») |
+| Produits | Liste (Tous · Publiés · Brouillons · Archivés), recherche par nom ou référence, création, modification, suppression, photos, **variantes** (D-24) | ✅ (variantes comprises) |
 | Catégories | Nom, description, couleur de section, ordre, archivage, suppression | ✅ |
-| Tableau de bord | **« À traiter aujourd'hui »** (commandes en attente, acomptes attendus, emails en échec, produits épuisés), nombre de commandes par statut, chiffre d'affaires (paiements enregistrés), dernières commandes, produits les plus commandés. Aujourd'hui : page d'accueil provisoire | 🔶 |
-| Commandes | Liste avec recherche (référence, téléphone, nom), filtres et tri ; détail : client, adresse, lignes figées, sous-total, frais, total, acompte attendu/reçu, reste à payer, statuts, notes internes, historique, paiements, reçu en PDF, bouton « Ouvrir WhatsApp », **bouton « Renvoyer » sur chaque email (P-46)**, **export Excel et CSV (D-25, P-55)** | 🔶 |
-| Clients | Nom, téléphone, email, historique des commandes, première et dernière commande ; accès restreint | 🔶 |
+| Tableau de bord | **« À traiter aujourd'hui »** (commandes en attente, acomptes attendus, emails en échec, produits épuisés), nombre de commandes par statut, chiffre d'affaires (paiements enregistrés), dernières commandes, produits les plus commandés. Aujourd'hui : page d'accueil provisoire | ✅ code v0.11 · 🔶 essai sur une vraie base |
+| Commandes | Liste avec recherche (référence, téléphone, nom), filtres et tri ; détail : client, adresse, lignes figées, sous-total, frais, total, acompte attendu/reçu, reste à payer, statuts, notes internes, historique, paiements, reçu en PDF, bouton « Ouvrir WhatsApp », **bouton « Renvoyer » sur chaque email (P-46)**, **export Excel et CSV (D-25, P-55)** | ✅ code v0.11 (liste, filtres, détail, statuts, paiements, frais, note, annulation, reçu PDF, **export Excel et CSV**) · 🔶 bouton « Renvoyer » (P-46) · 🔶 essai sur une vraie base |
+| Clients | Nom, téléphone, email, historique des commandes, première et dernière commande ; accès restreint | ✅ code v0.11 (liste, fiche, historique) · 🔶 essai sur une vraie base |
 | Analytics | Voir §7.6 | 🔶 |
-| Livraison | Communes d'Abidjan, villes de l'intérieur, pays ; frais fixes ou « à confirmer » ; **délais indicatifs en heures, minimum et maximum (P-56)** | 🔶 |
+| Livraison | Communes d'Abidjan, villes de l'intérieur, pays ; frais fixes ou « à confirmer » ; **délais indicatifs en heures, minimum et maximum (P-56)** | 🔶 (délais en base, ni écran ni affichage) |
 | Paramètres | Nom de la boutique, numéro WhatsApp de la vendeuse, email de notification, acompte, numéro Wave, informations du reçu | 🔶 |
 
 ### 7.4 Fiche produit (back-office) ✅
@@ -675,15 +716,16 @@ Format de réponse unique : `{ ok: true, data }` ou `{ ok: false, error: { code,
 |---|---|---|---|
 | GET | `/api/health` | public | ✅ |
 | POST | `/api/v1/admin/auth/login` · `/logout` | public (limité) · session | ✅ |
-| POST | `/api/v1/admin/products` · PUT/DELETE `/products/[id]` | admin | ✅ (🔶 liste des variantes imbriquée, D-24) |
+| POST | `/api/v1/admin/products` · PUT/DELETE `/products/[id]` | admin | ✅ (liste des variantes imbriquée, D-24) |
 | POST | `/api/v1/admin/categories` · PUT/DELETE `/categories/[id]` | admin | ✅ |
 | POST | `/api/v1/admin/uploads/sign` | admin (60 par heure) | ✅ |
-| POST | `/api/v1/cart/quote` | public (limité) | ✅ (🔶 `variantId` par ligne, D-24) |
-| POST | `/api/v1/orders` | public (limité, interrupteur) | ✅ v0.6 (🔶 `variantId` par ligne, D-24) |
-| PUT | `/api/v1/admin/orders/[id]/status` · `/note` · POST `/payments` | admin | 🔶 |
+| POST | `/api/v1/cart/quote` | public (limité) | ✅ (`variantId` par ligne, D-24) |
+| POST | `/api/v1/orders` | public (limité, interrupteur) | ✅ v0.6 (`variantId` par ligne, D-24) |
+| POST | `/api/v1/contact` | public (limité, interrupteur) | ✅ v3.0 (D-40, RM-62) |
+| POST | `/api/v1/admin/orders/[id]/status` · `/payments` · PUT `/note` · `/delivery-fee` | admin | ✅ code v0.11 (RM-53 à RM-58) |
 | GET | `/api/v1/admin/orders/[id]/receipt` | admin | ✅ v0.7 |
-| POST | `/api/v1/admin/payments/[id]/void` | admin | 🔶 |
-| GET | `/api/v1/admin/orders/export` | admin (propriétaire) | 🔶 (D-25, P-55) |
+| POST | `/api/v1/admin/orders/[id]/payments/[paymentId]/void` | admin | ✅ code v0.11 (RM-55) |
+| GET | `/api/v1/admin/orders/export` | admin (propriétaire) | ✅ (D-25, P-55) |
 | — | zones, paramètres, clients (admin) | admin | 🔶 |
 | GET | `/api/cron/send-emails` | secret `CRON_SECRET` (`Bearer`) ; fermée sans secret | ✅ v0.7 |
 | POST | `/api/v1/admin/notifications/[id]/resend` | admin | 🔶 (P-46, bouton « Renvoyer ») |
@@ -708,7 +750,7 @@ Une seule devise (FCFA, code `XOF`). Les tables d'analytique (étape 10, D-17) s
 | `ProductVariant` *(D-24)* | Produit, étiquette (unique par produit), SKU unique, prix et prix promo facultatifs (hérités du produit si vides), stock (nullable), actif, ordre |
 | `SlugRedirect` | Entité (produit/catégorie), ancien slug, cible — unique par (entité, slug) |
 | `DeliveryZone` | Nom, type (`ABIDJAN`/`INTERIOR`/`INTERNATIONAL`), frais (null = à confirmer), **délai indicatif min et max en heures** (D-26), actif, position |
-| `Customer` | Prénom, nom, téléphone unique, email |
+| `Customer` | **Nom complet** (`fullName`, D-41 ; remplace prénom et nom, migration `20261123000000_customer_full_name`), téléphone unique, email |
 | `Order` | Référence unique, clé d'idempotence unique, source (`WEBSITE`/`MANUAL`), **statut de livraison**, **statut de paiement**, zone, adresse, notes, sous-total, frais, total, montant à régler pour confirmer |
 | `OrderItem` | Nom, prix unitaire, quantité, total de ligne : **instantanés** ; produit lié (devient nul si supprimé) ; **variante liée (devient nulle si supprimée) et étiquette figée** (D-24) |
 | `Payment` | Type, mode, montant, date, administrateur, note, identifiant de transaction (futur webhook, unique), annulation (date, motif) |
@@ -731,8 +773,10 @@ Relations : une catégorie a plusieurs produits ; un produit a plusieurs images 
 
 Zones d'Abidjan pré-remplies par le seed (frais à confirmer) : Abobo, Adjamé, Anyama, Attécoubé, Bingerville, Cocody, Koumassi, Marcory, Plateau, Port-Bouët, Songon, Treichville, Yopougon. ❓ Communes réellement desservies.
 
-### Ajouts de schéma — deuxième migration (D-24, D-26) 🔶
+### Ajouts de schéma — deuxième migration (D-24, D-26) ✅ dans le schéma · 🔶 migrations jamais jouées sur une vraie base
 La migration `init` **existe maintenant** (`prisma/migrations/20261120000000_init`, présente dans le zip du 20 nov.) : ces ajouts feront une **deuxième migration** (une table et des colonnes facultatives : aucune donnée à convertir). Esquisse (le schéma complet s'écrit à l'étape 9 bis) :
+
+> **Réalisé (22 nov.).** Les variantes sont dans la migration `20261121120000_variants_orders_settings_analytics` ; `Product.optionLabel` est **facultatif** (migration `20261122000000_option_label_nullable`). `DeliveryZone.deliveryMinHours/MaxHours` existent en base mais **aucun écran ni texte public ne les lit**. Les tables d'analytique s'appellent `VisitorSession` et `VisitorEvent` (et non `Visitor`, `VisitSession`, `PageView`, `VisitorAction` comme dans l'esquisse du §9 bis). Le test `tests/unit/migrations.test.ts` rejoue toutes les migrations.
 
 ```prisma
 model ProductVariant {
@@ -756,7 +800,7 @@ model ProductVariant {
 // DeliveryZone  : + deliveryMinHours Int?  + deliveryMaxHours Int?   (P-56)
 ```
 
-### 9 bis. Tables d'analytique (étape 10) 🔶
+### 9 bis. Tables d'analytique (étape 10) ✅ tables dans le schéma (`VisitorSession`, `VisitorEvent`) · 🔶 aucune route ni écran ne les utilise
 | Table | Champs essentiels |
 |---|---|
 | `Visitor` | Identifiant aléatoire (cookie du navigateur, **posé seulement après consentement**), première et dernière visite, nombre de visites |
@@ -782,7 +826,7 @@ Texte et messages conservés `ASSISTANT_RETENTION_DAYS` jours (30 par défaut, �
 ### 10.1 En place ✅
 | Sujet | Mesure |
 |---|---|
-| Mots de passe | bcrypt (coût 12), 12 caractères minimum, 72 octets maximum ; jamais en clair, jamais en variable d'environnement |
+| Mots de passe | bcrypt (coût 12), 12 caractères minimum, 72 octets maximum ; jamais en clair en base. Le mot de passe du **propriétaire** vient de `ADMIN_PASSWORD` (variable d'environnement du serveur, D-34) ; seul son hash est enregistré |
 | Session | Jeton aléatoire 256 bits, **seul son hash est stocké** ; cookie `httpOnly`, `Secure`, `SameSite=Lax` (préfixe `__Host-` en production) ; 7 jours ; révocable |
 | Connexion | Limites par IP (10) et par email (5) sur 15 minutes, **y compris pour un email inconnu** ; message identique pour email inconnu, mot de passe faux et compte désactivé ; temps de réponse égalisé |
 | Vérification de session | Dans **chaque** page et chaque route du back-office ; le middleware ne fait qu'un tri rapide |
@@ -791,21 +835,22 @@ Texte et messages conservés `ASSISTANT_RETENTION_DAYS` jours (30 par défaut, �
 | Anti-abus | Compteur en base (jamais d'IP ni d'email en clair) ; signature d'envoi de photo limitée à 60 par heure et par compte |
 | Emails et reçu (v0.7) | Gabarits HTML dont tout texte saisi est échappé ; sujets sur une ligne ; jamais d'adresse ni de contenu dans le journal ; clé d'API masquée dans les erreurs stockées ; cron fermé sans secret, comparaison à temps constant ; reçu PDF réservé au back-office, sans cache |
 | Commande (v0.6) | Prix, frais, total et acompte toujours calculés par le serveur ; transaction unique ; stock réservé de façon atomique ; clé d'idempotence ; limites par IP (10 / 10 min) et par téléphone (5 / h), hachés ; champ piège ; interrupteur côté serveur ; journal sans nom, téléphone ni adresse ; confirmation `noindex`, sans `referrer`, limitée par IP |
+| Contact (v3.0) | Interrupteur, contrôle d'origine, limites par IP et par contact (hachées), champ piège, validation partagée, texte échappé dans le courriel, sujet sur une ligne, **rien conservé**, journal sans nom ni contenu, pas d'accusé automatique (P-69) |
 | Back-office | En-têtes `noindex`, `no-store` ; jamais indexé |
 | En-têtes | `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` |
 | Images | Signature Cloudinary limitée au dossier et aux formats ; image acceptée seulement si elle vient de notre compte |
 | Secrets | En variables d'environnement ; `.env*` exclus des archives ; le mot de passe du seed n'existe que le temps du seed |
 
-### 10.2 À faire 🔶
-- **Content-Security-Policy** (autoriser `api.cloudinary.com` et `res.cloudinary.com` et, pour la carte des visiteurs du back-office, `tile.openstreetmap.org`) ; **vérifier aussi le chargement de Vercel Web Analytics** (D-22).
-- **Politique de conservation** des données clients et procédure de suppression sur demande (une commande figée ne doit pas casser l'historique).
-- **Sauvegardes Neon** : vérifier la fenêtre de restauration du plan et **tester une restauration**.
-- Page de **changement de mot de passe** (révoque les sessions).
-- **Export des commandes** : propriétaire seulement, journal des exports, protection contre l'injection de formules (P-55).
-- **Bannière de consentement et page `/cookies`** (P-44) : obligatoires dès que l'analytique est active (D-17, D-22) ; **mise à jour de la politique de confidentialité** ; vérification par un professionnel (§14.2).
+### 10.2 État des chantiers de sécurité (v2.9)
+- ✅ **Content-Security-Policy** et en-têtes (`config/security-headers.mjs`, testés) ; Vercel Web Analytics chargé seulement après consentement. 🔶 à revérifier une fois déployé.
+- ✅ **Conservation** des données clients et **effacement sur demande** (`/admin/donnees-clients`, cron de rétention, commande figée conservée).
+- ✅ **Page de changement de mot de passe** ; ✅ **journal d'audit** (`AdminAuditLog`).
+- ✅ **Export des commandes** : propriétaire seulement, journalisé, protégé contre l'injection de formules (P-55).
+- ✅ **Bannière de consentement et page `/cookies`** (P-44). 🔶 **Mise à jour de la politique de confidentialité** et relecture par un professionnel (§14.2).
+- 🔶 **Sauvegardes Neon** : procédure écrite (`docs/SAUVEGARDES-NEON.md`) ; **la restauration n'a pas été testée** sur un vrai compte.
 
 ### 10.3 Données personnelles
-Collectées : nom, prénom, téléphone, adresse, email facultatif. Pas de compte client. Les adresses IP ne sont jamais conservées en clair (compteurs anti-abus : clés hachées) **ni dans l'analytique**. Une localisation par IP n'est jamais présentée comme une position exacte. **Analytique (D-17)** : pays, région ou province, ville approximatifs, appareil, navigateur, provenance, pages vues, boutons touchés et durée de visite ; **uniquement avec consentement** ; détail conservé 90 jours 🟡 puis supprimé, compteurs agrégés conservés ; un refus efface ce qui concerne le navigateur. **Vercel Web Analytics (D-22)** : même règle de consentement 🟡 (P-57) ; à citer dans `/cookies` et dans la politique de confidentialité. **Export des commandes (D-25)** : le fichier contient noms, téléphones et adresses ; il est généré à la demande et jamais conservé par le site ; sa garde relève ensuite de la vendeuse (à lui rappeler dans l'écran d'export). **Assistant IA (P-50)** : jamais de coordonnées demandées, téléphones et emails masqués, conversations enregistrées avec consentement seulement, 30 jours 🟡. ❓ Durée de conservation des commandes et des clients. Contenu des pages légales à fournir par la cliente (identité de l'éditeur, conditions de vente, retours) et à faire valider.
+Collectées : nom complet, téléphone, adresse, email facultatif. **Formulaire de contact (D-40)** : nom, canal de réponse, téléphone ou e-mail, message ; transmis par email à la vendeuse, **rien n'est conservé** par le site. Pas de compte client. Les adresses IP ne sont jamais conservées en clair (compteurs anti-abus : clés hachées) **ni dans l'analytique**. Une localisation par IP n'est jamais présentée comme une position exacte. **Analytique (D-17)** : pays, région ou province, ville approximatifs, appareil, navigateur, provenance, pages vues, boutons touchés et durée de visite ; **uniquement avec consentement** ; détail conservé 90 jours 🟡 puis supprimé, compteurs agrégés conservés ; un refus efface ce qui concerne le navigateur. **Vercel Web Analytics (D-22)** : même règle de consentement 🟡 (P-57) ; à citer dans `/cookies` et dans la politique de confidentialité. **Export des commandes (D-25)** : le fichier contient noms, téléphones et adresses ; il est généré à la demande et jamais conservé par le site ; sa garde relève ensuite de la vendeuse (à lui rappeler dans l'écran d'export). **Assistant IA (P-50)** : jamais de coordonnées demandées, téléphones et emails masqués, conversations enregistrées avec consentement seulement, 30 jours 🟡. ❓ Durée de conservation des commandes et des clients. Contenu des pages légales à fournir par la cliente (identité de l'éditeur, conditions de vente, retours) et à faire valider.
 
 ---
 
@@ -826,8 +871,10 @@ Collectées : nom, prénom, téléphone, adresse, email facultatif. Pas de compt
 
 | Niveau | Contenu | État |
 |---|---|---|
-| Typage | TypeScript strict | ✅ sans erreur |
+| Typage | TypeScript strict | ✅ sans erreur au dernier essai réel · après la fusion du 22 nov. : seul un contrôle partiel sans dépendances a été fait (aucune erreur nouvelle), **`npm run typecheck` à relancer** |
 | Unitaires et services | **587 tests exécutés** (v0.10, vrai Vitest, client Prisma généré) : 493 attendus en v0.8, + 35 pour l'effet « spaghetti » (v0.9), + 59 en v0.10 — moteur du mini-jeu (26, **vérifiés par mutation**), couleurs des pots, éclats, dessin des pots avec un faux contexte canvas, rendu du bloc et du footer, requête des couleurs de catégories, barre d'achat collée. Détail des suites plus anciennes : commande (validation, téléphone, montants, référence, message WhatsApp, reçu figé, service avec idempotence, survente, prix falsifié, zones, route avec limites et champ piège), emails et reçu (gabarits échappés, client Resend, boîte d'envoi, reprises, cron, reçu PDF), formulaire et confirmation en rendu serveur, mots de passe | ✅ |
+| Fusion du 22 nov. | Environ 900 cas de test écrits (variantes, jeu au slash, export, sécurité…) ; `npm test` et `npm run build` **non exécutés** après la fusion | 🔶 à relancer |
+| **Refonte du 23 nov.** | **Contrôlé** : rendu serveur des vrais composants et captures Chromium (menu, panier, confirmation, pied de page, héros, formulaire de contact, téléphone 390 px et ordinateur 1440 px) ; **une vingtaine de fichiers de tests lancés avec un exécuteur de remplacement, tous verts** (dont les nouveaux : modals à rideaux, commande retrouvée dans l'onglet, schéma, courriel et route de contact, lecture des anciens reçus, nom complet et case de vérification) ; route de contact exercée avec un faux service ; contrôle de type partiel des nouveaux modules purs. **Non exécutés** : `npm test` complet, `tsc` global, `next build`, les tests qui simulent Prisma, le PDF ou Excel, le contrôle visuel `e2e:visual` (mis à jour mais non rejoué). | 🔶 à relancer |
 | Compilation | `next build` (v0.10 : le code du jeu est un chunk séparé de 25,8 Ko, **absent du premier chargement** de la landing) | ✅ |
 | Contre une vraie base et un vrai Cloudinary | Liste de 8 vérifications à la main dans le `README` (puis 9 pour la commande) | 🔶 non fait |
 | Rendu serveur des composants de la vitrine (sections, grille, carrousel, carte, en-tête, FAQ) avec des données d'exemple ; **hydratation** : deux rendus identiques | Tests de rendu | ✅ |
@@ -853,12 +900,12 @@ Collectées : nom, prénom, téléphone, adresse, email facultatif. Pas de compt
 | 7 | Panier (modal, devis du serveur) ✅ · formulaire de commande (modal) ✅ livré en v0.6 | ✅ |
 | 8 | Enregistrement des commandes et message WhatsApp | ✅ livré en v0.6 (transaction, idempotence, stock, confirmation, lien `wa.me`) — **à vérifier contre une vraie base** ; **reçu en ticket PNG** téléchargé à la validation en v0.8 (P-39) |
 | 9 | Reçus (PDF) et notifications (Resend, cron) | ✅ livré en v0.7 (boîte d'envoi, tentative immédiate, cron, reçu PDF) — **à vérifier contre un vrai compte Resend** ; le domaine doit être acheté et vérifié |
-| **9 bis** | **Variantes de produit** (D-24) : schéma (`ProductVariant`, lignes de commande, délais des zones) **dans une deuxième migration**, formulaire produit, fiche, feuille du « + » (P-54), panier, devis, commande, reçu PDF, ticket PNG, emails, message WhatsApp, tests | 🔶 **à faire avant la migration et avant l'étape 10** 🟡 |
-| 10 | Statuts, paiements, livraison, clients, paramètres, tableau de bord « à traiter aujourd'hui », **onglet Analytics** (D-17, §7.6), **alerte email « Nouvelle visite » à la vendeuse** (P-45), bouton « Renvoyer » (P-46), **export Excel et CSV des commandes** (D-25), **délais indicatifs par zone** (D-26), **Vercel Web Analytics** (D-22), le tout **au style AKATech** (D-16) | 🔶 **spécification ajustée en v2.6** |
-| 11 | SEO (statistiques : **Vercel Web Analytics + analytique maison**, D-22 ; pas de Google Analytics) | 🔶 |
+| **9 bis** | **Variantes de produit** (D-24) : schéma, formulaire produit, fiche, feuille du « + » (P-54), panier, devis, commande, données structurées, tests | ✅ **dans le code (fusion du 22 nov.)** ; 🔶 à vérifier contre une vraie base ; **délais de zone (D-26) : colonnes seulement** |
+| 10 | Statuts, paiements, livraison, clients, paramètres, tableau de bord « à traiter aujourd'hui », **onglet Analytics** (D-17, §7.6), **alerte email « Nouvelle visite »** (P-45), bouton « Renvoyer » (P-46), **export Excel et CSV** (D-25), **délais indicatifs par zone** (D-26), **Vercel Web Analytics** (D-22), le tout **au style AKATech** (D-16) | 🔶 **export ✅ et Vercel Analytics ✅ ; statuts, paiements, annulation, frais, note, clients, tableau de bord et identifiants d'environnement ✅ écrits (code v0.11, jamais exécutés)** ; **reste** : écran Paramètres, zones et délais éditables, analytique maison, alerte « Nouvelle visite », bouton « Renvoyer » |
+| 11 | SEO (sitemap, robots, canoniques, données structurées par option) | ✅ code (`docs/SEO-INDEXATION.md`) · 🔶 Search Console après déploiement |
 | 12 | Tests desktop et mobile | ✅ Chromium (v0.10, 179 vérifications) · 🔶 appareils réels, Safari, Firefox |
 | 13 | Animations avancées (**effet « spaghetti »**, reprise du code de Rabbit Shop : D-18, D-29) et mini-jeu (**pots réalistes**, D-19) | **Spaghetti ✅ livré en v0.9** (CSS pur, titres et textes de la landing ; vu en capture fixe seulement : l'animation elle-même n'a pas été jugée à l'œil). **Mini-jeu ✅ livré en v0.10** (toucher et balayage horizontal, contrôle Chromium) — traitée avant la 10 (D-20) |
-| **13 bis** | **Habillage Meëra Kinks** (D-30, D-31) : variables et polices de la charte, logo (header, footer), favicon et image de partage, couleurs des catégories = sous-gammes (P-59, P-60, P-61, P-64, P-65) ; **pied de page en trois zones fusionné avec l'aire de jeu** (D-32, §4.8) ; **mini-jeu au slash** avec pots de la gamme (D-33, §4.6) ; textes revus (P-66) | 🔶 **à faire, proposé avant la 9 bis et la 10** 🟡 (surtout du CSS et de l'interface, sans migration) |
+| **13 bis** | **Habillage Meëra Kinks** (D-30, D-31) ; **pied de page fusionné avec l'aire de jeu** (D-32) ; **mini-jeu au slash** (D-33) | ✅ logos, polices, favicon, pied de page, slash et moitiés de pots dans le code · **v3.0 : pied de page refait en trois parties (D-37), modals à rideaux (D-36), page À propos (D-38), textes v1.0 (D-42)** · 🔶 traînée, son, pots GLB, image de partage, validation sur appareils |
 | 14 | Déploiement : domaine, emails, sauvegardes, indexation | 🔶 |
 | 15 | **Assistant commercial IA** (D-14, D-21, §15.1) : **spécification et données préparées maintenant**, construction après l'étape 10 | 🔶 préparée en v2.5 |
 
@@ -868,11 +915,11 @@ Collectées : nom, prénom, téléphone, adresse, email facultatif. Pas de compt
 **Lot v0.8** : fiche produit au format mobile de référence (galerie balayable, ligne Quantité, bouton avec prix, cartes, pastilles, barre d'achat collée), panier en feuille (liste défilante, pied fixe), en-tête logo / panier / hamburger, **reçu de commande en ticket PNG** téléchargé à la validation (P-39) ; 30 tests de plus.
 **Lot v0.9** : effet « spaghetti » en CSS pur (courbe `elastic.out(0.75, 0.3)` recalculée en CSS `linear()`, titres lettre par lettre, textes par mot, texte complet dans le HTML, mouvement réduit respecté) ; 35 tests de plus. Une erreur de typage de cette livraison (`spaghetti.test.ts`) a été corrigée en v0.10.
 **Lot v0.10** : **mini-jeu Cosmetic Smash** (moteur testé, pots dessinés en canvas, éclatement, chargement à l'approche du footer, accessibilité) ; **contrôle visuel dans Chromium** (`npm run e2e:visual`, 179 vérifications) et **quatre défauts corrigés** (barre d'achat collée sur la landing et sur le pied de page, erreur de typage, éclats trop pâles) ; 59 tests de plus (587 au total) ; `package.json` en 0.10.0.
-**Pas encore** : migration jouée contre une vraie base (le fichier `init` existe depuis le 20 nov.), **variantes de produit (D-24)**, paiements et commandes dans le back-office, **export des commandes (D-25)**, écran Paramètres, **analytique**, **habillage Meëra Kinks, logo et favicon (D-30, D-31)**, **pied de page fusionné et slash (D-32, D-33)**, contrôle visuel sur appareils réels, déploiement.
+**Pas encore** : migrations jouées contre une vraie base (dont `20261123000000_customer_full_name`), **essai du traitement des commandes sur une vraie base** (code v0.11 écrit), **écran Paramètres**, **zones de livraison éditables et délais affichés**, **analytique maison** (tables seulement), **assistant IA**, son et traînée du jeu, contrôle visuel sur appareils réels, déploiement.
 
 > **Ordre décidé le 19 novembre (D-20) : l'étape 13 passe avant la 10.** ⚠ Sans l'étape 10, les commandes ne se lisent qu'en base de données et la vendeuse ne peut ni changer un statut, ni enregistrer un paiement : **la boutique ne peut pas ouvrir à la vente avant la fin de l'étape 10.**
 >
-> **Ordre proposé 🟡 (v2.6).** Étape **9 bis (variantes)** avant la 10, car la 10 lit les lignes de commande avec leur option. La migration `init` existe déjà : la 9 bis ajoute une **deuxième migration**. **Le spaghetti (v0.9) et le mini-jeu (v0.10) sont faits ; reste l'étape 13 bis (habillage Meëra Kinks, pied de page fusionné, slash), proposée avant la 9 bis.**
+> **Ordre (v3.0).** Les étapes 9 bis (variantes), 13 bis (habillage, pied de page, slash) et le traitement des commandes (code v0.11) sont dans le code. **La suite : vérifier (npm test, typecheck, build), essayer sur une vraie base, puis écran Paramètres, zones et délais, analytique maison.**
 
 ---
 
@@ -910,7 +957,7 @@ Collectées : nom, prénom, téléphone, adresse, email facultatif. Pas de compt
 | 27 | **Délais indicatifs (P-56)** : à partir de quand courent-ils (confirmation de la commande, paiement reçu, expédition) ? Peut-on les préciser par pays ou par ville ? | Textes de livraison |
 | 28 | **Variantes (P-53)** : quels types d'options (taille, couleur, format), combien par produit, des prix différents d'une option à l'autre ? | Saisie des produits |
 | 29 | **Catalogue et catégories** : Meëra Kinks est une marque **capillaire** (charte). Les familles « soins corporels » et « accessoires » du cahier v1.0 restent-elles au catalogue ? Quelles sont les **6 catégories** (A2), et à quelle **sous-gamme** (Hydratation, Nettoyage et Pousse, Nutrition) chacune appartient-elle ? | Collections, couleurs, textes de la landing (§32 du document de la landing) |
-| 30 | **Crédit du pied de page** : formulation et lien (proposé : « Site réalisé par AKATech Studio ») | Pied de page (§4.8) |
+| 30 | ✅ **Tranché le 23 nov.** : crédit « **Créé par AKATech Studio** », lien `https://akatech.vercel.app/`, logo fourni (`public/brand/akatech-studio-logo.webp`) | Pied de page (§4.8) |
 
 ### 14.2 Côté technique (Aka)
 | # | Point | Bloque |
@@ -1031,6 +1078,8 @@ Collectées : nom, prénom, téléphone, adresse, email facultatif. Pas de compt
 | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Photos | ✅ |
 | `RESEND_API_KEY`, `EMAIL_FROM` | Emails | 🔶 |
 | `CRON_SECRET` | Protège la reprise des emails | 🔶 |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Identifiants du compte propriétaire (D-34) ; le serveur crée le compte à la première connexion | ✅ code v0.11 |
+| `NEXT_PUBLIC_CONTACT_FORM_ENABLED` | Interrupteur du formulaire de contact (actif par défaut ; `0` = masqué et route fermée) | ✅ v3.0 |
 | `NEXT_PUBLIC_SITE_URL` | Seule variable publique | 🔶 |
 | `ANALYTICS_RETENTION_DAYS` | Durée de conservation du détail des visites (90 par défaut, 🟡) | 🔶 étape 10 |
 | `GEMINI_API_KEY`, `GROQ_API_KEY` | Fournisseurs de l'assistant IA (un seul suffit pour démarrer) | 🔶 étape 15 |
@@ -1046,23 +1095,39 @@ Collectées : nom, prénom, téléphone, adresse, email facultatif. Pas de compt
 
 ---
 
-## 16 bis. État des tâches restantes dans le code après la fusion
+## 16 bis. Ce qui est fait et ce qu'il reste à faire (relu dans le code le 22 novembre 2026)
 
+### Fait (présent dans le code)
+Vitrine complète · catalogue, catégories, redirections de slug · **variantes de produit** (back-office, boutique, panier, devis, commande) · commande WhatsApp avec idempotence et stock atomique · emails, reçu PDF, ticket PNG · connexion sécurisée, mot de passe, audit · **export Excel/CSV** · consentement et `/cookies` · conservation et effacement des données clients · SEO · effet spaghetti · **mini-jeu au slash** (moitiés de pots) · logos, polices, favicon · pied de page avec le jeu · Vercel Web Analytics après consentement · tests de rendu et contrôle Chromium.
+
+**Ajouté en v3.0 (23 nov.)** : modals à rideaux (menu, panier, commande, confirmation) · pied de page en trois parties avec filigrane en texte et crédit AKATech (logo au survol) · pages `/a-propos` et `/credits` · effet élastique limité aux titres et surtitres · formulaire de contact relié à Resend · champ « Nom complet » et case de vérification (migration `customer_full_name`) · textes du document v1.0 · lot v0.11 fusionné.
+
+### Reste à faire, par priorité
 | Priorité | Reste à faire | État |
 |---|---|---|
-| P0 | Vérifier la compatibilité complète des modules v0.8 ajoutés avec le schéma et les routes v0.10, puis valider `npm run typecheck`, `npm test` et `npm run build` | 🔶 à vérifier dans l’environnement de livraison |
-| P0 | Brancher et tester une vraie base Neon, appliquer la migration, créer le compte admin et tester les sauvegardes/restaurations | 🔶 |
-| P0 | Tester les emails avec un vrai domaine Resend (SPF/DKIM), la pièce jointe PDF et le cron | 🔶 |
-| P1 | Ajouter les variantes `ProductVariant` et les faire suivre dans produit, panier, commande, reçu, emails et WhatsApp | 🔶 |
-| P1 | Construire le back-office Commandes : statuts, paiements, annulation, livraison, clients, tableau de bord et paramètres | 🔶 |
-| P1 | Construire l’analytique propriétaire avec consentement, onglet Analytics et alerte email « Nouvelle visite » | 🔶 |
-| P1 | Appliquer complètement la charte v1.2 : logo officiel dans header/footer, favicon icône seule, six couleurs, Poppins/Great Vibes, couleurs de catégories et textes du jeu | ✅ réalisé dans le code ; les fichiers vectoriels définitifs restent à fournir si la marque en possède |
-| P1 | Footer en trois zones (liens/logo, aire de jeu, filigrane/copyright/crédit) et slash avec deux moitiés de pot, tactile/souris | ✅ réalisé dans le code ; validation sur appareils réels reste à faire |
-| P2 | Construire l’assistant commercial IA et ses garde-fous, limites, supervision et tests d’évaluation | 🔶 |
-| P2 | Tester sur iPhone Safari, Android Chrome, Safari et Firefox ; valider le plaisir de jeu, l’accessibilité et les performances | 🔶 |
-| P2 | Déployer sur Vercel, acheter/configurer le domaine et effectuer la recette finale avec les contenus réels | 🔶 / ❓ |
+| P0 | `npm ci`, `prisma generate`, `npm run typecheck`, `npm test`, `npm run build` sur le code fusionné ; corriger ce qui casse | 🔶 jamais lancé après la fusion |
+| P0 | **Appliquer la migration `20261123000000_customer_full_name`** (reprise des noms existants) et vérifier qu'un **ancien reçu** (prénom + nom) s'ouvre toujours ; essayer une commande complète avec « Nom complet » et la case de vérification | 🔶 |
+| P1 | **Essayer le formulaire de contact avec un vrai compte Resend** (adresse de notification des paramètres, domaine vérifié) ; confirmer les limites et le message d'erreur | 🔶 |
+| P1 | **Valider avec la cliente les textes du document v1.0** (P-67), notamment « À propos », « À découvrir en ce moment » et les délais de la FAQ | ❓ cliente |
+| P2 | Rejouer `npm run e2e:visual` (mis à jour pour le nouveau pied de page, les modals de droite et la case de vérification) et tester le survol du crédit sur téléphone | 🔶 |
+| P0 | Appliquer **toutes** les migrations sur une vraie base Neon (le test PGlite le fait en mémoire), créer le compte propriétaire, **tester une restauration** | 🔶 |
+| P0 | **Back-office Commandes** : liste et filtres, détail, statut de livraison et de paiement, enregistrer un paiement, annulation avec restitution du stock (RM-16), remboursement, historique, notes internes (D-35, RM-53 à RM-59) | ✅ **écrit** (code 0.11), 🔶 **à essayer sur une vraie base** : tests unitaires écrits mais jamais lancés avec vitest dans cet environnement |
+| P0 | Emails : domaine Resend vérifié (SPF/DKIM), pièce jointe PDF, cron | 🔶 / ❓ |
+| P1 | **Tableau de bord** « à traiter aujourd'hui » et vue **Clients** | ✅ écrits (code 0.11), 🔶 à essayer avec de vraies commandes |
+| P0 | **Identifiants admin dans l'environnement** (D-34) : renseigner `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` sur Vercel (Production) puis se connecter sur `/admin/login` | ✅ code écrit, 🔶 à renseigner |
+| P1 | **Écran Paramètres** (propriétaire) : nom, WhatsApp, emails, acompte, Wave, règles de paiement, réseaux, produit mis en avant | 🔶 (`StoreSettings` existe, lu par le site mais non modifiable) |
+| P1 | **Zones de livraison** : édition des frais et **délais indicatifs** (RM-47), affichage à la commande et dans les messages | 🔶 (colonnes en base seulement) |
+| P1 | **Analytique maison** : routes de collecte après consentement, session, provenance, pays/ville sans IP, onglet Analytics, **alerte « Nouvelle visite »** dédupliquée dans l'outbox | 🔶 (tables seulement) |
+| P1 | Vérifier que le **libellé d'option** figure dans le reçu PDF, le ticket PNG, les emails et le message WhatsApp, avec une vraie base | 🔶 repris de la v0.10, non rejoué |
+| P1 | Politique de confidentialité et textes légaux : mise à jour et relecture ; contenus de marque et catalogue réels | ❓ cliente |
+| P2 | Jeu : **traînée de coupe**, **son de coupe**, pots GLB (`public/assets/smash/`), réglage du plaisir de jeu | 🔶 |
+| P2 | Image de partage (Open Graph) et fichiers vectoriels des logos | 🔶 / ❓ |
+| P2 | Assistant commercial IA (§15.1) : garde-fous, limites, supervision, évaluation | 🔶 |
+| P2 | Tests iPhone Safari, Android Chrome, Safari, Firefox ; accessibilité et performance | 🔶 |
+| P2 | Déploiement Vercel, domaine, Search Console, recette finale avec les vrais contenus | 🔶 / ❓ |
+| P3 | Nettoyage : `json-ld.ts` et `product-json-ld.ts` font double emploi ; `manus-routes.json` cité par `TODO.md` est absent ; les anciennes versions du cahier sont dans `docs/` | 🔶 |
 
-Cette liste complète les étapes déjà décrites au §13 ; elle ne remplace ni ne supprime l’historique du cahier. Les validations encore ouvertes sont principalement l'essai sur vrais iPhone/Android, les recettes navigateur complètes et les assets vectoriels définitifs s'ils doivent remplacer les rendus PNG fournis.
+Cette liste complète le §13 sans effacer l'historique. **Ordre conseillé : P0 dans l'ordre (vérifier, base réelle, commandes), puis le reste du P1, puis le P2.**
 
 ## 17. Journal des versions
 
@@ -1088,6 +1153,12 @@ Cette liste complète les étapes déjà décrites au §13 ; elle ne remplace ni
 | Code 0.9 | **Effet « spaghetti »** : courbe élastique recalculée en CSS `linear()`, titres lettre par lettre et textes par mot, rendu serveur, mouvement réduit ; 35 tests de plus |
 | Code 0.10 | **Mini-jeu Cosmetic Smash** (moteur pur testé, pots canvas, éclatement, chargement à l'approche du footer, accessibilité), **contrôle visuel dans Chromium** (179 vérifications), **quatre défauts corrigés** (barre collée sur la landing et le pied de page, typage, éclats), `package.json` 0.10.0 ; 587 tests |
 | **Cahier 2.7** | **Mise à jour d'après la v0.10 et la charte Meëra Kinks v1.2** : D-30 (charte), D-31 (logo combiné header et footer, icône pour le favicon), D-32 (pied de page en trois zones fusionné avec l'aire de jeu), D-33 (slash, pots coupés en deux) ; P-59 à P-66 ; RM-49 à RM-52 ; §4.6 réécrit, §4.7 (identité) et §4.8 (pied de page) ajoutés ; étape 13 bis ; questions 29 et 30 ; état du code et des tests (§12, §13). **Aucune partie de la charte, du logo, du pied de page ni du slash n'est construite.** |
+| Code 0.11 | **Traitement des commandes et accès admin** (d'après la demande du 22 novembre 2026) : `orders-admin.service` (statuts, paiements, annulation avec stock, remboursement, frais, note, tableau de bord, clients), 5 routes `/api/v1/admin/orders/[id]/…`, écrans `/admin` (à traiter aujourd'hui), `/admin/commandes`, `/admin/commandes/[id]`, `/admin/clients`, portail de connexion à la charte, identifiants admin depuis `ADMIN_EMAIL` / `ADMIN_PASSWORD` / `ADMIN_NAME` (D-34), 4 nouvelles actions d'audit ; règles pures dans `lib/shop/order-admin.ts` ; environ 101 tests ajoutés (non lancés avec vitest) |
+| Code 0.10 fusionné | **boutique-1 + variantes de la v0.10** : formulaire d'options, feuille de choix, lignes produit + option, prix « à partir de », libellé d'option facultatif (migration `20261122000000_option_label_nullable`), test de rejeu des migrations ; le code parallèle de la v0.9.1 (sécurité) n'est pas repris ; `docs/FUSION-V10-VARIANTES.md` |
+| **Cahier 2.9** | **État réel relu dans le code** : variantes, habillage Meëra Kinks, pied de page, slash et sécurité marqués ✅ ; traitement des commandes, Paramètres, zones/délais, analytique maison, assistant IA et déploiement restent 🔶 ; §10.2 et §16 bis réécrits ; chiffres de tests non relancés |
+| Code 0.11 fusionné | **Lot v0.11 (`boutique-v0_11-fichiers-modifies.zip`) fusionné dans boutique-3** : traitement des commandes, paiements, clients, tableau de bord, identifiants d'environnement ; adapté au champ « Nom complet » (recherche, fiche, message WhatsApp) |
+| Code 0.12 (boutique-3) | **Refonte du 23 nov.** : `CurtainModal` (menu, panier, commande, confirmation par la droite), `ConfirmationModal`, pied de page en trois parties, `FooterCredit` (logo au survol), pages `/a-propos` et `/credits`, formulaire de contact + `POST /api/v1/contact`, « Nom complet » et case de vérification, migration `20261123000000_customer_full_name`, textes v1.0, logo AKATech |
+| **Cahier 3.0** | **Mise à jour d'après le code boutique-3** : D-36 à D-42, P-67 à P-69, RM-60 à RM-63, §4.4 (mécanisme de modal), §4.8 (pied de page en trois parties), §5 (pages), §6.2 et §6.5 (commande, contact), §7.3 et §8.3 (lot v0.11), §9, §10, §12, §13, §16 et §16 bis ; D-07, D-08, D-18 et D-32 annotées |
 
 ---
 
@@ -1132,6 +1203,7 @@ Cette liste complète les étapes déjà décrites au §13 ; elle ne remplace ni
 | **Hello Hello Outfit** — liste | Grille asymétrique (tailles et décalages variés) ; carte = photo, nom, prix, point + catégorie ; en-tête minimal « panier (0) » et menu |
 | **Hello Hello Outfit** — fiche | Lien de retour, grand titre, prix, galerie, description courte, option, sélecteur « − 1 + », grand bouton « Ajouter ↗ », pied de page typographique très large |
 | **Palmo** | Interactivité et mini-jeu dans le footer (complément). **Capture du 21 nov. annotée par Aka** : zone 1 (marque), zone 2 (liens de navigation), aire de jeu, zone 3 (filigrane, copyright) → §4.8. On en reprend l'ordre des zones, pas les éléments graphiques |
+| **Skarlett** (capture du pied de page, 23 nov.) | Disposition en trois parties : logo, contacts et réseaux en icônes / liens légaux / navigation en haut ; jeu au milieu ; nom de la marque écrit en très grand et mentions en bas (D-37) |
 | **Charte graphique Meëra Kinks v1.2** (`Charte_graphique_Meera_Kinks_v1_2.pdf`) | **Référence de l'identité** (D-30) : ADN, ton, palette de six couleurs, polices Poppins et Great Vibes, logos L1 à L5, icônes I1 à I5 → §4.7 |
 | **Logo simple** (`logo_simple_meera_PDF.pdf`) | Logo L1 sur fond Beige, en PDF : sert de référence ; les fichiers transparents ou vectoriels restent à fournir (P-60) |
 | **Rabbit Shop** (`rabbit-shop_1.zip`) | Titres élastiques lettre par lettre (`.elastic-title`, GSAP SplitText, `elastic.out`), image au survol d'une lettre, boutons magnétiques. **Code relu le 19 nov. (`lib/useGsapLenis.ts`) : repris pour l'effet « spaghetti » (D-29, P-41), **réalisé sans GSAP en v0.9** ; Vercel Web Analytics y est monté dans `app/layout.tsx` |

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { paymentReminder } from '@/content/livraison';
 import { PRODUCT_TEXT } from '@/content/product-page';
+import { SEO } from '@/content/seo';
 import { JsonLd } from '@/components/shop/JsonLd';
 import { ProductBadges } from '@/components/shop/ProductBadges';
 import { ProductGallery } from '@/components/shop/ProductGallery';
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return {
     // Titre et méta-description : ceux saisis en back-office, sinon générés depuis le nom et la description.
     title: product.seoTitle ?? product.name,
-    description: product.metaDescription ?? summarize(product.description),
+    description: product.metaDescription ?? (product.description.trim() ? summarize(product.description) : SEO.productFallback(product.name)),
     alternates: { canonical: productPath(product.slug) },
     openGraph: { title: product.seoTitle ?? product.name, ...(image ? { images: [{ url: image.url, alt: image.alt }] } : {}) },
   };

@@ -64,7 +64,7 @@ export interface ExportOrder {
   deliveryFee: number | null;
   total: number | null;
   upfrontAmount: number | null;
-  customer: { firstName: string; lastName: string; phone: string; email: string | null };
+  customer: { fullName: string; phone: string; email: string | null };
   items: readonly { productNameSnapshot: string; quantity: number }[];
   payments: readonly PaymentLine[];
 }
@@ -140,7 +140,7 @@ export function buildExportRow(order: ExportOrder): ExportCell[] {
   return [
     text(order.reference),
     { at: order.createdAt },
-    text(`${order.customer.firstName} ${order.customer.lastName}`.trim()),
+    text(order.customer.fullName.trim()),
     text(order.customer.phone),
     text(order.customer.email ?? ''),
     ORDERS_EXPORT_ZONE_LABELS[order.zoneType],

@@ -60,9 +60,10 @@ describe('règles de paiement : source unique (RM-41)', () => {
   it('la FAQ n’affiche jamais un numéro de téléphone ou de paiement', () => {
     const text = faqItems(2000).map((item) => item.answer).join(' ');
     expect(text).not.toMatch(/\+?\d[\d\s]{7,}\d/);
-    expect(text).toContain('Le numéro Wave n’est pas affiché publiquement');
+    expect(text).toContain('au numéro communiqué par la vendeuse après confirmation');
   });
-  it('la FAQ couvre les six questions du document', () => {
-    expect(faqItems(2000)).toHaveLength(6);
+  it('la FAQ couvre les neuf questions des textes v1.0', () => {
+    expect(faqItems(2000)).toHaveLength(9);
+    expect(faqItems(2000, 'Awa Beauty').some((item) => item.question === 'Comment contacter Awa Beauty ?')).toBe(true);
   });
 });

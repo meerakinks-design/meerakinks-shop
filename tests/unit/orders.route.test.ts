@@ -12,13 +12,13 @@ const IP = '203.0.113.7';
 const validBody = (overrides: Record<string, unknown> = {}) => ({
   idempotencyKey: KEY,
   items: [{ productId: 'prod_a', quantity: 1 }],
-  firstName: 'Awa',
-  lastName: 'Koné',
+  fullName: 'Awa Koné',
   phoneDialCode: '225',
   phone: '07 00 00 00 00',
   zoneType: 'ABIDJAN',
   placeName: 'Cocody',
   address: 'Riviera Palmeraie, rue des jardins',
+  infoConfirmed: true,
   companyFax: '',
   ...overrides,
 });
@@ -131,10 +131,10 @@ describe('POST /api/v1/orders', () => {
 
   it('422 avec le détail par champ quand la validation échoue', async () => {
     const post = await loadPost();
-    const { response, json } = await call(post, request(validBody({ firstName: '', phone: '07 00', items: [] })));
+    const { response, json } = await call(post, request(validBody({ fullName: '', phone: '07 00', items: [] })));
     expect(response.status).toBe(422);
     expect(json.error.code).toBe('VALIDATION_ERROR');
-    expect(json.error.fields.firstName[0]).toBe('Indiquez votre prénom.');
+    expect(json.error.fields.fullName[0]).toBe('Indiquez votre nom et prénom.');
     expect(json.error.fields.phone[0]).toContain('10 chiffres');
     expect(json.error.fields.items[0]).toBe('Votre panier est vide.');
     expect(createOrder).not.toHaveBeenCalled();
@@ -142,7 +142,7 @@ describe('POST /api/v1/orders', () => {
 
   it('champ piège rempli : faux succès, rien n’est enregistré (§6.3)', async () => {
     const post = await loadPost();
-    const { response, json } = await call(post, request(validBody({ companyFax: '0102030405', firstName: '' })));
+    const { response, json } = await call(post, request(validBody({ companyFax: '0102030405', fullName: '' })));
     expect(response.status).toBe(201);
     expect(json.data.reference).toBe('CMD-00000000');
     expect(createOrder).not.toHaveBeenCalled();

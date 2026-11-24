@@ -10,6 +10,7 @@ export function LoginForm() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ApiFieldErrors>({});
@@ -62,16 +63,21 @@ export function LoginForm() {
 
       <div className="field">
         <label htmlFor="password">Mot de passe</label>
-        <input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          aria-invalid={Boolean(fieldErrors.password)}
-          aria-describedby={fieldErrors.password ? 'password-error' : undefined}
-          required
-        />
+        <div className="inline-fields">
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            aria-invalid={Boolean(fieldErrors.password)}
+            aria-describedby={fieldErrors.password ? 'password-error' : undefined}
+            required
+          />
+          <button type="button" className="btn btn-quiet" onClick={() => setShowPassword((value) => !value)} aria-pressed={showPassword}>
+            {showPassword ? 'Masquer' : 'Afficher'}
+          </button>
+        </div>
         {fieldErrors.password && (
           <p id="password-error" className="field-error">
             {fieldErrors.password[0]}

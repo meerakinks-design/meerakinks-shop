@@ -31,7 +31,7 @@ export function toSubject(value: string, max = 150): string {
 }
 
 const money = (amount: number | null, fallback = 'à confirmer') => (amount === null ? fallback : formatFcfa(amount));
-const fullName = (receipt: ReceiptData) => `${receipt.customer.firstName} ${receipt.customer.lastName}`;
+const fullName = (receipt: ReceiptData) => receipt.customer.fullName;
 const placeOf = (receipt: ReceiptData) => formatPlaceLabel(receipt.delivery.zoneType, receipt.delivery.city, receipt.delivery.country);
 
 function noticeFor(receipt: ReceiptData): string {
@@ -153,7 +153,7 @@ export function buildCustomerReceivedEmail(input: CustomerEmailInput): EmailCont
   const contact = [receipt.shop.contactPhone, receipt.shop.contactEmail].filter((value): value is string => Boolean(value));
 
   const body = [
-    paragraph(`Bonjour ${escapeHtml(receipt.customer.firstName)},`),
+    paragraph(`Bonjour ${escapeHtml(receipt.customer.fullName)},`),
     paragraph(`${escapeHtml(ORDER_THANKS)} Votre commande <strong>${escapeHtml(reference)}</strong> est bien enregistrée.`),
     heading('Récapitulatif'),
     linesTable(receipt),
@@ -165,7 +165,7 @@ export function buildCustomerReceivedEmail(input: CustomerEmailInput): EmailCont
   ].join('');
 
   const text = [
-    `Bonjour ${receipt.customer.firstName},`,
+    `Bonjour ${receipt.customer.fullName},`,
     '',
     `${ORDER_THANKS} Votre commande ${reference} est bien enregistrée.`,
     '',
@@ -196,12 +196,12 @@ export interface StatusEmailInput {
 
 export function buildStatusChangedEmail(input: StatusEmailInput): EmailContent {
   const label = DELIVERY_STATUS_LABELS[input.deliveryStatus];
-  const first = input.receipt.customer.firstName;
+  const name = input.receipt.customer.fullName;
   const body = [
-    paragraph(`Bonjour ${escapeHtml(first)},`),
+    paragraph(`Bonjour ${escapeHtml(name)},`),
     paragraph(`Le statut de votre commande <strong>${escapeHtml(input.reference)}</strong> est maintenant : <strong>${escapeHtml(label)}</strong>.`),
   ].join('');
-  const text = [`Bonjour ${first},`, '', `Le statut de votre commande ${input.reference} est maintenant : ${label}.`].join('\n');
+  const text = [`Bonjour ${name},`, '', `Le statut de votre commande ${input.reference} est maintenant : ${label}.`].join('\n');
   return { subject: toSubject(`Votre commande ${input.reference} : ${label}`), html: layout({ title: `Commande ${input.reference}`, body, storeName: input.storeName }), text };
 }
 

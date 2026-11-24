@@ -12,6 +12,7 @@ const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f]/;
 const CONTROL_CHARACTERS_EXCEPT_NEWLINE = /[\u0000-\u0009\u000b-\u001f\u007f]/;
 const FORBIDDEN_CHARACTERS = 'Certains caractères ne sont pas autorisés.';
 const tooLong = (max: number) => `Maximum ${max} caractères.`;
+const CONFIRM_MESSAGE = 'Cochez la case pour confirmer votre commande.';
 const emptyToUndefined = (value: string | undefined) => (value ? value : undefined);
 
 /** Texte obligatoire sur une seule ligne. */
@@ -63,8 +64,8 @@ const baseOrderSchema = z.object({
   idempotencyKey: z.string({ required_error: 'Clé de commande manquante.' }).regex(IDEMPOTENCY_KEY_PATTERN, 'Clé de commande invalide.'),
   items: z.array(cartItemSchema).min(1, 'Votre panier est vide.').max(MAX_CART_LINES),
 
-  firstName: requiredLine(2, ORDER_LIMITS.name, 'Indiquez votre prénom.', 'Le prénom doit compter au moins 2 caractères.'),
-  lastName: requiredLine(2, ORDER_LIMITS.name, 'Indiquez votre nom.', 'Le nom doit compter au moins 2 caractères.'),
+  /** « Nom complet » : nom et prénom dans un seul champ. */
+  fullName: requiredLine(2, ORDER_LIMITS.fullName, 'Indiquez votre nom et prénom.', 'Votre nom doit compter au moins 2 caractères.'),
   phoneDialCode: z.string().trim().max(8).default(DEFAULT_DIAL_CODE),
   phone: z
     .string({ required_error: 'Indiquez votre numéro de téléphone.', invalid_type_error: 'Indiquez votre numéro de téléphone.' })
@@ -83,6 +84,9 @@ const baseOrderSchema = z.object({
   address: requiredLine(5, ORDER_LIMITS.address, 'Indiquez votre adresse de livraison.', 'Précisez votre adresse (quartier, rue, repère).'),
   addressDetails: optionalLine(ORDER_LIMITS.addressDetails),
   customerNote: optionalParagraph(ORDER_LIMITS.note),
+
+  /** Case « J'ai vérifié les informations de ma commande » : obligatoire, contrôlée aussi par le serveur. */
+  infoConfirmed: z.boolean({ required_error: CONFIRM_MESSAGE, invalid_type_error: CONFIRM_MESSAGE }).refine((value) => value === true, CONFIRM_MESSAGE),
 
   /** Champ piège (honeypot) : invisible pour un humain, rempli par les robots. */
   companyFax: z.string().max(200).optional(),

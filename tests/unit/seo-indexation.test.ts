@@ -52,17 +52,18 @@ describe('siteBaseUrl', () => {
 });
 
 describe('sitemap.xml', () => {
-  it('liste accueil, boutique, catégories, catégories actives et produits publiés, en adresses absolues', async () => {
+  it('liste accueil, boutique, catégories, à propos, catégories actives et produits publiés, en adresses absolues', async () => {
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://boutique.ci/');
     const entries = await sitemap();
     expect(entries.map((entry) => entry.url)).toEqual([
       'https://boutique.ci/',
       'https://boutique.ci/boutique',
       'https://boutique.ci/categories',
+      'https://boutique.ci/a-propos',
       'https://boutique.ci/categorie/soins',
       'https://boutique.ci/produit/beurre-de-karite',
     ]);
-    expect(entries[4]?.lastModified).toEqual(new Date('2026-11-01T10:00:00Z'));
+    expect(entries[5]?.lastModified).toEqual(new Date('2026-11-01T10:00:00Z'));
   });
 
   it('ne contient ni le back-office, ni la commande, ni les pages légales encore provisoires', async () => {
@@ -128,7 +129,7 @@ describe('pages non indexées', () => {
   });
 
   it('/categories : titre, description et canonique', () => {
-    expect(categoriesMetadata.title).toBe('Catégories');
+    expect(categoriesMetadata.title).toEqual({ absolute: 'Nos soins par besoin – Meëra Kinks' });
     expect(String(categoriesMetadata.description).length).toBeGreaterThan(30);
     expect(categoriesMetadata.alternates?.canonical).toBe('/categories');
   });

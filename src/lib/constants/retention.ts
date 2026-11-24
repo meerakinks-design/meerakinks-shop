@@ -21,8 +21,7 @@ export const ANALYTICS_DETAIL_RETENTION_DAYS = 90;
 export const FINAL_DELIVERY_STATUSES = ['DELIVERED', 'CANCELLED'] as const;
 
 /** Textes qui remplacent les données effacées (jamais une valeur vide : les écrans et les reçus restent lisibles). */
-export const ANONYMIZED_FIRST_NAME = 'Client';
-export const ANONYMIZED_LAST_NAME = 'anonymisé';
+export const ANONYMIZED_FULL_NAME = 'Client anonymisé';
 export const ANONYMIZED_ADDRESS = 'Adresse supprimée';
 
 /** Le téléphone est unique en base : on le remplace par une valeur unique par fiche, qui ne correspond à aucun numéro réel. */

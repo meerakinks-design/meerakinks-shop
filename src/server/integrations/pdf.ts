@@ -221,7 +221,7 @@ export async function renderReceiptPdf(input: ReceiptPdfInput): Promise<Uint8Arr
   writer.rule();
 
   writer.heading('Client');
-  writer.write(`${receipt.customer.firstName} ${receipt.customer.lastName}`, { bold: true });
+  writer.write(receipt.customer.fullName, { bold: true });
   writer.write(formatPhoneDisplay(receipt.customer.phone));
   if (receipt.customer.email) writer.write(receipt.customer.email);
 

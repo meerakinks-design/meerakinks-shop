@@ -18,7 +18,7 @@ const receipt = (overrides: Partial<ReceiptData> = {}): ReceiptData => ({
     issuedAt: new Date('2026-11-17T10:00:00.000Z'),
     shop: { name: 'Awa Beauty', legalName: 'Awa Beauty SARL', address: 'Abidjan, Cocody', contactPhone: '+225 01 02 03 04 05', contactEmail: 'contact@awa.example' },
     depositAmount: 2000,
-    customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' },
+    customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' },
     delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: 'Riviera Palmeraie\nPortail bleu' },
     lines: [
       { name: 'Sérum éclat', unitPrice: 10000, quantity: 2, lineTotal: 20000 },
@@ -127,7 +127,7 @@ describe('reçu PDF — contenu (RM-24, RM-25)', () => {
   });
 
   it('omet les coordonnées absentes au lieu d’écrire « null »', async () => {
-    const bare = receipt({ shop: { name: 'Awa Beauty', legalName: null, address: null, contactPhone: null, contactEmail: null }, customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: null } });
+    const bare = receipt({ shop: { name: 'Awa Beauty', legalName: null, address: null, contactPhone: null, contactEmail: null }, customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: null } });
     const text = extractPdfText(await renderReceiptPdf(input({ receipt: bare })));
     expect(text).not.toMatch(/null|undefined/);
   });
@@ -136,7 +136,7 @@ describe('reçu PDF — contenu (RM-24, RM-25)', () => {
 describe('reçu PDF — robustesse', () => {
   it('n’échoue jamais sur des caractères que la police ne sait pas écrire (emoji, alphabets, lettres rares)', async () => {
     const odd = receipt({
-      customer: { firstName: 'Ọlá', lastName: 'Adéwálé 😀', phone: '+2250700000000', email: null },
+      customer: { fullName: 'Ọlá Adéwálé 😀', phone: '+2250700000000', email: null },
       lines: [{ name: 'Crème 日本語 «spéciale» — 50 ml', unitPrice: 1000, quantity: 1, lineTotal: 1000 }],
     });
     const text = extractPdfText(await renderReceiptPdf(input({ receipt: odd })));

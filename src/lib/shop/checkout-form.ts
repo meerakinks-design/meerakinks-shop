@@ -8,8 +8,8 @@ import type { OrderPayload } from '@/lib/validation/order.schema';
 // Rien ici ne touche au DOM : tout est testable sans navigateur.
 
 export interface CheckoutValues {
-  firstName: string;
-  lastName: string;
+  /** « Nom complet » : nom et prénom. */
+  fullName: string;
   /** Indicatif choisi dans la liste, ou OTHER_DIAL_CODE. */
   dialCode: string;
   /** Indicatif saisi quand « Autre pays » est choisi. */
@@ -23,14 +23,15 @@ export interface CheckoutValues {
   address: string;
   addressDetails: string;
   customerNote: string;
+  /** Case « J'ai vérifié les informations de ma commande ». */
+  infoConfirmed: boolean;
   /** Champ piège : doit rester vide. */
   companyFax: string;
 }
 
 /** Champs affichables, dans l'ordre de la page (sert à placer le focus sur le premier champ invalide). */
 export const CHECKOUT_FIELDS = [
-  'firstName',
-  'lastName',
+  'fullName',
   'phone',
   'email',
   'zoneType',
@@ -40,13 +41,13 @@ export const CHECKOUT_FIELDS = [
   'address',
   'addressDetails',
   'customerNote',
+  'infoConfirmed',
 ] as const;
 export type CheckoutField = (typeof CHECKOUT_FIELDS)[number];
 export type CheckoutErrors = Partial<Record<CheckoutField, string>>;
 
 export const emptyCheckoutValues = (): CheckoutValues => ({
-  firstName: '',
-  lastName: '',
+  fullName: '',
   dialCode: DEFAULT_DIAL_CODE,
   otherDialCode: '',
   phone: '',
@@ -58,6 +59,7 @@ export const emptyCheckoutValues = (): CheckoutValues => ({
   address: '',
   addressDetails: '',
   customerNote: '',
+  infoConfirmed: false,
   companyFax: '',
 });
 
@@ -84,8 +86,7 @@ export function buildOrderPayload(values: CheckoutValues, items: readonly Payloa
   return {
     idempotencyKey,
     items: items.map(({ productId, quantity }) => ({ productId, quantity })),
-    firstName: values.firstName,
-    lastName: values.lastName,
+    fullName: values.fullName,
     phoneDialCode: values.dialCode === OTHER_DIAL_CODE ? values.otherDialCode : values.dialCode,
     phone: values.phone,
     email: values.email,
@@ -96,6 +97,7 @@ export function buildOrderPayload(values: CheckoutValues, items: readonly Payloa
     address: values.address,
     addressDetails: values.addressDetails,
     customerNote: values.customerNote,
+    infoConfirmed: values.infoConfirmed,
     companyFax: values.companyFax,
   };
 }

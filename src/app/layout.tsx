@@ -1,9 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import '@/styles/globals.css';
+import { SEO } from '@/content/seo';
 
 export const metadata: Metadata = {
-  title: { default: 'Meëra Kinks', template: '%s · Meëra Kinks' },
-  description: 'La beauté, le soin et vos essentiels au quotidien.',
+  title: { default: SEO.home.title, template: '%s – Meëra Kinks' },
+  description: SEO.home.description,
   // Icônes servies par le site lui-même (jamais par Cloudinary) : le navigateur les réclame avant tout le reste.
   icons: {
     icon: [{ url: '/brand/favicon-icon.png', type: 'image/png' }, { url: '/favicon.ico', sizes: 'any' }],

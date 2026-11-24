@@ -8,14 +8,14 @@ import { formatFcfa } from '@/lib/money';
 import type { QuoteLine } from '@/lib/shop/quote-types';
 import { DELIVERY_FEES_NOTE, paymentReminder } from '@/content/livraison';
 import { useCart } from './CartProvider';
-import { Modal } from './Modal';
+import { CurtainModal } from './CurtainModal';
 import { QuantityStepper } from './QuantityStepper';
 import { openModal } from '@/lib/shop/modal-state';
 import { useModal } from './useModal';
 
 const STATUS_NOTES: Partial<Record<QuoteLine['status'], string>> = {
-  unavailable: 'Ce produit n’est plus disponible.',
-  out_of_stock: 'Ce produit est épuisé pour le moment.',
+  unavailable: 'La disponibilité de ce produit a changé. Vérifiez votre panier avant de continuer.',
+  out_of_stock: 'Ce produit n’est pas disponible pour le moment.',
 };
 
 export function CartModal({ depositAmount }: { depositAmount: number }) {
@@ -24,17 +24,17 @@ export function CartModal({ depositAmount }: { depositAmount: number }) {
   const isEmpty = cart.lines.length === 0;
 
   return (
-    <Modal hash={MODAL_HASHES.cart} title="Mon panier" className="modal-cart">
+    <CurtainModal hash={MODAL_HASHES.cart} title="Votre panier" closeLabel="Fermer le panier" className="modal-cart">
       {isEmpty ? (
-        <div className="empty-state">
-          <p>Votre panier est vide.</p>
+        <div className="empty-state" data-rise="">
+          <p>Votre panier attend ses premiers essentiels.</p>
           <Link className="btn" href={PUBLIC_ROUTES.shop} onClick={close}>
             Découvrir la boutique
           </Link>
         </div>
       ) : quoteStatus === 'error' && !quote ? (
         <div className="empty-state" role="alert">
-          <p>Impossible d’afficher votre panier pour le moment.</p>
+          <p>Votre panier n’a pas pu être mis à jour. Veuillez réessayer.</p>
           <button type="button" className="btn" onClick={retryQuote}>
             Réessayer
           </button>
@@ -48,12 +48,15 @@ export function CartModal({ depositAmount }: { depositAmount: number }) {
       ) : (
         <>
           <div className="cart-scroll">
+            <p className="help-text cart-intro" data-rise="">
+              Voici les soins que vous avez sélectionnés. Vérifiez votre panier avant de passer commande.
+            </p>
             <ul className="cart-lines">
               {quote.lines.map((line) => {
                 const note = STATUS_NOTES[line.status] ?? (line.status === 'limited' ? `Quantité limitée à ${line.quantity} (stock disponible).` : null);
                 const unavailable = line.status === 'unavailable' || line.status === 'out_of_stock';
                 return (
-                  <li key={line.productId} className={`cart-line${unavailable ? ' is-unavailable' : ''}`}>
+                  <li key={line.productId} className={`cart-line${unavailable ? ' is-unavailable' : ''}`} data-rise="">
                     {line.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={cloudinaryThumbnail(line.imageUrl, 240)} alt={line.imageAlt} width={104} height={104} loading="lazy" />
@@ -93,13 +96,18 @@ export function CartModal({ depositAmount }: { depositAmount: number }) {
                 );
               })}
             </ul>
-            <p className="help-text">{paymentReminder(depositAmount)}</p>
+            <p className="help-text" data-rise="">{paymentReminder(depositAmount)}</p>
+            <p className="cart-continue" data-rise="">
+              <Link className="link-button" href={PUBLIC_ROUTES.shop} onClick={close}>
+                Continuer mes achats
+              </Link>
+            </p>
           </div>
 
           <div className="cart-footer">
             <div className="cart-summary" aria-live="polite">
               <p className="cart-row">
-                <span>Livraison</span>
+                <span>Frais de livraison</span>
                 <span>À confirmer</span>
               </p>
               <p className="cart-row cart-subtotal">
@@ -131,6 +139,6 @@ export function CartModal({ depositAmount }: { depositAmount: number }) {
           </div>
         </>
       )}
-    </Modal>
+    </CurtainModal>
   );
 }

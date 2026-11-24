@@ -28,7 +28,7 @@ const row = (reference = 'CMD-7K3M9QXP') => ({
   deliveryFee: 1500,
   total: 26500,
   upfrontAmount: 5000,
-  customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' },
+  customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' },
   items: [{ productNameSnapshot: 'Huile', quantity: 2 }],
   payments: [{ kind: 'DEPOSIT', amount: 5000, voidedAt: null }],
 });

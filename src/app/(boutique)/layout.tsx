@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LANDING } from '@/content/landing';
+import { SEO } from '@/content/seo';
 import { CartModal } from '@/components/shop/CartModal';
 import { CartProvider } from '@/components/shop/CartProvider';
 import { CheckoutModal } from '@/components/shop/CheckoutModal';
@@ -10,11 +10,11 @@ import { Header } from '@/components/shop/Header';
 import { IntroLoader } from '@/components/shop/IntroLoader';
 import { MenuModal } from '@/components/shop/MenuModal';
 import { PageTransition } from '@/components/shop/PageTransition';
-import { HistoryModal } from '@/components/shop/HistoryModal';
+import { ConfirmationModal } from '@/components/shop/ConfirmationModal';
 import { ModalRouteSync } from '@/components/shop/ModalRouteSync';
 import { cld } from '@/lib/cloudinary-static';
 import { CHECKOUT_ENABLED, HOME_ANALYTICS_ENABLED } from '@/lib/constants/features';
-import { hasContactChannels } from '@/lib/shop/contact';
+import { hasContactSection } from '@/lib/shop/contact';
 import { getCategoryAccents, getPublicSettings, getPublicZones, hasCollections } from '@/server/services/catalog.queries';
 import '@/styles/shop.css';
 import '@/styles/smash.css';
@@ -26,15 +26,15 @@ export async function generateMetadata(): Promise<Metadata> {
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
   return {
     ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
-    title: { default: settings.storeName, template: `%s · ${settings.storeName}` },
-    description: LANDING.hero.text,
+    title: { default: SEO.home.title, template: `%s – ${settings.storeName}` },
+    description: SEO.home.description,
     openGraph: { siteName: settings.storeName, locale: 'fr_FR', type: 'website' },
   };
 }
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
   const [settings, showCollections, zones, accents] = await Promise.all([getPublicSettings(), hasCollections(), getPublicZones(), getCategoryAccents()]);
-  const showContact = hasContactChannels(settings);
+  const showContact = hasContactSection(settings);
   const socials = [
     { label: 'Instagram', href: settings.instagramUrl },
     { label: 'TikTok', href: settings.tiktokUrl },
@@ -51,11 +51,11 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
         {children}
       </main>
       <Footer settings={settings} showCollections={showCollections} accents={accents} />
-      {/* Les modals vivent dans le layout : l'icône du panier fonctionne sur toutes les pages. */}
+      {/* Les modals (menu, panier, commande, confirmation) vivent dans le layout, entrent par la droite et partagent le même mécanisme. */}
       <MenuModal storeName={settings.storeName} showCollections={showCollections} showContact={showContact} socials={socials} />
       <CartModal depositAmount={settings.depositAmount} />
       {CHECKOUT_ENABLED && <CheckoutModal depositAmount={settings.depositAmount} zones={zones} />}
-      <HistoryModal storeName={settings.storeName} />
+      <ConfirmationModal depositAmount={settings.depositAmount} storeName={settings.storeName} />
       <ModalRouteSync />
       <PageTransition />
       <IntroLoader logoSrc={cld('/brand/logo-meera-kinks.png', { width: 500 })} iconSrc={cld('/brand/favicon-icon.png')} storeName={settings.storeName} />

@@ -8,7 +8,7 @@ const receipt = (overrides: Partial<Parameters<typeof buildReceiptData>[0]> = {}
     issuedAt: new Date('2026-11-17T10:00:00.000Z'),
     shop: { name: 'Awa Beauty', legalName: null, address: null, contactPhone: null, contactEmail: null },
     depositAmount: 2000,
-    customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' },
+    customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' },
     delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: 'Riviera Palmeraie\nPortail bleu' },
     lines: [{ name: 'Sérum éclat', unitPrice: 10000, quantity: 2, lineTotal: 20000 }],
     subtotal: 20000,
@@ -60,7 +60,7 @@ describe('alerte à la vendeuse', () => {
 
   it('ÉCHAPPE tout ce que le client a saisi : aucune balise ne passe dans la boîte de la vendeuse', () => {
     const hostile = receipt({
-      customer: { firstName: '<b>Awa</b>', lastName: '"><script>alert(1)</script>', phone: '+2250700000000', email: 'a"b@example.com' },
+      customer: { fullName: '<b>Awa</b> "><script>alert(1)</script>', phone: '+2250700000000', email: 'a"b@example.com' },
       delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: '<i>Cocody</i>', address: '<script>steal()</script>\n<img src=x onerror=alert(2)>' },
       lines: [{ name: '<script>produit()</script>', unitPrice: 1000, quantity: 1, lineTotal: 1000 }],
     });
@@ -71,7 +71,7 @@ describe('alerte à la vendeuse', () => {
   });
 
   it('un nom piégé ne peut pas casser le sujet ni y injecter un en-tête', () => {
-    const sneaky = receipt({ customer: { firstName: 'Awa', lastName: 'Koné\r\nBcc: pirate@example.com', phone: '+2250700000000', email: null } });
+    const sneaky = receipt({ customer: { fullName: 'Awa Koné\r\nBcc: pirate@example.com', phone: '+2250700000000', email: null } });
     expect(seller(sneaky).subject).not.toMatch(/[\r\n]/);
   });
 
@@ -96,7 +96,7 @@ describe('accusé de réception au client', () => {
     const email = customer();
     expect(email.subject).toBe('Votre commande CMD-7K3M9QXP est enregistrée');
     for (const content of [email.html, email.text]) {
-      expect(content).toContain('Bonjour Awa,');
+      expect(content).toContain('Bonjour Awa Koné,');
       expect(content).toContain('Merci pour votre confiance !');
       expect(content).toContain('CMD-7K3M9QXP');
       expect(content).toContain('Sérum éclat');
@@ -124,9 +124,9 @@ describe('accusé de réception au client', () => {
     expect(customer(withContact).text).toContain('Une question ? +225 01 02 03 04 05 · contact@awa.example');
   });
 
-  it('échappe le prénom et les noms de produits', () => {
+  it('échappe le nom du client et les noms de produits', () => {
     const hostile = receipt({
-      customer: { firstName: '<script>x</script>', lastName: 'Koné', phone: '+2250700000000', email: null },
+      customer: { fullName: '<script>x</script> Koné', phone: '+2250700000000', email: null },
       lines: [{ name: '<b>Pack</b>', unitPrice: 1000, quantity: 1, lineTotal: 1000 }],
     });
     expect(customer(hostile).html).not.toMatch(/<script|<b>Pack/);
@@ -137,7 +137,7 @@ describe('changement de statut', () => {
   it('annonce le nouveau statut avec son libellé', () => {
     const email = buildStatusChangedEmail({ reference: 'CMD-7K3M9QXP', receipt: receipt(), storeName: 'Awa Beauty', deliveryStatus: 'CONFIRMED' });
     expect(email.subject).toBe('Votre commande CMD-7K3M9QXP : Confirmée');
-    expect(email.text).toContain('Bonjour Awa,');
+    expect(email.text).toContain('Bonjour Awa Koné,');
     expect(email.html).toContain('<strong>Confirmée</strong>');
   });
 });

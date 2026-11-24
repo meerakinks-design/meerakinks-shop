@@ -9,6 +9,12 @@ describe('routes publiques', () => {
     expect(categoryPath('soins-capillaires')).toBe('/categorie/soins-capillaires');
     expect(PUBLIC_ROUTES.shop).toBe('/boutique');
     expect(PUBLIC_ROUTES.orderConfirmation).toBe('/commande/confirmation');
+    expect(PUBLIC_ROUTES.about).toBe('/a-propos'); // « Notre histoire » : page dédiée
+    expect(PUBLIC_ROUTES.credits).toBe('/credits');
+  });
+  it('menu, panier, commande et confirmation sont des modals à ancre ; « Notre histoire » n’en est plus un', () => {
+    expect(MODAL_HASHES).toMatchObject({ menu: '#menu', cart: '#panier', checkout: '#commande', confirmation: '#confirmation' });
+    expect(Object.values(MODAL_HASHES)).not.toContain('#notre-histoire');
   });
   it('n’ont pas de page pour le panier, la commande, le contact ni la FAQ', () => {
     const paths = Object.values(PUBLIC_ROUTES) as string[];

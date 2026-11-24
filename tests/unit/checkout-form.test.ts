@@ -30,7 +30,7 @@ describe('createIdempotencyKey', () => {
 });
 
 describe('buildOrderPayload', () => {
-  const values = { ...emptyCheckoutValues(), firstName: 'Awa', lastName: 'Koné', phone: '07 00 00 00 00', placeName: 'Cocody', address: 'Riviera Palmeraie' };
+  const values = { ...emptyCheckoutValues(), fullName: 'Awa Koné', phone: '07 00 00 00 00', placeName: 'Cocody', address: 'Riviera Palmeraie', infoConfirmed: true };
   const items = [{ productId: 'prod_a', quantity: 2, name: 'ne doit pas partir', unitPrice: 1 }];
 
   it('n’envoie que des identifiants et des quantités : jamais de prix, de nom de produit ni de total (D-10)', () => {
@@ -44,6 +44,13 @@ describe('buildOrderPayload', () => {
     expect(orderInputSchema.safeParse(buildOrderPayload(values, items, createIdempotencyKey())).success).toBe(true);
   });
 
+  it('transmet la case de vérification : décochée, le schéma refuse la commande', () => {
+    expect(buildOrderPayload(values, items, createIdempotencyKey()).infoConfirmed).toBe(true);
+    expect(emptyCheckoutValues().infoConfirmed).toBe(false); // jamais cochée d’avance
+    const unchecked = orderInputSchema.safeParse(buildOrderPayload({ ...values, infoConfirmed: false }, items, createIdempotencyKey()));
+    expect(unchecked.success).toBe(false);
+  });
+
   it('utilise l’indicatif saisi quand « Autre pays » est choisi', () => {
     const payload = buildOrderPayload({ ...values, dialCode: OTHER_DIAL_CODE, otherDialCode: '971', phone: '50 123 4567' }, items, createIdempotencyKey());
     expect(payload.phoneDialCode).toBe('971');
@@ -53,8 +60,8 @@ describe('buildOrderPayload', () => {
 
 describe('toFieldErrors', () => {
   it('garde le premier message de chaque champ du formulaire', () => {
-    const { errors, general } = toFieldErrors({ firstName: ['Indiquez votre prénom.', 'autre'], phone: ['Numéro invalide'], email: undefined });
-    expect(errors).toEqual({ firstName: 'Indiquez votre prénom.', phone: 'Numéro invalide' });
+    const { errors, general } = toFieldErrors({ fullName: ['Indiquez votre nom et prénom.', 'autre'], phone: ['Numéro invalide'], email: undefined });
+    expect(errors).toEqual({ fullName: 'Indiquez votre nom et prénom.', phone: 'Numéro invalide' });
     expect(general).toBeNull();
   });
   it('transforme ce qui n’est pas un champ (panier, clé) en message général', () => {
@@ -69,7 +76,7 @@ describe('toFieldErrors', () => {
 
 describe('focus sur le premier champ invalide', () => {
   it('suit l’ordre de la page, pas l’ordre des erreurs', () => {
-    expect(firstInvalidField({ address: 'x', lastName: 'y', phone: 'z' })).toBe('lastName');
+    expect(firstInvalidField({ address: 'x', infoConfirmed: 'y', phone: 'z' })).toBe('phone'); // ordre de la page : nom, téléphone… puis la case de vérification en dernier
     expect(firstInvalidField({})).toBeNull();
   });
   it('la destination (liste ou champ libre) partage un seul identifiant', () => {

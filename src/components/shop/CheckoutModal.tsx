@@ -1,11 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react';
 import { postJson } from '@/lib/api-client';
 import type { ApiError } from '@/lib/api-result';
-import { MODAL_HASHES, PUBLIC_ROUTES, orderConfirmationPath } from '@/lib/constants/routes';
+import { MODAL_HASHES, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import type { ZoneTypeValue } from '@/lib/constants/order';
 import {
   buildOrderPayload,
@@ -18,14 +17,15 @@ import {
   type CheckoutErrors,
   type CheckoutValues,
 } from '@/lib/shop/checkout-form';
-import { openModal } from '@/lib/shop/modal-state';
+import { saveConfirmedOrder } from '@/lib/shop/confirmed-order';
+import { openModal, replaceModal } from '@/lib/shop/modal-state';
 import { markFreshReceipt } from '@/lib/shop/receipt-flag';
 import type { OrderCreated } from '@/lib/shop/order-types';
 import type { PublicZones } from '@/lib/shop/zones';
 import { orderInputSchema } from '@/lib/validation/order.schema';
 import { useCart } from './CartProvider';
 import { CheckoutForm, type CheckoutAlert, type CheckoutStatus } from './CheckoutForm';
-import { Modal } from './Modal';
+import { CurtainModal } from './CurtainModal';
 import { useModal } from './useModal';
 
 /** Au-delà, on propose « Réessayer » plutôt que d'attendre sans fin (la clé d'idempotence rend le renvoi sûr). */
@@ -37,7 +37,6 @@ interface CheckoutModalProps {
 }
 
 export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
-  const router = useRouter();
   const { hydrated, cart, quote, quoteIsCurrent, quoteStatus, clear, retryQuote } = useCart();
   const { isOpen, close } = useModal(MODAL_HASHES.checkout);
   const idPrefix = useId();
@@ -67,7 +66,7 @@ export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
   const amounts = estimateCheckoutAmounts({ subtotal, zoneType: values.zoneType, zone: selectedZone, depositAmount });
   const canSubmit = quoteIsCurrent && !hasProblems && subtotal > 0;
 
-  function changeField(field: keyof CheckoutValues, value: string) {
+  function changeField(field: keyof CheckoutValues, value: string | boolean) {
     setValues((current) => ({ ...current, [field]: value }));
     if (field in errors || (field === 'deliveryZoneId' && errors.placeName) || (field === 'placeName' && errors.deliveryZoneId)) {
       setErrors((current) => {
@@ -88,7 +87,7 @@ export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
 
   function showErrors(found: CheckoutErrors, general?: string | null) {
     setErrors(found);
-    setAlert({ tone: 'error', message: general ?? 'Certaines informations sont à corriger.' });
+    setAlert({ tone: 'error', message: general ?? 'Certains champs sont à compléter avant de continuer.' });
     const first = firstInvalidField(found);
     if (first) document.getElementById(controlIdFor(idPrefix, first))?.focus();
   }
@@ -96,7 +95,7 @@ export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
   function handleFailure(error: ApiError) {
     setStatus('idle');
     if (error.code === 'NETWORK_ERROR') {
-      setAlert({ tone: 'error', message: 'Connexion impossible. Vos informations sont conservées : réessayez dans un instant.' });
+      setAlert({ tone: 'error', message: 'La connexion semble interrompue. Vos informations sont conservées : vérifiez votre réseau puis réessayez.' });
     } else if (error.code === 'VALIDATION_ERROR') {
       const { errors: found, general } = toFieldErrors(error.fields);
       showErrors(found, general ?? error.message);
@@ -133,14 +132,15 @@ export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
       return;
     }
 
-    // Commande enregistrée : le panier est vidé et la page de confirmation prend le relais (le bouton WhatsApp s'y trouve).
+    // Commande enregistrée : le panier est vidé et le modal de confirmation prend le relais, à droite (le bouton WhatsApp s'y trouve).
     setStatus('done');
     keyRef.current = null;
     clear();
     setValues(emptyCheckoutValues());
-    // Le reçu (ticket PNG) se télécharge tout de suite sur la page de confirmation.
+    // Le reçu (ticket PNG) se télécharge tout de suite dans le modal de confirmation.
     markFreshReceipt(result.data.reference);
-    router.replace(orderConfirmationPath(result.data.reference));
+    saveConfirmedOrder(result.data);
+    replaceModal(MODAL_HASHES.confirmation);
   }
 
   const shopLink = (
@@ -153,7 +153,7 @@ export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
   if (status === 'done') {
     body = (
       <p role="status" className="empty-state">
-        Commande enregistrée. Redirection…
+        Votre commande est enregistrée. Nous préparons la suite.
       </p>
     );
   } else if (!hydrated) {
@@ -161,14 +161,14 @@ export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
   } else if (cart.lines.length === 0) {
     body = (
       <div className="empty-state">
-        <p>Votre panier est vide.</p>
+        <p>Votre panier attend ses premiers essentiels.</p>
         {shopLink}
       </div>
     );
   } else if (quoteStatus === 'error' && !quote) {
     body = (
       <div className="empty-state" role="alert">
-        <p>Impossible de préparer votre commande pour le moment.</p>
+        <p>Votre commande n’a pas pu être préparée pour le moment. Veuillez réessayer.</p>
         <button type="button" className="btn" onClick={retryQuote}>
           Réessayer
         </button>
@@ -181,28 +181,33 @@ export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
       ? { tone: 'conflict', message: 'Votre panier a changé : certains articles ne sont plus disponibles en quantité suffisante. Revoyez votre panier avant de commander.' }
       : null;
     body = (
-      <CheckoutForm
-        idPrefix={idPrefix}
-        values={values}
-        errors={errors}
-        zones={zones}
-        depositAmount={depositAmount}
-        recap={{ lines: billableLines.map(({ productId, name, quantity, lineTotal }) => ({ productId, name, quantity, lineTotal })), subtotal }}
-        amounts={amounts}
-        alert={alert ?? problemAlert}
-        status={status}
-        canSubmit={canSubmit}
-        onChange={changeField}
-        onZoneTypeChange={changeZoneType}
-        onSubmit={handleSubmit}
-        onEditCart={() => openModal(MODAL_HASHES.cart)}
-      />
+      <>
+        <p className="help-text checkout-intro">
+          Renseignez vos coordonnées pour transmettre votre commande. Notre équipe vous contactera ensuite sur WhatsApp pour la confirmer.
+        </p>
+        <CheckoutForm
+          idPrefix={idPrefix}
+          values={values}
+          errors={errors}
+          zones={zones}
+          depositAmount={depositAmount}
+          recap={{ lines: billableLines.map(({ productId, name, quantity, lineTotal }) => ({ productId, name, quantity, lineTotal })), subtotal }}
+          amounts={amounts}
+          alert={alert ?? problemAlert}
+          status={status}
+          canSubmit={canSubmit}
+          onChange={changeField}
+          onZoneTypeChange={changeZoneType}
+          onSubmit={handleSubmit}
+          onEditCart={() => openModal(MODAL_HASHES.cart)}
+        />
+      </>
     );
   }
 
   return (
-    <Modal hash={MODAL_HASHES.checkout} title="Passer commande" className="modal-checkout">
+    <CurtainModal hash={MODAL_HASHES.checkout} title="Vos informations de livraison" closeLabel="Fermer la commande" className="modal-checkout">
       {body}
-    </Modal>
+    </CurtainModal>
   );
 }

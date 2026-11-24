@@ -26,7 +26,7 @@ export function privacySections(options: { homeAnalytics: boolean }): LegalSecti
       title: 'Quelles données sont collectées ?',
       paragraphs: [],
       items: [
-        'Quand vous commandez : prénom, nom, numéro de téléphone, adresse email (facultative), zone de livraison, commune, ville ou pays, adresse de livraison et précisions, message éventuel et contenu de la commande.',
+        'Quand vous commandez : nom complet, numéro de téléphone, adresse email (facultative), zone de livraison, commune, ville ou pays, adresse de livraison et précisions, message éventuel et contenu de la commande.',
         'Ensuite, la boutique enregistre le suivi de votre commande : statuts, paiements (montants et dates) et notes de suivi.',
         'Le site ne collecte aucun numéro de carte bancaire.',
         `Quand vous visitez le site : des données techniques (adresse IP, date, page demandée) sont traitées par l’hébergeur pour afficher le site et le protéger. Pour limiter les abus (commandes répétées, tentatives de connexion), le site compte les demandes pendant 10 minutes à 1 heure à partir d’une empreinte de votre adresse IP et de votre numéro de téléphone (et non des valeurs elles-mêmes), supprimée automatiquement au plus tard ${RATE_LIMIT_FINGERPRINT_MAX_DAYS} jours après.`,

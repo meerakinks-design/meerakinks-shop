@@ -24,7 +24,7 @@ const EXPORT_SELECT = {
   deliveryFee: true,
   total: true,
   upfrontAmount: true,
-  customer: { select: { firstName: true, lastName: true, phone: true, email: true } },
+  customer: { select: { fullName: true, phone: true, email: true } },
   items: { orderBy: { id: 'asc' }, select: { productNameSnapshot: true, quantity: true } },
   payments: { select: { kind: true, amount: true, voidedAt: true } },
 } satisfies Prisma.OrderSelect;

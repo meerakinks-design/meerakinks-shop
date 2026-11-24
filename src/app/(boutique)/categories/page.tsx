@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { SEO } from '@/content/seo';
 import { readableTextColor } from '@/lib/color';
 import { categoryPath } from '@/lib/constants/routes';
 import { FALLBACK_ACCENTS } from '@/lib/shop/sections';
 import { listActiveCategories } from '@/server/services/catalog.queries';
 
 export const revalidate = 3600;
-export const metadata: Metadata = { title: 'Catégories', description: 'Parcourez les catégories de la boutique pour trouver le produit qu’il vous faut.', alternates: { canonical: '/categories' } };
+export const metadata: Metadata = { title: { absolute: SEO.categories.title }, description: SEO.categories.description, alternates: { canonical: '/categories' } };
 
 export default async function CategoriesPage() {
   const categories = await listActiveCategories();

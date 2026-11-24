@@ -6,6 +6,10 @@ export const AUDIT_ACTIONS = [
   'CUSTOMER_ANONYMIZED', // effacement d'un client sur demande (details : identifiant de la fiche, nombre de commandes)
   'RETENTION_PURGE', // purge planifiée de fin de conservation (details : nombre de clients anonymisés)
   'ORDERS_EXPORTED', // export Excel ou CSV des commandes (details : format, filtres, nombre de lignes)
+  'ORDER_CANCELLED', // annulation d'une commande (details : référence, stock restitué, montant à rembourser)
+  'ORDER_PAYMENT_RECORDED', // encaissement ou remboursement saisi (details : référence, type, mode, montant)
+  'ORDER_PAYMENT_VOIDED', // paiement annulé pour erreur de saisie (details : référence, type, montant)
+  'ORDER_FEE_SET', // frais de livraison fixés par la vendeuse (details : référence, frais, total)
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

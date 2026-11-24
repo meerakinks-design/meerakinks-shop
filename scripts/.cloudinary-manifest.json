@@ -10,5 +10,11 @@
     "publicId": "meera/public/brand/logo-meera-kinks",
     "resourceType": "image",
     "updatedAt": "2026-11-22T05:25:58.401Z"
+  },
+  "brand/akatech-studio-logo.webp": {
+    "hash": "64d70aed912309c2f1e6a4a710ba2956819d1dd6964be75916fd6b7e94cfde9b",
+    "publicId": "meera/public/brand/akatech-studio-logo",
+    "resourceType": "image",
+    "updatedAt": "2026-11-24T00:46:53.696Z"
   }
 }

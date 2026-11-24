@@ -1,18 +1,17 @@
 /**
  * Seed idempotent : relancer `npm run db:seed` ne duplique rien et n'écrase aucun réglage existant.
  *
- *   SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD   obligatoires (compte propriétaire)
- *   SEED_ADMIN_NAME, SEED_STORE_NAME, SEED_SELLER_WHATSAPP   facultatifs
+ *   ADMIN_EMAIL / ADMIN_PASSWORD   obligatoires : compte propriétaire (les mêmes variables que le serveur lit à la connexion).
+ *                                  Anciens noms SEED_ADMIN_EMAIL / SEED_ADMIN_PASSWORD acceptés si les nouveaux sont absents.
+ *   ADMIN_NAME (ou SEED_ADMIN_NAME), SEED_STORE_NAME, SEED_SELLER_WHATSAPP   facultatifs
  *   SEED_CONTACT_EMAIL, SEED_INSTAGRAM_URL, SEED_TIKTOK_URL, SEED_FACEBOOK_URL   facultatifs (landing, pied de page)
- *   SEED_RESET_PASSWORD=1   réinitialise le mot de passe d'un compte déjà existant
  *   SEED_DEMO=1             ajoute des produits de démonstration (refusé en production)
  *
- * Le mot de passe n'est lu qu'ici, en local, puis haché : il n'existe pas dans l'environnement
- * de production.
+ * L'environnement fait foi : si le compte existe déjà avec un autre mot de passe, il est réaligné sur ADMIN_PASSWORD
+ * et les sessions ouvertes sont fermées. Seul le hash bcrypt est enregistré en base.
  */
 import { PrismaClient, ZoneType } from '@prisma/client';
-import { emailField, newPasswordSchema } from '../src/lib/validation/auth.schema';
-import { hashPassword } from '../src/server/auth/password';
+import { readEnvAdminConfig, syncEnvAdmin } from '../src/server/auth/env-admin';
 
 const prisma = new PrismaClient();
 
@@ -41,24 +40,22 @@ function requireEnv(name: string): string {
 }
 
 async function seedAdmin() {
-  const email = emailField.parse(requireEnv('SEED_ADMIN_EMAIL'));
-  const password = newPasswordSchema.parse(requireEnv('SEED_ADMIN_PASSWORD'));
-  const name = process.env.SEED_ADMIN_NAME?.trim() || 'Propriétaire';
+  const config = readEnvAdminConfig({
+    ADMIN_EMAIL: process.env.ADMIN_EMAIL || process.env.SEED_ADMIN_EMAIL,
+    ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || process.env.SEED_ADMIN_PASSWORD,
+    ADMIN_NAME: process.env.ADMIN_NAME || process.env.SEED_ADMIN_NAME,
+  });
+  if (config.status === 'absent') throw new Error('Variables manquantes : ADMIN_EMAIL et ADMIN_PASSWORD (voir .env.example).');
+  if (config.status === 'invalid') throw new Error(config.problems.join(' '));
 
-  const existing = await prisma.adminUser.findUnique({ where: { email }, select: { id: true } });
-  if (!existing) {
-    await prisma.adminUser.create({ data: { email, name, passwordHash: await hashPassword(password), role: 'OWNER' } });
-    console.info('Compte admin créé.');
-    return email;
-  }
-  if (process.env.SEED_RESET_PASSWORD === '1') {
-    await prisma.adminUser.update({ where: { id: existing.id }, data: { passwordHash: await hashPassword(password) } });
-    await prisma.adminSession.deleteMany({ where: { adminUserId: existing.id } }); // révoque les sessions ouvertes
-    console.info('Mot de passe réinitialisé, sessions révoquées.');
-  } else {
-    console.info('Compte admin déjà présent : inchangé (SEED_RESET_PASSWORD=1 pour réinitialiser).');
-  }
-  return email;
+  const result = await syncEnvAdmin(prisma, config);
+  const messages = {
+    created: 'Compte admin créé.',
+    updated: 'Compte admin mis à jour d’après l’environnement (mot de passe, nom ou rôle) ; sessions ouvertes fermées si le mot de passe a changé.',
+    unchanged: 'Compte admin déjà à jour : inchangé.',
+  } as const;
+  console.info(messages[result]);
+  return config.email;
 }
 
 async function seedSettings(notificationEmail: string) {

@@ -222,7 +222,8 @@ Les « Reçus » se téléchargent depuis la commande, les « Notifications » (
 | `CRON_SECRET` | Protège `/api/cron/send-emails` (16 caractères minimum) ; route fermée sans lui |
 | `NEXT_PUBLIC_SITE_URL` | Variable publique |
 | `NEXT_PUBLIC_CHECKOUT_ENABLED` | `1` = commande en ligne ouverte (bouton « Commander » et `POST /api/v1/orders`) |
-| `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD` | **Uniquement pour `prisma db seed`**, en local, puis supprimées. Le mot de passe est haché en base et n'existe pas en production |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME` | Compte propriétaire du back-office (D-34). Lues par le serveur à la connexion et par `prisma db seed` ; seul le hash bcrypt va en base. À renseigner sur Vercel (Production), jamais dans le dépôt |
+| `SEED_*` | Uniquement pour `prisma db seed`, en local (démo, liens de contact). Anciens `SEED_ADMIN_*` encore lus par le seed |
 
 **Domaine.** À acheter avant l'étape 5. Resend n'envoie depuis une adresse à ton nom (`commandes@ton-domaine`) qu'après vérification DNS (SPF et DKIM) ; sans cela il ne livre qu'à l'adresse du compte Resend, donc pas à la vendeuse.
 
@@ -240,3 +241,27 @@ Les « Reçus » se téléchargent depuis la commande, les « Notifications » (
 | 6 | Dashboard, commandes, zones, paramètres | C1–C3 (zones à seeder) |
 | 7 | Habillage final, vrais produits | F0b–F0d (charte, photos, produits, prix) |
 | 8 | Variantes | A3, seulement si « oui » |
+
+## Traitement des commandes (code 0.11)
+
+| Fichier | Rôle |
+|---|---|
+| `src/lib/shop/order-admin.ts` | Règles pures : statut de paiement calculé, contrôle d'un paiement, étapes de livraison, plan de restitution du stock, « à faire » par commande |
+| `src/lib/validation/order-admin.schema.ts` | Schémas Zod des actions et des filtres de la liste |
+| `src/lib/constants/admin-orders.ts` | Chemins, filtres lisibles de l'adresse, limites |
+| `src/server/services/orders-admin.service.ts` | Écritures en transaction gardée par `updatedAt` ; liste, détail, tableau de bord, clients |
+| `src/server/auth/env-admin.ts` | Lecture et alignement du compte propriétaire d'après l'environnement |
+| `src/app/api/v1/admin/orders/[id]/{status,payments,payments/[paymentId]/void,delivery-fee,note}/route.ts` | Routes (session admin, anti-CSRF, corps validé) |
+| `src/app/admin/(protege)/{page,commandes,commandes/[id],clients,clients/[id]}` | Écrans |
+| `src/components/admin/{OrderActions,PaymentPanel,OrderSideForms,OrderBadges,Pagination}.tsx` | Composants |
+
+## Ajouts de boutique-3 (23 novembre 2026)
+
+- `src/components/shop/CurtainModal.tsx` : modal « rideaux » commun (menu, panier, commande, confirmation) ; `ConfirmationModal.tsx` ; `MenuModal.tsx`, `CartModal.tsx`, `CheckoutModal.tsx` s'appuient dessus (`Modal.tsx` et `HistoryModal.tsx` supprimés).
+- `src/lib/shop/confirmed-order.ts` : dernière commande gardée dans l'onglet pour la confirmation en modal ; `modal-state.ts` : `replaceModal` et `dismissModal`.
+- `src/components/shop/Footer.tsx`, `FooterCredit.tsx` (crédit AKATech, logo au survol), `SocialIcons.tsx` ; `src/lib/constants/credits.ts`.
+- `src/app/(boutique)/a-propos/page.tsx`, `src/app/(boutique)/credits/page.tsx`.
+- Contact : `src/components/shop/ContactForm.tsx`, `src/lib/validation/contact.schema.ts`, `src/lib/constants/contact.ts`, `src/app/api/v1/contact/route.ts`, `src/server/services/contact.service.ts`, `contact-email.ts`, `src/content/contact-messages.ts`.
+- Textes : `src/content/landing.ts`, `faq.ts`, `seo.ts` (document v1.0).
+- Données : `Customer.fullName` (migration `prisma/migrations/20261123000000_customer_full_name`).
+- Le lot v0.11 (admin) vit dans `src/server/services/orders-admin.service.ts`, `src/app/admin/(protege)/*`, `src/app/api/v1/admin/orders/[id]/*`.

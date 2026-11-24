@@ -19,6 +19,11 @@ const serverEnvSchema = z.object({
   CLOUDINARY_API_KEY: optional(z.string().min(1)),
   CLOUDINARY_API_SECRET: optional(z.string().min(1)),
   CRON_SECRET: optional(z.string().min(16)),
+  // Compte propriétaire du back-office. Validés (forme, longueur) par server/auth/env-admin.ts : une valeur refusée ne doit
+  // pas empêcher le site de démarrer, seulement le compte de se créer.
+  ADMIN_EMAIL: optional(z.string().min(1)),
+  ADMIN_PASSWORD: optional(z.string().min(1)),
+  ADMIN_NAME: optional(z.string().min(1)),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

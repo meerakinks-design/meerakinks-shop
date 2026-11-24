@@ -5,7 +5,7 @@ const NETWORK_FAILURE = {
   ok: false,
   error: {
     code: 'NETWORK_ERROR',
-    message: 'Connexion impossible. Vérifie ta connexion internet et réessaie.',
+    message: 'La connexion semble interrompue. Vérifiez votre réseau puis réessayez.',
     retryable: true,
   },
 } as const;

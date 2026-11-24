@@ -105,7 +105,9 @@ describe('panier (feuille)', () => {
   it('panier vide : message et lien vers la boutique, pas de pied de commande', () => {
     const html = wrap(<CartModal depositAmount={2000} />);
     expect(html).toContain('modal-cart');
-    expect(html).toContain('Votre panier est vide.');
+    expect(html).toContain('Votre panier attend ses premiers essentiels.');
+    expect(html).toContain('curtain-dialog'); // même mécanisme que le menu : rideaux qui glissent depuis la droite
+    expect(html).toContain('curtain-layer');
     expect(html).not.toContain('cart-checkout');
   });
 });

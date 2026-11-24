@@ -47,8 +47,7 @@ const input = (overrides: Record<string, unknown> = {}) =>
   orderInputSchema.parse({
     idempotencyKey: KEY,
     items: [{ productId: 'prod_a', quantity: 2 }],
-    firstName: 'Awa',
-    lastName: 'Koné',
+    fullName: 'Awa Koné',
     phoneDialCode: '225',
     phone: '07 00 00 00 00',
     zoneType: 'ABIDJAN',
@@ -69,7 +68,7 @@ const storedOrder = (overrides: Record<string, unknown> = {}) => ({
   deliveryFee: null,
   total: null,
   upfrontAmount: 2000,
-  customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000' },
+  customer: { fullName: 'Awa Koné', phone: '+2250700000000' },
   items: [{ productId: 'prod_a', productNameSnapshot: 'Sérum éclat', unitPriceSnapshot: 10000, quantity: 2, lineTotal: 20000 }],
   ...overrides,
 });
@@ -98,7 +97,7 @@ beforeEach(() => {
     deliveryFee: data.deliveryFee,
     total: data.total,
     upfrontAmount: data.upfrontAmount,
-    customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000' },
+    customer: { fullName: 'Awa Koné', phone: '+2250700000000' },
     items: data.items.create,
   }));
 });
@@ -166,7 +165,7 @@ describe('createOrder — commande à Abidjan, destination saisie (aucune zone c
     const receipt = data.receipt.create.data;
     expect(receipt.version).toBe(1);
     expect(receipt.shop.name).toBe('Awa Beauty');
-    expect(receipt.customer).toEqual({ firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' });
+    expect(receipt.customer).toEqual({ fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' });
     expect(receipt.lines).toEqual([{ name: 'Sérum éclat', unitPrice: 10000, quantity: 2, lineTotal: 20000 }]);
     expect(receipt.amounts).toEqual({ currency: 'XOF', subtotal: 20000, deliveryFee: null, total: null, upfrontAmount: 2000 });
     expect(receipt.paymentTerms).toContain('acompte');
@@ -186,8 +185,8 @@ describe('createOrder — commande à Abidjan, destination saisie (aucune zone c
     await createOrder(input({ email: 'Awa@Example.com' }));
     expect(tx.customer.upsert).toHaveBeenCalledWith({
       where: { phone: '+2250700000000' },
-      create: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' },
-      update: { firstName: 'Awa', lastName: 'Koné', email: 'awa@example.com' },
+      create: { fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' },
+      update: { fullName: 'Awa Koné', email: 'awa@example.com' },
       select: { id: true },
     });
   });

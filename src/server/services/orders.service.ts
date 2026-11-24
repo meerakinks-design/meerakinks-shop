@@ -35,7 +35,7 @@ const ORDER_SELECT = {
   deliveryFee: true,
   total: true,
   upfrontAmount: true,
-  customer: { select: { firstName: true, lastName: true, phone: true } },
+  customer: { select: { fullName: true, phone: true } },
   items: { orderBy: { id: 'asc' }, select: { productId: true, variantId: true, variantLabelSnapshot: true, productNameSnapshot: true, unitPriceSnapshot: true, quantity: true, lineTotal: true } },
 } satisfies Prisma.OrderSelect;
 type OrderRow = Prisma.OrderGetPayload<{ select: typeof ORDER_SELECT }>;
@@ -89,7 +89,7 @@ function toOrderCreated(row: OrderRow, settings: Pick<SettingsRow, 'storeName' |
   const message = buildOrderMessage({
     ...recap,
     storeName: settings.storeName,
-    customerName: `${row.customer.firstName} ${row.customer.lastName}`,
+    customerName: row.customer.fullName,
     phone: formatPhoneDisplay(row.customer.phone),
     address: row.shippingAddress,
     note: row.customerNote,
@@ -190,8 +190,8 @@ async function insertOrder(tx: Prisma.TransactionClient, input: OrderInput): Pro
   // garde sa propre copie dans le reçu figé.
   const customer = await tx.customer.upsert({
     where: { phone: input.phoneE164 },
-    create: { firstName: input.firstName, lastName: input.lastName, phone: input.phoneE164, email: input.email ?? null },
-    update: { firstName: input.firstName, lastName: input.lastName, ...(input.email ? { email: input.email } : {}) },
+    create: { fullName: input.fullName, phone: input.phoneE164, email: input.email ?? null },
+    update: { fullName: input.fullName, ...(input.email ? { email: input.email } : {}) },
     select: { id: true },
   });
 
@@ -201,7 +201,7 @@ async function insertOrder(tx: Prisma.TransactionClient, input: OrderInput): Pro
     issuedAt: new Date(),
     shop: { name: settings.storeName, legalName: settings.legalName, address: settings.address, contactPhone: settings.contactPhone, contactEmail: settings.contactEmail },
     depositAmount: settings.depositAmount,
-    customer: { firstName: input.firstName, lastName: input.lastName, phone: input.phoneE164, email: input.email ?? null },
+    customer: { fullName: input.fullName, phone: input.phoneE164, email: input.email ?? null },
     delivery: { zoneType: input.zoneType, country: destination.country, city: destination.city, address: shippingAddress },
     lines: lines.map(({ name, unitPrice, quantity, lineTotal: total }) => ({ name, unitPrice, quantity, lineTotal: total })),
     subtotal,

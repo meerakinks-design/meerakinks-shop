@@ -27,7 +27,7 @@ interface CheckoutFormProps {
   alert: CheckoutAlert | null;
   status: CheckoutStatus;
   canSubmit: boolean;
-  onChange: (field: keyof CheckoutValues, value: string) => void;
+  onChange: (field: keyof CheckoutValues, value: string | boolean) => void;
   onZoneTypeChange: (zoneType: ZoneTypeValue) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onEditCart: () => void;
@@ -74,16 +74,16 @@ function a11y(id: string, error: string | undefined, hasHelp = false) {
 }
 
 const SENDING_LABELS: Record<CheckoutStatus, string> = {
-  idle: 'Envoyer ma commande',
-  sending: 'Envoi en cours…',
-  done: 'Commande envoyée',
+  idle: 'Confirmer ma commande',
+  sending: 'Enregistrement de votre commande…',
+  done: 'Commande enregistrée',
 };
 
 /** Formulaire de commande (§6.2). Présentationnel : l'état et l'envoi vivent dans CheckoutModal. */
 export function CheckoutForm(props: CheckoutFormProps) {
   const { idPrefix, values, errors, zones, depositAmount, recap, amounts, alert, status, canSubmit, onChange, onZoneTypeChange, onSubmit, onEditCart } = props;
   const id = (name: string) => `${idPrefix}-${name}`;
-  const text = (field: keyof CheckoutValues) => ({
+  const text = (field: Exclude<keyof CheckoutValues, 'infoConfirmed'>) => ({
     name: field,
     value: values[field],
     onChange: (event: { target: { value: string } }) => onChange(field, event.target.value),
@@ -117,14 +117,9 @@ export function CheckoutForm(props: CheckoutFormProps) {
 
       <fieldset className="field checkout-group">
         <legend>Vos coordonnées</legend>
-        <div className="checkout-row">
-          <Field id={id('firstName')} label="Prénom" error={errors.firstName}>
-            <input type="text" autoComplete="given-name" maxLength={ORDER_LIMITS.name} {...text('firstName')} {...a11y(id('firstName'), errors.firstName)} />
-          </Field>
-          <Field id={id('lastName')} label="Nom" error={errors.lastName}>
-            <input type="text" autoComplete="family-name" maxLength={ORDER_LIMITS.name} {...text('lastName')} {...a11y(id('lastName'), errors.lastName)} />
-          </Field>
-        </div>
+        <Field id={id('fullName')} label="Nom complet" error={errors.fullName}>
+          <input type="text" autoComplete="name" placeholder="Votre nom et prénom" maxLength={ORDER_LIMITS.fullName} {...text('fullName')} {...a11y(id('fullName'), errors.fullName)} />
+        </Field>
 
         <Field id={id('phone')} label="Téléphone (WhatsApp)" error={phoneError} help="Avec l’indicatif de votre pays : la vendeuse vous contactera sur ce numéro.">
           <div className="phone-row">
@@ -216,6 +211,24 @@ export function CheckoutForm(props: CheckoutFormProps) {
       <p className="help-text">
         Vos informations servent uniquement à traiter votre commande (voir la <Link href={PUBLIC_ROUTES.privacy}>politique de confidentialité</Link>).
       </p>
+
+      <div className="field checkout-confirm">
+        <label className="check-row" htmlFor={id('infoConfirmed')}>
+          <input
+            type="checkbox"
+            name="infoConfirmed"
+            checked={values.infoConfirmed}
+            onChange={(event) => onChange('infoConfirmed', event.target.checked)}
+            {...a11y(id('infoConfirmed'), errors.infoConfirmed)}
+          />
+          <span>J’ai vérifié les informations de ma commande.</span>
+        </label>
+        {errors.infoConfirmed && (
+          <p id={`${id('infoConfirmed')}-error`} className="field-error">
+            {errors.infoConfirmed}
+          </p>
+        )}
+      </div>
 
       {alert && (
         <div className={`checkout-alert is-${alert.tone}`} role="alert">

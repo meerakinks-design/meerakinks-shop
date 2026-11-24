@@ -253,7 +253,7 @@ async function scenarioProduct(page, context, device) {
   const atBottom = await barState();
   check(scope, 'pied de page à l’écran : la barre collée se range', !atBottom.visible, `visible : ${atBottom.visible}`);
   const legalReachable = await page.evaluate(() => {
-    const links = [...document.querySelectorAll('.footer-legal a')];
+    const links = [...document.querySelectorAll('.footer-col-info a')];
     return links.length > 0 && links.every((link) => {
       const rect = link.getBoundingClientRect();
       return link.contains(document.elementFromPoint(rect.left + Math.min(8, rect.width / 2), rect.top + rect.height / 2));
@@ -276,7 +276,7 @@ async function scenarioLanding(page, device) {
   await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }));
   await page.waitForTimeout(900);
   const fixedOverFooter = await page.evaluate(() => {
-    const links = [...document.querySelectorAll('.footer-legal a')];
+    const links = [...document.querySelectorAll('.footer-col-info a')];
     return links.every((link) => {
       const rect = link.getBoundingClientRect();
       return link.contains(document.elementFromPoint(rect.left + Math.min(8, rect.width / 2), rect.top + rect.height / 2));
@@ -304,16 +304,15 @@ async function scenarioCart(page, device) {
   const lines = await page.locator('.cart-line').count();
   check(scope, 'deux lignes dans le panier', lines === 2, `${lines} lignes`);
 
-  const panel = await box(page.locator('dialog.modal-cart .modal-panel'));
+  const panel = await box(page.locator('dialog.modal-cart .curtain-panel'));
   const viewport = page.viewportSize();
+  // Même mécanisme que le menu : le panneau est collé à DROITE (téléphone comme ordinateur).
+  check(scope, 'panneau : collé au bord droit de l’écran', Math.abs(panel.x + panel.width - (viewport.width - 8)) <= 2, `bord droit ${Math.round(panel.x + panel.width)} / écran ${viewport.width}`);
+  check(scope, 'panneau : pleine hauteur (marges de 8 px)', Math.abs(panel.y - 8) <= 2 && Math.abs(panel.y + panel.height - (viewport.height - 8)) <= 2, `${Math.round(panel.y)} → ${Math.round(panel.y + panel.height)}`);
   if (phone) {
-    check(scope, 'feuille : ancrée en bas de l’écran', Math.abs(panel.y + panel.height - (viewport.height - 8)) <= 2, `bas ${Math.round(panel.y + panel.height)} / écran ${viewport.height}`);
-    check(scope, 'feuille : presque pleine largeur', panel.width >= viewport.width - 20 && panel.x >= 0, `${Math.round(panel.width)} px sur ${viewport.width}`);
-    check(scope, 'feuille : ne dépasse pas 92 % de la hauteur', panel.height <= viewport.height * 0.92 + 1, `${Math.round(panel.height)} px`);
+    check(scope, 'panneau : une bande du site reste visible à gauche (on sent qu’il vient de la droite)', panel.x >= 36 && panel.x <= 60, `x = ${Math.round(panel.x)} px`);
   } else {
-    const centeredY = Math.abs(panel.y + panel.height / 2 - viewport.height / 2) < 6;
-    const centeredX = Math.abs(panel.x + panel.width / 2 - viewport.width / 2) < 2;
-    check(scope, 'fenêtre centrée sur ordinateur', centeredX && centeredY, `centre (${Math.round(panel.x + panel.width / 2)}, ${Math.round(panel.y + panel.height / 2)})`);
+    check(scope, 'panneau : largeur fixe sur ordinateur (34 rem au plus)', panel.width <= 34 * 16 + 1, `${Math.round(panel.width)} px`);
   }
   const checkout = await box(page.locator('.cart-checkout'));
   check(scope, 'bouton « Passer commande » entièrement visible', checkout.y >= 0 && checkout.y + checkout.height <= viewport.height && checkout.height >= 44, `haut ${Math.round(checkout.y)}, bas ${Math.round(checkout.y + checkout.height)}, ${Math.round(checkout.height)} px`);
@@ -359,18 +358,22 @@ async function scenarioReceipt(page, context, device, downloads) {
   await page.waitForTimeout(400);
   await shot(page, device, '06-commande-formulaire');
   const dialog = page.locator('dialog.modal-checkout');
-  await dialog.getByLabel('Prénom').fill('Awa');
-  await dialog.getByLabel('Nom', { exact: true }).fill('Koné');
+  await dialog.getByLabel('Nom complet').fill('Awa Koné');
   await dialog.locator('input[type="tel"]').fill('07 00 00 00 00');
   await dialog.locator('select[name="deliveryZoneId"]').selectOption('zone-cocody');
   await dialog.getByLabel('Adresse précise').fill('Riviera Palmeraie, près de la pharmacie');
+  // Sans la case « J’ai vérifié les informations de ma commande », rien ne part : le message d’erreur s’affiche.
+  await dialog.locator('button[type="submit"]').click();
+  check(scope, 'formulaire : sans la case cochée, la commande ne part pas', await dialog.getByText('Cochez la case pour confirmer votre commande.').first().isVisible());
+  await dialog.getByLabel('J’ai vérifié les informations de ma commande.').check();
   const submit = dialog.locator('button[type="submit"]');
   check(scope, 'formulaire : bouton d’envoi actif une fois rempli', await submit.isEnabled());
   await shot(page, device, '07-commande-rempli');
 
   const before = downloads.length;
   await submit.click();
-  await page.waitForURL(/\/commande\/confirmation\?ref=CMD-/, { timeout: 30_000 });
+  await page.waitForFunction(() => location.hash === '#confirmation', null, { timeout: 30_000 });
+  await page.waitForSelector('dialog.modal-confirmation[open]', { timeout: 15_000 });
   await page.waitForSelector('.receipt-printer', { timeout: 30_000 });
   await page.waitForTimeout(200);
   await shot(page, device, '08-ticket-debut');

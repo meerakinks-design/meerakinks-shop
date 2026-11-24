@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { JsonLd } from '@/components/shop/JsonLd';
+import { SEO } from '@/content/seo';
 import { ShopGrid } from '@/components/shop/ShopGrid';
 import { hasShopFilters, parseShopParams, shopHref, type ShopSort } from '@/lib/shop/search';
 import { absoluteUrl } from '@/lib/shop/seo';
@@ -8,8 +9,8 @@ import { listActiveCategories, listShopProducts } from '@/server/services/catalo
 
 // Les variantes filtrées ou triées ont pour adresse canonique /boutique (pas de contenu dupliqué).
 const baseMetadata: Metadata = {
-  title: 'Boutique',
-  description: 'Découvrez tous nos produits, par catégorie, par nouveautés ou par offres.',
+  title: { absolute: SEO.shop.title },
+  description: SEO.shop.description,
   alternates: { canonical: '/boutique' },
 };
 

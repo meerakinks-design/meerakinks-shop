@@ -21,6 +21,8 @@ export const HOME_COUNTRY = 'Côte d’Ivoire';
 
 export const ORDER_LIMITS = {
   name: 60,
+  /** « Nom complet » : nom et prénom dans un seul champ. */
+  fullName: 120,
   email: 120,
   place: 80,
   phone: 30,

@@ -219,7 +219,7 @@ export async function scenarioGame({ page: parentPage, context: parentContext, d
   const links = await page.evaluate(() => {
     const stage = document.querySelector('.smash').getBoundingClientRect();
     const result = [];
-    for (const link of document.querySelectorAll('.site-footer .footer-grid a, .site-footer .footer-legal a')) {
+    for (const link of document.querySelectorAll('.site-footer .footer-col a')) {
       const rect = link.getBoundingClientRect();
       const overlaps = rect.bottom > stage.top && rect.top < stage.bottom && rect.right > stage.left && rect.left < stage.right;
       result.push({ text: link.textContent.trim(), overlaps });
@@ -227,7 +227,7 @@ export async function scenarioGame({ page: parentPage, context: parentContext, d
     return result;
   });
   check(scope, 'les liens du footer ne sont jamais recouverts par le jeu', links.length >= 6 && links.every((link) => !link.overlaps), `${links.length} liens vérifiés`);
-  const legal = page.locator('.footer-legal a').first();
+  const legal = page.locator('.footer-col-info a').first();
   await legal.scrollIntoViewIfNeeded();
   const topElement = await legal.evaluate((element) => {
     const rect = element.getBoundingClientRect();

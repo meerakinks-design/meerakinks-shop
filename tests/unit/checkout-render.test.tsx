@@ -55,7 +55,7 @@ describe('formulaire de commande — champs', () => {
   const html = form();
 
   it('affiche les champs du cahier §6.2, chacun avec son libellé', () => {
-    for (const label of ['Prénom', 'Nom', 'Téléphone (WhatsApp)', 'Email', 'Adresse précise', 'Précisions', 'Note pour la vendeuse']) {
+    for (const label of ['Nom complet', 'Téléphone (WhatsApp)', 'Email', 'Adresse précise', 'Précisions', 'Note pour la vendeuse']) {
       expect(html).toContain(label);
     }
     expect(html).toContain('(facultatif)');
@@ -65,10 +65,26 @@ describe('formulaire de commande — champs', () => {
     expect(html).toContain('Un autre pays');
   });
 
+  it('un seul champ « Nom complet » (plus de prénom ni de nom séparés)', () => {
+    expect(html).not.toContain('t-firstName');
+    expect(html).not.toContain('t-lastName');
+    expect(html).not.toContain('given-name');
+  });
+
+  it('la case « J’ai vérifié les informations de ma commande » est là, décochée, reliée à son libellé', () => {
+    expect(html).toContain('J’ai vérifié les informations de ma commande.');
+    expect(html).toContain('for="t-infoConfirmed"');
+    expect(html).toMatch(/<input[^>]*type="checkbox"[^>]*name="infoConfirmed"/);
+    expect(html).not.toMatch(/name="infoConfirmed"[^>]*checked/);
+    expect(html.indexOf('t-infoConfirmed')).toBeGreaterThan(html.indexOf('t-customerNote')); // en dernier, juste avant le bouton
+    expect(form({}, { infoConfirmed: true })).toMatch(/name="infoConfirmed"[^>]*checked/);
+  });
+
   it('associe chaque libellé à son champ (htmlFor ↔ id) et aide les claviers mobiles', () => {
-    expect(html).toContain('for="t-firstName"');
-    expect(html).toContain('id="t-firstName"');
-    expect(html).toContain('autoComplete="given-name"');
+    expect(html).toContain('for="t-fullName"');
+    expect(html).toContain('id="t-fullName"');
+    expect(html).toContain('autoComplete="name"');
+    expect(html).toContain('placeholder="Votre nom et prénom"');
     expect(html).toContain('autoComplete="tel-national"');
     expect(html).toContain('inputMode="tel"');
     expect(html).toContain('type="email"');
@@ -91,7 +107,7 @@ describe('formulaire de commande — champs', () => {
     expect(form({ canSubmit: false })).toMatch(/<button type="submit"[^>]*disabled/);
     const sending = form({ status: 'sending' });
     expect(sending).toMatch(/<button type="submit"[^>]*disabled/);
-    expect(sending).toContain('Envoi en cours…');
+    expect(sending).toContain('Enregistrement de votre commande…');
     expect(sending).toContain('aria-busy="true"');
   });
 });
@@ -126,19 +142,19 @@ describe('formulaire de commande — destination', () => {
 });
 
 describe('formulaire de commande — erreurs', () => {
-  const html = form({ errors: { firstName: 'Indiquez votre prénom.', phone: 'Un numéro ivoirien compte 10 chiffres (ex. 07 00 00 00 00).', placeName: 'Indiquez votre commune.' } });
+  const html = form({ errors: { fullName: 'Indiquez votre nom et prénom.', phone: 'Un numéro ivoirien compte 10 chiffres (ex. 07 00 00 00 00).', placeName: 'Indiquez votre commune.' } });
 
   it('affiche chaque message à côté de son champ et le relie par aria', () => {
-    expect(html).toContain('id="t-firstName-error"');
-    expect(html).toContain('Indiquez votre prénom.');
+    expect(html).toContain('id="t-fullName-error"');
+    expect(html).toContain('Indiquez votre nom et prénom.');
     expect(html).toContain('aria-invalid="true"');
-    expect(html).toContain('aria-describedby="t-firstName-error"');
+    expect(html).toContain('aria-describedby="t-fullName-error"');
     expect(html).toContain('aria-describedby="t-phone-error"');
     expect(html).toContain('aria-describedby="t-destination-error"');
   });
 
   it('ne marque pas invalides les champs sans erreur', () => {
-    expect(html).not.toContain('aria-describedby="t-lastName-error"');
+    expect(html).not.toContain('aria-describedby="t-infoConfirmed-error"');
   });
 
   it('une alerte de conflit propose de revoir le panier ; une alerte réseau, non', () => {
@@ -254,14 +270,15 @@ describe('modal de commande (rendu serveur)', () => {
     </CartProvider>,
   );
 
-  it('est un <dialog> titré « Passer commande »', () => {
+  it('est un <dialog> à rideaux, titré « Vos informations de livraison »', () => {
     expect(html).toContain('<dialog');
-    expect(html).toContain('Passer commande');
+    expect(html).toContain('Vos informations de livraison');
     expect(html).toContain('modal-checkout');
+    expect(html).toContain('curtain-dialog');
   });
 
   it('n’affiche pas le formulaire avant que le panier soit chargé dans le navigateur', () => {
-    expect(html).not.toContain('Envoyer ma commande');
+    expect(html).not.toContain('Confirmer ma commande');
     expect(html).toContain('aria-busy="true"');
   });
 });

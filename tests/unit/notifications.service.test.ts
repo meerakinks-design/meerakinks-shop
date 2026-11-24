@@ -40,7 +40,7 @@ const receiptJson = (email: string | null = 'awa@example.com') =>
         issuedAt: NOW,
         shop: { name: 'Awa Beauty', legalName: null, address: null, contactPhone: null, contactEmail: null },
         depositAmount: 2000,
-        customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email },
+        customer: { fullName: 'Awa Koné', phone: '+2250700000000', email },
         delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: 'Riviera Palmeraie' },
         lines: [{ name: 'Sérum éclat', unitPrice: 10000, quantity: 2, lineTotal: 20000 }],
         subtotal: 20000,

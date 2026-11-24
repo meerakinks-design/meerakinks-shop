@@ -5,8 +5,7 @@ const KEY = '0b9d6f1e-6a43-4d6a-9d0e-3f6a5c2b7e11';
 const base = (overrides: Record<string, unknown> = {}): Record<string, unknown> => ({
   idempotencyKey: KEY,
   items: [{ productId: 'prod_1', quantity: 2 }],
-  firstName: 'Awa',
-  lastName: 'Koné',
+  fullName: 'Awa Koné',
   phoneDialCode: '225',
   phone: '07 00 00 00 00',
   email: '',
@@ -17,6 +16,7 @@ const base = (overrides: Record<string, unknown> = {}): Record<string, unknown> 
   address: 'Riviera Palmeraie, rue des jardins',
   addressDetails: '',
   customerNote: '',
+  infoConfirmed: true,
   companyFax: '',
   ...overrides,
 });
@@ -38,8 +38,8 @@ describe('commande — cas valide', () => {
   });
 
   it('nettoie les espaces et met l’email en minuscules', () => {
-    const parsed = orderInputSchema.parse(base({ firstName: '  Awa  ', email: '  Awa@Example.COM ' }));
-    expect(parsed.firstName).toBe('Awa');
+    const parsed = orderInputSchema.parse(base({ fullName: '  Awa Koné  ', email: '  Awa@Example.COM ' }));
+    expect(parsed.fullName).toBe('Awa Koné');
     expect(parsed.email).toBe('awa@example.com');
   });
 
@@ -82,16 +82,22 @@ describe('commande — panier', () => {
 });
 
 describe('commande — identité et téléphone', () => {
-  it('exige prénom, nom et téléphone, en français', () => {
-    const errors = fieldErrors(base({ firstName: '', lastName: ' ', phone: '' }));
-    expect(errors?.firstName?.[0]).toBe('Indiquez votre prénom.');
-    expect(errors?.lastName?.[0]).toBe('Indiquez votre nom.');
+  it('exige le nom complet et le téléphone, en français', () => {
+    const errors = fieldErrors(base({ fullName: '  ', phone: '' }));
+    expect(errors?.fullName?.[0]).toBe('Indiquez votre nom et prénom.');
     expect(errors?.phone?.[0]).toBe('Indiquez votre numéro de téléphone.');
   });
-  it('refuse un nom d’une lettre et les caractères de contrôle', () => {
-    expect(fieldErrors(base({ firstName: 'A' }))?.firstName).toBeDefined();
-    expect(fieldErrors(base({ lastName: 'Ko\nné' }))?.lastName).toBeDefined();
-    expect(fieldErrors(base({ firstName: 'x'.repeat(61) }))?.firstName).toBeDefined();
+  it('refuse un nom d’une lettre, trop long, et les caractères de contrôle', () => {
+    expect(fieldErrors(base({ fullName: 'A' }))?.fullName?.[0]).toBe('Votre nom doit compter au moins 2 caractères.');
+    expect(fieldErrors(base({ fullName: 'Awa Ko\nné' }))?.fullName).toBeDefined();
+    expect(fieldErrors(base({ fullName: 'x'.repeat(121) }))?.fullName).toBeDefined();
+    expect(orderInputSchema.safeParse(base({ fullName: 'Marie-Claire Kouassi N’Guessan' })).success).toBe(true);
+  });
+  it('exige la case « J’ai vérifié les informations de ma commande »', () => {
+    expect(fieldErrors(base({ infoConfirmed: false }))?.infoConfirmed?.[0]).toBe('Cochez la case pour confirmer votre commande.');
+    expect(fieldErrors(base({ infoConfirmed: undefined }))?.infoConfirmed?.[0]).toBe('Cochez la case pour confirmer votre commande.');
+    expect(fieldErrors(base({ infoConfirmed: 'true' }))?.infoConfirmed).toBeDefined(); // une chaîne n’est pas une case cochée
+    expect(orderInputSchema.safeParse(base({ infoConfirmed: true })).success).toBe(true);
   });
   it('signale un numéro invalide sur le champ téléphone', () => {
     expect(fieldErrors(base({ phone: '07 00 00' }))?.phone?.[0]).toContain('10 chiffres');
@@ -104,8 +110,8 @@ describe('commande — identité et téléphone', () => {
 
 describe('commande — erreurs groupées', () => {
   it('remonte toutes les erreurs en une seule fois, téléphone compris (pas de correction en deux temps)', () => {
-    const errors = fieldErrors(base({ firstName: '', phone: '07 00', items: [], address: '', placeName: '' }));
-    expect(Object.keys(errors ?? {}).sort()).toEqual(['address', 'firstName', 'items', 'phone', 'placeName']);
+    const errors = fieldErrors(base({ fullName: '', phone: '07 00', items: [], address: '', placeName: '', infoConfirmed: false }));
+    expect(Object.keys(errors ?? {}).sort()).toEqual(['address', 'fullName', 'infoConfirmed', 'items', 'phone', 'placeName']);
   });
 });
 

@@ -1,11 +1,14 @@
 // Adresses publiques du site : une seule source de vérité (liens, sitemap, rafraîchissement du cache).
-// Le panier, la commande et « Notre histoire » sont des MODALS : ils n'ont pas de page, seulement une
-// ancre (#panier…) pour que le bouton Retour du téléphone les ferme au lieu de quitter le site.
+// Le menu, le panier, la commande et la confirmation sont des MODALS qui entrent par la droite : ils n'ont pas de page
+// propre, seulement une ancre (#panier…) pour que le bouton Retour du téléphone les ferme au lieu de quitter le site.
+// « Notre histoire » est la page dédiée /a-propos (ce n'est plus un modal).
 
 export const PUBLIC_ROUTES = {
   home: '/',
   shop: '/boutique',
   categories: '/categories',
+  about: '/a-propos',
+  credits: '/credits',
   orderConfirmation: '/commande/confirmation',
   cgv: '/cgv',
   cgu: '/cgu',
@@ -17,7 +20,7 @@ export const PUBLIC_ROUTES = {
 export const MODAL_HASHES = {
   cart: '#panier',
   checkout: '#commande',
-  story: '#notre-histoire',
+  confirmation: '#confirmation',
   menu: '#menu',
 } as const;
 
