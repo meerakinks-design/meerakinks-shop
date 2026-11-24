@@ -3,14 +3,15 @@ import { JsonLd } from '@/components/shop/JsonLd';
 import { CategorySections } from '@/components/shop/CategorySections';
 import { ShopGrid } from '@/components/shop/ShopGrid';
 import Spaghetti from '@/components/shop/Spaghetti';
-import { BestSellers, Collections, Contact, Faq, FinalCta, Focus, Hero, Instagram, Marquee, Reviews, StoryTeaser, Why } from '@/components/shop/LandingSections';
+import { Collections, Contact, Faq, FinalCta, Hero, Marquee, Why } from '@/components/shop/LandingSections';
+import { ScrollStage } from '@/components/shop/ScrollStage';
 import { LANDING } from '@/content/landing';
 import { SEO } from '@/content/seo';
 import { cld } from '@/lib/cloudinary-static';
 import { hasPromotion } from '@/lib/shop/product-display';
 import { buildShopLayout } from '@/lib/shop/sections';
 import { absoluteUrl } from '@/lib/shop/seo';
-import { getFeaturedProducts, getFocusProduct, getPublicSettings, getShopData } from '@/server/services/catalog.queries';
+import { getPublicSettings, getShopData } from '@/server/services/catalog.queries';
 
 // Page statique régénérée toutes les heures, et immédiatement après chaque modification du back-office.
 export const revalidate = 3600;
@@ -19,19 +20,19 @@ export const metadata: Metadata = { title: { absolute: SEO.home.title }, descrip
 
 export default async function HomePage() {
   const settings = await getPublicSettings();
-  const [{ categories, products }, featured, focus] = await Promise.all([
-    getShopData(),
-    getFeaturedProducts(8),
-    getFocusProduct(settings.focusProductId),
-  ]);
+  const { categories, products } = await getShopData();
   const layout = buildShopLayout(categories, products);
   const siteUrl = absoluteUrl('/');
   const sameAs = [settings.instagramUrl, settings.tiktokUrl, settings.facebookUrl].filter(Boolean);
 
   return (
     <>
-      <Hero showCollections={layout.mode === 'categories'} products={featured} iconSrc={cld('/brand/favicon-icon.png')} />
+      {/* Parcours : héros (l'élixir 3D sort de l'affiche) → « Le soin en toute simplicité » → produits par catégorie →
+          FAQ (la brume prend le relais) → CTA (la brume se pose sur la photo) → contact. Avis et témoignages retirés pour l'instant. */}
+      <ScrollStage />
+      <Hero showCollections={layout.mode === 'categories'} iconSrc={cld('/brand/favicon-icon.png')} />
       <Marquee />
+      <Why storeName={settings.storeName} />
       {layout.mode === 'categories' && <Collections sections={layout.sections} hasOffers={products.some(hasPromotion)} />}
 
       {/* Section Boutique (décision D-12) : sections sticky par catégorie, sinon grille. Rien sans produit publié. */}
@@ -50,7 +51,6 @@ export default async function HomePage() {
           ) : (
             <div className="container section">
               <div className="section-head">
-                <Spaghetti as="p" className="eyebrow">{LANDING.shop.eyebrow}</Spaghetti>
                 <Spaghetti as="h2" ghost={LANDING.shop.titleGhost}>{LANDING.shop.title}</Spaghetti>
                 <p className="lead">{LANDING.shop.text}</p>
               </div>
@@ -60,15 +60,9 @@ export default async function HomePage() {
         </section>
       )}
 
-      {featured.length > 0 && <BestSellers products={featured} />}
-      <StoryTeaser storeName={settings.storeName} />
-      {focus && <Focus product={focus} />}
-      <Why storeName={settings.storeName} />
-      <Reviews settings={settings} />
-      <Instagram settings={settings} />
       <Faq settings={settings} />
-      <Contact settings={settings} />
       <FinalCta />
+      <Contact settings={settings} />
 
       <JsonLd
         data={{

@@ -16,5 +16,29 @@
     "publicId": "meera/public/brand/akatech-studio-logo",
     "resourceType": "image",
     "updatedAt": "2026-11-24T00:46:53.696Z"
+  },
+  "models/brume-spray-200ml.glb": {
+    "hash": "4a560075408c6da0cc87c4dad7b921bf30443b2342c036656a53bd6191ac5878",
+    "publicId": "meera/public/models/brume-spray-200ml.glb",
+    "resourceType": "raw",
+    "updatedAt": "2026-11-24T07:51:37.228Z"
+  },
+  "models/elixir-winter-50ml.glb": {
+    "hash": "9dd04e8f7aad5b3a752ea234011ca2518e8c896a0b88ec24a799a379887b19c5",
+    "publicId": "meera/public/models/elixir-winter-50ml.glb",
+    "resourceType": "raw",
+    "updatedAt": "2026-11-24T07:51:41.700Z"
+  },
+  "stage/cta1.webp": {
+    "hash": "012829e61ab6a73bdbd44cacc714dd170eca5364a148459292a9c6a931f18183",
+    "publicId": "meera/public/stage/cta1",
+    "resourceType": "image",
+    "updatedAt": "2026-11-24T07:51:42.460Z"
+  },
+  "stage/hero2.webp": {
+    "hash": "a3f6c323a09a8b4f305dc71c75621c159972c4dc95b6e8f34d4b6820f8866ffa",
+    "publicId": "meera/public/stage/hero2",
+    "resourceType": "image",
+    "updatedAt": "2026-11-24T07:51:43.260Z"
   }
 }

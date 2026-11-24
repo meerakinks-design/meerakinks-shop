@@ -20,6 +20,7 @@ import '@/styles/shop.css';
 import '@/styles/smash.css';
 import '@/styles/spaghetti.css';
 import '@/styles/ui.css';
+import '@/styles/stage.css';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSettings();

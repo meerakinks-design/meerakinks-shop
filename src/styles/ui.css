@@ -317,3 +317,15 @@ li:nth-child(5n + 5) > .product-card { --card-bg: var(--color-terracotta); --car
 .about-block h2 { margin-top: 0; }
 .about-cta { margin-top: var(--space-8); }
 .order-reference { white-space: nowrap; }
+
+/* ---------- Champs de toute la boutique : même contour pointillé, même taille que le formulaire de contact ---------- */
+:root { --form-line: color-mix(in srgb, var(--color-brown) 55%, transparent); --field-h: 3.75rem; --field-r: 1.1rem; }
+.field :is(input:not([type='radio'], [type='checkbox'], [type='hidden']), select, textarea),
+.shop-search input, .search-form input, .inline-fields select {
+  min-height: var(--field-h); padding-inline: 1.5rem; border: 1px dashed var(--form-line); border-radius: var(--field-r);
+  background: transparent; color: inherit; font: inherit; font-size: 1.0625rem;
+}
+.field textarea { min-height: 7rem; padding: 1.25rem 1.5rem; }
+.field :is(input, select, textarea):focus-visible, .shop-search input:focus-visible, .search-form input:focus-visible { border-style: solid; border-color: var(--color-brown); }
+.field [aria-invalid='true'] { border-style: solid; border-color: var(--color-danger); }
+.field .dial-group, .dial-group { border: 1px dashed var(--form-line); border-radius: var(--field-r); background: transparent; }

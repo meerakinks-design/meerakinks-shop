@@ -4,11 +4,12 @@ import { INSTAGRAM_POSTS, MAX_INSTAGRAM_POSTS, MIN_INSTAGRAM_POSTS } from '@/con
 import { faqItems } from '@/content/faq';
 import { LANDING } from '@/content/landing';
 import { REVIEWS } from '@/content/avis';
-import { categoryPath, productPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
+import { categoryPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { fill } from '@/lib/shop/template';
 import { hasContactChannels, hasContactSection } from '@/lib/shop/contact';
 import { whatsappLink } from '@/lib/shop/whatsapp';
 import { cloudinaryTransform } from '@/lib/cloudinary-url';
+import { STAGE } from '@/lib/stage/config';
 import type { CategorySection, ShopProduct } from '@/lib/shop/sections';
 import type { FocusProduct, PublicSettings } from '@/server/services/catalog.queries';
 import { JsonLd } from './JsonLd';
@@ -26,9 +27,8 @@ import { summarize } from '@/lib/shop/seo';
  * élastique dès l'affichage ; la description reste fixe. Les produits viennent du catalogue ; sans photo, la tête aux
  * deux puffs de la marque tient la scène.
  */
-export function Hero({ showCollections, products = [], iconSrc }: { showCollections: boolean; products?: readonly ShopProduct[]; iconSrc: string }) {
+export function Hero({ showCollections, iconSrc }: { showCollections: boolean; products?: readonly ShopProduct[]; iconSrc: string }) {
   const hero = LANDING.hero;
-  const [main, ...floating] = products.filter((product) => product.image).slice(0, 4);
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="container hero-inner">
@@ -51,21 +51,17 @@ export function Hero({ showCollections, products = [], iconSrc }: { showCollecti
         </div>
         <p className="hero-reassurance">{hero.reassurance}</p>
 
-        <div className="hero-stage" aria-hidden={main ? undefined : 'true'}>
-          <div className="hero-disc" />
-          {main ? (
-            <Link href={productPath(main.slug)} className="hero-main" aria-label={`Voir ${main.name}`}>
-              <ProductImage image={main.image} sizes="(min-width: 900px) 30rem, 80vw" priority />
-            </Link>
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="hero-icon" src={iconSrc} alt="" width={420} height={420} />
-          )}
-          {floating.slice(0, 3).map((product, index) => (
-            <span key={product.id} className={`hero-float hero-float-${index + 1}`} aria-hidden="true">
-              <ProductImage image={product.image} widths={[160, 240, 320]} sizes="8rem" />
-            </span>
-          ))}
+        <div className="hero-stage">
+          <div className="hero-poster">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className="hero-poster-img" src="/stage/hero2.webp" alt={hero.posterAlt} width={1124} height={1399} />
+            {STAGE.heroCleanSrc && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="hero-poster-clean" src={STAGE.heroCleanSrc} alt="" aria-hidden="true" width={1124} height={1399} />
+            )}
+            {/* Repère de l'élixir 3D : il sort de l'affiche et descend vers « Le soin en toute simplicité » (voir ScrollStage). */}
+            <span className="stage-anchor stage-anchor-hero" data-stage-anchor="hero" aria-hidden="true" />
+          </div>
           <svg className="hero-badge" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
             <defs>
               <path id="hero-badge-circle" d="M100,100 m-76,0 a76,76 0 1,1 152,0 a76,76 0 1,1 -152,0" />
@@ -219,6 +215,7 @@ export function Why({ storeName }: { storeName: string }) {
         <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="why-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.intro, { storeName })}</p>
+        <div className="stage-split">
         <ol className="why-steps" role="list">
           {copy.items.map((item, index) => (
             <li key={item.title} className="why-step" style={{ '--i': index } as CSSProperties}>
@@ -234,6 +231,10 @@ export function Why({ storeName }: { storeName: string }) {
             </li>
           ))}
         </ol>
+        <div className="stage-slot" data-stage-slot="why" aria-hidden="true">
+          <span className="stage-anchor" data-stage-anchor="why" />
+        </div>
+        </div>
       </div>
     </section>
   );
@@ -321,25 +322,32 @@ export function Faq({ settings }: { settings: PublicSettings }) {
   const askLink = whatsappLink(settings.whatsappNumber, fill(LANDING.contact.whatsappMessage, { storeName: settings.storeName }));
   return (
     <section id="faq" className="section" aria-labelledby="faq-title">
-      <div className="container page-narrow">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
+      <div className="container">
         <Spaghetti as="h2" id="faq-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
-        <div className="faq-list">
-          {items.map((item) => (
-            <details key={item.question}>
-              <summary>{item.question}</summary>
-              <p>{item.answer}</p>
-            </details>
-          ))}
+        <div className="stage-split">
+          <div>
+            <div className="faq-list">
+              {items.map((item) => (
+                <details key={item.question}>
+                  <summary>{item.question}</summary>
+                  <p>{item.answer}</p>
+                </details>
+              ))}
+            </div>
+            {askLink && (
+              <p>
+                <a className="btn btn-quiet" href={askLink} target="_blank" rel="noopener noreferrer">
+                  {copy.cta}
+                </a>
+              </p>
+            )}
+          </div>
+          {/* La brume prend le relais de l'élixir ici, puis rejoint la photo du CTA. */}
+          <div className="stage-slot" data-stage-slot="faq" aria-hidden="true">
+            <span className="stage-anchor" data-stage-anchor="faq" />
+          </div>
         </div>
-        {askLink && (
-          <p>
-            <a className="btn btn-quiet" href={askLink} target="_blank" rel="noopener noreferrer">
-              {copy.cta}
-            </a>
-          </p>
-        )}
       </div>
       <JsonLd
         data={{
@@ -398,21 +406,46 @@ export function Contact({ settings }: { settings: PublicSettings }) {
   );
 }
 
+/**
+ * CTA final (réf. carte E-Carnet) : la photo de la femme qui tend le spray se fond en dégradé dans une carte brun chocolat,
+ * puis titre, trois points, bouton et lien. Le spray 3D (brume) atterrit sur celui de la photo au défilement.
+ */
 export function FinalCta() {
   const copy = LANDING.finalCta;
   return (
-    <section className="section final-cta section-brand" aria-labelledby="final-title">
-      <div className="container page-narrow">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
-        <Spaghetti as="h2" id="final-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
-        <p className="lead">{copy.text}</p>
-        <div className="hero-actions">
-          <Link className="btn" href={PUBLIC_ROUTES.shop}>
-            {copy.primaryCta}
-          </Link>
-          <Link className="btn btn-quiet" href="/boutique?tri=nouveautes">
-            {copy.secondaryCta}
-          </Link>
+    <section className="section cta-section" aria-labelledby="final-title">
+      <div className="container">
+        <div className="cta-card">
+          <div className="cta-photo">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/stage/cta1.webp" alt={copy.photoAlt} width={1122} height={1402} loading="lazy" />
+            <span className="stage-anchor stage-anchor-cta" data-stage-anchor="cta" aria-hidden="true" />
+          </div>
+          <div className="cta-body">
+            <Spaghetti as="h2" id="final-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
+            <p className="lead">{copy.text}</p>
+            <ul className="cta-checks" role="list">
+              {copy.checks.map((item) => (
+                <li key={item}>
+                  <span className="cta-check-ico" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
+                      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
+                      <path d="m8.2 12.3 2.6 2.6 5-5.4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <Link className="cta-btn" href={PUBLIC_ROUTES.shop}>
+              {copy.primaryCta}
+              <span aria-hidden="true">›</span>
+            </Link>
+            <Link className="cta-link" href="/boutique?tri=nouveautes">
+              {copy.secondaryCta}
+            </Link>
+            <p className="cta-note">{copy.note}</p>
+          </div>
         </div>
       </div>
     </section>

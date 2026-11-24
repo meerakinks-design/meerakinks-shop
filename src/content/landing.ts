@@ -12,6 +12,7 @@ export const LANDING = {
     titleMain: 'Vos kinks méritent le meilleur de',
     titleScript: 'votre routine.',
     badge: 'Embrassez vos kinks',
+    posterAlt: 'Elixir Winter, Mousse Kinky et Fluffy Kinks, les soins Meëra Kinks tenus dans deux mains.',
     text: 'Hydratation, nettoyage ou nutrition : trouvez les soins qui accompagnent les besoins de vos cheveux crépus. Une routine plus claire commence ici.',
     primaryCta: 'Découvrir les soins',
     secondaryCta: 'Trouver mon essentiel',
@@ -153,6 +154,9 @@ export const LANDING = {
     text: 'Explorez les gammes, découvrez les produits et choisissez les soins qui correspondent aux besoins de vos cheveux.',
     primaryCta: 'Explorer les soins',
     secondaryCta: 'Voir les nouveautés',
+    photoAlt: 'Une femme tend le spray Brume Meëra Kinks devant son afro.',
+    checks: ['Des soins classés par besoin', 'Des informations claires sur chaque produit', 'Votre commande confirmée sur WhatsApp'],
+    note: 'Une question avant de commander ? Écrivez-nous juste en dessous.',
   },
   smash: {
     // Textes validés (textes v1.0, §2.16).
