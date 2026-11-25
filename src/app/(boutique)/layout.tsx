@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { SEO } from '@/content/seo';
+import { SHOWCASE_ENABLED } from '@/content/vitrine';
 import { CartModal } from '@/components/shop/CartModal';
 import { CartProvider } from '@/components/shop/CartProvider';
 import { CheckoutModal } from '@/components/shop/CheckoutModal';
@@ -22,6 +23,7 @@ import '@/styles/shop.css';
 import '@/styles/smash.css';
 import '@/styles/spaghetti.css';
 import '@/styles/ui.css';
+import '@/styles/showcase.css';
 import '@/styles/stage.css';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -36,7 +38,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
-  const [settings, showCollections, zones, accents, delivery] = await Promise.all([getPublicSettings(), hasCollections(), getPublicZones(), getCategoryAccents(), getPublicDelivery()]);
+  const [settings, hasCollectionsInDb, zones, accents, delivery] = await Promise.all([getPublicSettings(), hasCollections(), getPublicZones(), getCategoryAccents(), getPublicDelivery()]);
+  // Vitrine photo active : il n'y a pas de section « Collections » sur la landing, donc pas de lien vers elle.
+  const showCollections = SHOWCASE_ENABLED ? false : hasCollectionsInDb;
   const showContact = hasContactSection(settings);
   const socials = buildSocialLinks(settings);
 

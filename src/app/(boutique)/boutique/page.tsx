@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { JsonLd } from '@/components/shop/JsonLd';
 import { SEO } from '@/content/seo';
 import { ShopGrid } from '@/components/shop/ShopGrid';
+import { ShowcaseGrid } from '@/components/shop/ShowcaseGrid';
+import { SHOWCASE_ENABLED } from '@/content/vitrine';
 import { hasShopFilters, parseShopParams, shopHref, type ShopSort } from '@/lib/shop/search';
 import { absoluteUrl } from '@/lib/shop/seo';
 import { listActiveCategories, listShopProducts } from '@/server/services/catalog.queries';
@@ -30,6 +32,9 @@ const SORT_LABELS: Array<{ sort: ShopSort; label: string }> = [
 ];
 
 export default async function ShopPage({ searchParams }: { searchParams: Record<string, string | string[] | undefined> }) {
+  // Vitrine photo (étape 1) : les soins viennent de src/content/vitrine.ts, sans base de données ni filtres.
+  if (SHOWCASE_ENABLED) return <ShowcasePage />;
+
   const params = parseShopParams(searchParams);
   const [products, categories] = await Promise.all([listShopProducts(params), listActiveCategories()]);
   const filtered = hasShopFilters(params);
@@ -96,6 +101,32 @@ export default async function ShopPage({ searchParams }: { searchParams: Record<
         <ShopGrid products={products} uniform={uniform} showCategory={categories.length > 0} />
       )}
 
+      {home && shop && (
+        <JsonLd
+          data={{
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Accueil', item: home },
+              { '@type': 'ListItem', position: 2, name: 'Boutique', item: shop },
+            ],
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/** Page Boutique en mode vitrine : le titre, puis les photos disposées comme dans la référence (prix et fiches : étape suivante). */
+function ShowcasePage() {
+  const home = absoluteUrl('/');
+  const shop = absoluteUrl('/boutique');
+  return (
+    <div className="showcase-page">
+      <div className="container">
+        <h1>Boutique</h1>
+        <ShowcaseGrid />
+      </div>
       {home && shop && (
         <JsonLd
           data={{

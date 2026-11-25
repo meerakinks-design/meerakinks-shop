@@ -162,6 +162,10 @@ export const LANDING = {
     soundOn: 'Son activé',
     soundOff: 'Son coupé',
     resume: 'Reprendre',
+    // 🟡 Noms d'action des boutons à icône (lus par les lecteurs d'écran, affichés en infobulle) : À VALIDER.
+    muteAction: 'Couper le son',
+    unmuteAction: 'Activer le son',
+    controls: 'Commandes du jeu',
     // 🟡 Libellés techniques ajoutés par le code, absents des textes v1.0 : À VALIDER.
     boardLabel: 'Zone de jeu Cosmetic Smash',
     hint: 'Tranchez les pots avec le doigt ou la souris : un slash les coupe en deux. Au clavier : Espace ou Entrée.',

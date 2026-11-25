@@ -155,6 +155,21 @@ export async function scenarioGame({ page: parentPage, context: parentContext, d
   check(scope, phone ? 'un toucher sur un pot le fait éclater : le score monte' : 'un clic sur un pot le fait éclater : le score monte', gained && afterSmash.score >= 10, `Score ${scoreBefore} → ${afterSmash.score}`);
   check(scope, 'points gagnés = 10, 20 ou 30 selon la taille', [10, 20, 30].includes(afterSmash.score - scoreBefore), `+${afterSmash.score - scoreBefore}`);
 
+  // 3 bis. Commandes en icônes ---------------------------------------------------------------------------------------
+  const iconButtons = await page.evaluate(() =>
+    [...document.querySelectorAll('.smash-icon-btn')].map((button) => {
+      const box = button.getBoundingClientRect();
+      return { name: button.getAttribute('aria-label'), text: button.textContent.trim(), width: box.width, height: box.height, top: Math.round(box.top) };
+    }),
+  );
+  check(scope, 'commandes : trois boutons à icône nommés (Pause, Recommencer, Son), sans texte visible', iconButtons.length === 3 && iconButtons.every((button) => button.name && button.text === ''), iconButtons.map((button) => button.name).join(', '));
+  check(scope, 'commandes : cibles d’au moins 44 px, sur une seule ligne', iconButtons.every((button) => button.width >= 44 && button.height >= 44) && new Set(iconButtons.map((button) => button.top)).size === 1, iconButtons.map((button) => `${Math.round(button.width)}×${Math.round(button.height)}`).join(' · '));
+  check(scope, 'texte d’introduction retiré une fois le plateau ouvert', (await page.locator('.smash-text').count()) === 0);
+  await page.getByRole('button', { name: 'Couper le son' }).click();
+  check(scope, 'Son : le bouton devient « Activer le son » et l’état est annoncé', (await page.getByRole('button', { name: 'Activer le son' }).isVisible()) && /son coupé/i.test(await page.locator('.smash [aria-live]').innerText()));
+  await page.getByRole('button', { name: 'Activer le son' }).click();
+  check(scope, 'Son : un second clic le rétablit', await page.getByRole('button', { name: 'Couper le son' }).isVisible());
+
   // 4. Pause / reprise ----------------------------------------------------------------------------------------------
   await page.getByRole('button', { name: 'Pause' }).click();
   check(scope, 'Pause : la partie est en pause, le bouton devient « Reprendre »', (await waitState('paused', 2000)) && (await page.getByRole('button', { name: 'Reprendre' }).isVisible()));

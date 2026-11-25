@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { LANDING } from '@/content/landing';
 import type { SmashController, SmashHud } from '@/lib/smash/game';
+import { PauseIcon, PlayIcon, RestartIcon, SoundOffIcon, SoundOnIcon } from './SmashIcons';
 import Spaghetti from './Spaghetti';
 
 type GameModule = typeof import('@/lib/smash/game');
@@ -17,6 +18,8 @@ const START_HUD: SmashHud = { status: 'ready', score: 0, seconds: 30 };
  *  - Le code du jeu (`@/lib/smash/game`) est importé À LA DEMANDE quand le footer approche (700 px avant), jamais avant.
  *  - Le jeu ne démarre qu'au clic sur « Jouer » : tant qu'on n'a pas cliqué, aucun canvas, aucune boucle d'animation.
  *  - Moins d'animations demandé (`prefers-reduced-motion`) : le bouton est remplacé par le message validé, et le code n'est pas chargé.
+ *  - Commandes (pause / reprise, recommencer, son) : trois boutons ronds à icône de 44 px, nommés par `aria-label` (infobulle au survol).
+ *    Une fois le plateau ouvert, le texte d'introduction disparaît pour laisser la place au jeu.
  */
 export function SmashGame({ accents }: { accents: readonly string[] }) {
   const titleId = useId();
@@ -127,6 +130,7 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
     mutedRef.current = next;
     setMuted(next);
     controllerRef.current?.setMuted(next);
+    setAnnouncement(next ? text.soundOff : text.soundOn);
   }, []);
 
   const togglePause = () => {
@@ -134,17 +138,21 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
     else controllerRef.current?.pause();
   };
 
+  const paused = hud.status === 'paused';
+  const over = hud.status === 'over';
+  const lowTime = hud.status === 'running' && hud.seconds <= 5;
+
   return (
     <section ref={sectionRef} className="smash" aria-labelledby={titleId} data-smash={open ? hud.status : 'idle'} data-code={code}>
       <Spaghetti as="h2" id={titleId} className="smash-title">
         {text.title}
       </Spaghetti>
-      <Spaghetti as="p" className="smash-text">
-        {text.text}
-      </Spaghetti>
 
       {!open && (
         <>
+          <Spaghetti as="p" className="smash-text">
+            {text.text}
+          </Spaghetti>
           <button type="button" className="btn smash-play" data-track="game_play" onClick={play} disabled={!hydrated}>
             {text.play}
           </button>
@@ -155,30 +163,62 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
       {open && (
         <div className="smash-board">
           <div className="smash-hud">
-            <p className="smash-stat">
-              {text.score} : <strong>{hud.score}</strong>
-            </p>
-            <p className="smash-stat">
-              {text.time} : <strong>{hud.seconds} s</strong>
-            </p>
-            <div className="smash-actions">
-              <button type="button" className="btn btn-quiet" onClick={togglePause} disabled={hud.status === 'over'}>
-                {hud.status === 'paused' ? text.resume : text.pause}
+            <div className="smash-stats">
+              <p className="smash-stat">
+                <span className="smash-stat-label">{text.score}</span>
+                <strong>{hud.score}</strong>
+              </p>
+              <p className="smash-stat" data-low={lowTime}>
+                <span className="smash-stat-label">{text.time}</span>
+                <strong>{hud.seconds} s</strong>
+              </p>
+            </div>
+            <div className="smash-actions" role="group" aria-label={text.controls}>
+              <button
+                type="button"
+                className="smash-icon-btn"
+                data-primary="true"
+                onClick={togglePause}
+                disabled={over}
+                aria-label={paused ? text.resume : text.pause}
+                title={paused ? text.resume : text.pause}
+              >
+                {paused ? <PlayIcon /> : <PauseIcon />}
               </button>
-              <button type="button" className="btn btn-quiet" onClick={() => void play()}>
-                {text.restart}
+              <button type="button" className="smash-icon-btn" onClick={() => void play()} aria-label={text.restart} title={text.restart}>
+                <RestartIcon />
               </button>
-              <button type="button" className="btn btn-quiet" onClick={toggleSound}>
-                {muted ? text.soundOff : text.soundOn}
+              <button
+                type="button"
+                className="smash-icon-btn"
+                onClick={toggleSound}
+                aria-label={muted ? text.unmuteAction : text.muteAction}
+                title={muted ? text.unmuteAction : text.muteAction}
+              >
+                {muted ? <SoundOffIcon /> : <SoundOnIcon />}
               </button>
             </div>
           </div>
           <div className="smash-stage">
             <canvas ref={canvasRef} tabIndex={0} role="group" aria-label={text.boardLabel} aria-describedby={hintId} />
-            {hud.status === 'over' && (
-              <div className="smash-over">
+            {/* Pause : toucher le plateau reprend la partie (confort tactile). Pour le clavier et les lecteurs d'écran, le bouton de la barre reste LA commande. */}
+            {paused && (
+              <div className="smash-overlay smash-paused" aria-hidden="true" onClick={togglePause}>
+                <span className="smash-paused-icon">
+                  <PlayIcon size={34} />
+                </span>
+                <span className="smash-paused-label">{text.livePaused}</span>
+              </div>
+            )}
+            {over && (
+              <div className="smash-overlay smash-over">
+                <div className="smash-final">
+                  <span>{text.score}</span>
+                  <strong>{hud.score}</strong>
+                </div>
                 <p>{text.over}</p>
                 <button ref={replayRef} type="button" className="btn" onClick={() => void play()}>
+                  <RestartIcon size={20} />
                   {text.replay}
                 </button>
               </div>

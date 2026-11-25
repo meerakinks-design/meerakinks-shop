@@ -2,11 +2,14 @@ import type { Metadata } from 'next';
 import { JsonLd } from '@/components/shop/JsonLd';
 import { CategorySections } from '@/components/shop/CategorySections';
 import { ShopGrid } from '@/components/shop/ShopGrid';
+import { ShowcaseGrid } from '@/components/shop/ShowcaseGrid';
 import Spaghetti from '@/components/shop/Spaghetti';
 import { Collections, Contact, Faq, FinalCta, Hero, Marquee, Why } from '@/components/shop/LandingSections';
 import { ScrollStage } from '@/components/shop/ScrollStage';
 import { LANDING } from '@/content/landing';
 import { SEO } from '@/content/seo';
+import { SHOWCASE_ENABLED } from '@/content/vitrine';
+import Link from 'next/link';
 import { cld } from '@/lib/cloudinary-static';
 import { hasPromotion } from '@/lib/shop/product-display';
 import { buildShopLayout } from '@/lib/shop/sections';
@@ -20,7 +23,9 @@ export const metadata: Metadata = { title: { absolute: SEO.home.title }, descrip
 
 export default async function HomePage() {
   const settings = await getPublicSettings();
-  const [{ categories, products }, delivery] = await Promise.all([getShopData(), getPublicDelivery()]);
+  // Vitrine photo (étape 1) : la section Boutique vient de src/content/vitrine.ts ; le catalogue de la base n'est pas lu.
+  const noShopData: Awaited<ReturnType<typeof getShopData>> = { categories: [], products: [] };
+  const [{ categories, products }, delivery] = await Promise.all([SHOWCASE_ENABLED ? noShopData : getShopData(), getPublicDelivery()]);
   const layout = buildShopLayout(categories, products);
   const siteUrl = absoluteUrl('/');
   const sameAs = [settings.instagramUrl, settings.tiktokUrl, settings.facebookUrl].filter(Boolean);
@@ -35,8 +40,26 @@ export default async function HomePage() {
       <Why storeName={settings.storeName} />
       {layout.mode === 'categories' && <Collections sections={layout.sections} hasOffers={products.some(hasPromotion)} />}
 
+      {/* Vitrine photo : les soins en grille asymétrique (réf. Hello Hello), sans prix pour l'instant. */}
+      {SHOWCASE_ENABLED && (
+        <section id="boutique" className="shop-section" aria-label={LANDING.shop.title}>
+          <div className="container section">
+            <div className="section-head">
+              <Spaghetti as="h2" ghost={LANDING.shop.titleGhost}>{LANDING.shop.title}</Spaghetti>
+              <p className="lead">{LANDING.shop.text}</p>
+            </div>
+            <ShowcaseGrid />
+            <div className="showcase-more">
+              <Link className="btn btn-pill" href="/boutique">
+                {LANDING.shop.cta}
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Section Boutique (décision D-12) : sections sticky par catégorie, sinon grille. Rien sans produit publié. */}
-      {products.length > 0 && (
+      {!SHOWCASE_ENABLED && products.length > 0 && (
         <section id="boutique" className="shop-section" aria-label={LANDING.shop.title}>
           {layout.mode === 'categories' ? (
             <>

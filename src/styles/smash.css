@@ -3,7 +3,6 @@
 .smash-title { margin: 0; font-size: clamp(1.5rem, 4vw, 2.25rem); text-wrap: balance; }
 .smash-text { max-width: 42rem; margin: 0; }
 .smash .btn { background: var(--color-beige); color: var(--color-brown); padding-inline: var(--space-6); }
-.smash .btn-quiet { background: transparent; color: inherit; border: 1px solid rgb(255 255 255 / 0.6); padding-inline: var(--space-4); }
 .smash .btn:disabled { opacity: 0.5; cursor: default; }
 
 /* Moins d'animations demandé : pas de bouton « Jouer », le message validé à la place. Géré en CSS : aucun clignotement au chargement. */
@@ -14,10 +13,34 @@
 }
 
 .smash-board { display: grid; gap: var(--space-3); width: 100%; }
-.smash-hud { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-6); }
-.smash-stat { margin: 0; font-variant-numeric: tabular-nums; }
-.smash-stat strong { font-size: 1.25rem; }
-.smash-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+/* Barre de jeu : score et temps à gauche, trois commandes rondes à icône à droite. Sur 360 px de large tout tient sur UNE ligne ; plus étroit, les commandes passent dessous. */
+.smash-hud { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); }
+.smash-stats { display: flex; gap: var(--space-4); text-align: left; }
+.smash-stat { display: grid; margin: 0; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.smash-stat-label { font-size: 0.8125rem; color: rgb(255 255 255 / 0.78); }
+.smash-stat strong { min-width: 3ch; font-size: 1.75rem; font-weight: 700; }
+/* Les 5 dernières secondes : le temps passe à l'orange vif (contraste suffisant sur le fond brun). */
+.smash-stat[data-low='true'] strong { color: var(--color-gold-orange); }
+.smash-actions { display: flex; gap: 0.375rem; }
+/* Écran de 320 px ou moins : les commandes passent sous le score ; tout se centre pour que la barre reste équilibrée. */
+@media (max-width: 349px) { .smash-hud { justify-content: center; } }
+
+/* Boutons ronds à icône (pause / reprise, recommencer, son) : 44 px = la cible tactile du site. Le nom vient de aria-label, l'infobulle de title. */
+.smash-icon-btn {
+  display: inline-grid; place-items: center; flex: none; width: var(--tap-target); height: var(--tap-target); padding: 0;
+  border: 1.5px solid color-mix(in srgb, var(--color-beige) 55%, transparent); border-radius: 50%; background: transparent; color: var(--color-beige);
+  cursor: pointer; transition: background-color 0.15s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.smash-icon-btn:hover { background: color-mix(in srgb, var(--color-beige) 16%, transparent); }
+.smash-icon-btn:active { transform: scale(0.92); }
+.smash-icon-btn:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+/* Pause / reprise : la commande principale de la partie, donc la seule pleine. */
+.smash-icon-btn[data-primary='true'] { border-color: var(--color-beige); background: var(--color-beige); color: var(--color-brown); }
+.smash-icon-btn[data-primary='true']:hover { background: #fff; }
+.smash-icon-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+.smash-icon-btn:disabled:hover { background: transparent; }
+.smash-icon-btn[data-primary='true']:disabled:hover { background: var(--color-beige); }
 
 .smash-stage {
   position: relative; width: 100%; aspect-ratio: 1 / 1; overflow: hidden; border-radius: var(--radius);
@@ -28,8 +51,17 @@
 .smash-stage canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; touch-action: pan-y; cursor: crosshair; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
 .smash-stage canvas:focus-visible { outline: 3px solid var(--color-focus); outline-offset: -3px; }
 .smash[data-smash='paused'] .smash-stage canvas { opacity: 0.55; }
-.smash-over { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: var(--space-4); padding: var(--space-4); text-align: center; color: #fff; background: rgb(35 31 28 / 0.6); }
-.smash-over p { margin: 0; font-size: 1.25rem; font-weight: 700; }
-.smash-hint { margin: 0; font-size: 0.875rem; color: rgb(255 255 255 / 0.78); }
+/* Voiles posés sur le plateau (pause, fin de partie). */
+.smash-overlay { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: var(--space-4); padding: var(--space-4); text-align: center; color: var(--color-beige); }
+.smash-paused { gap: var(--space-3); background: color-mix(in srgb, var(--color-brown-deep) 30%, transparent); cursor: pointer; }
+.smash-paused-icon { display: grid; place-items: center; width: 4.5rem; height: 4.5rem; padding-left: 0.2rem; border-radius: 50%; background: var(--color-beige); color: var(--color-brown); }
+.smash-paused-label { font-weight: 600; text-shadow: 0 1px 6px rgb(0 0 0 / 0.35); }
+.smash-over { background: color-mix(in srgb, var(--color-brown-deep) 93%, transparent); }
+.smash-over p { margin: 0; max-width: 20rem; font-size: 1.125rem; font-weight: 600; text-wrap: balance; }
+.smash-final { display: grid; line-height: 1; font-variant-numeric: tabular-nums; }
+.smash-final span { font-size: 0.9375rem; color: rgb(255 255 255 / 0.78); }
+.smash-final strong { font-size: clamp(3.25rem, 17vw, 4.75rem); font-weight: 800; }
+.smash .btn svg { flex: none; margin-right: 0.5rem; }
+.smash-hint { margin: 0; font-size: 0.875rem; text-wrap: balance; color: rgb(255 255 255 / 0.78); }
 /* Téléphone : plateau CARRÉ, pleine largeur. Ordinateur : plateau large, toute la largeur du pied de page. */
 @media (min-width: 700px) { .smash-stage { aspect-ratio: auto; height: clamp(20rem, 38vw, 28rem); } }

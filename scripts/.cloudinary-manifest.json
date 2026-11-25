@@ -40,5 +40,59 @@
     "publicId": "meera/public/stage/hero2",
     "resourceType": "image",
     "updatedAt": "2026-11-25T00:04:23.776Z"
+  },
+  "products/brume-1.webp": {
+    "hash": "6b6401fc55ebcf4ddefda850c3e7c552c49db9b0711356978aa56dfaf88a5469",
+    "publicId": "meera/public/products/brume-1",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:09.852Z"
+  },
+  "products/elixir-wunter-1.webp": {
+    "hash": "e37cf2b3252685dc810c5b4da5d67b18a8861cf40abac014ce45815bdd23c2c9",
+    "publicId": "meera/public/products/elixir-wunter-1",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:13.966Z"
+  },
+  "products/elixir-wunter-2.webp": {
+    "hash": "4b2f6846152a7ffe67baddf116486d078bc982e2c1690b61f7a1770b044f7b9b",
+    "publicId": "meera/public/products/elixir-wunter-2",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:19.663Z"
+  },
+  "products/fluffy-kinks-1.webp": {
+    "hash": "c4729bf968596942e6d75d613a5657b4704f828c133d6831df5552d072ff4264",
+    "publicId": "meera/public/products/fluffy-kinks-1",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:22.478Z"
+  },
+  "products/fluffy-kinks-2.webp": {
+    "hash": "8ac66fa6d47b9486fd2b276d12145f0b2a500339ebef21528b5369bbaef3fcbf",
+    "publicId": "meera/public/products/fluffy-kinks-2",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:28.060Z"
+  },
+  "products/mousse-kinky-1.webp": {
+    "hash": "e8c6433200ef466259a747a2986af5cddaa7e1615cbaaba25e694c29ef2ba98a",
+    "publicId": "meera/public/products/mousse-kinky-1",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:30.939Z"
+  },
+  "products/slik-1.webp": {
+    "hash": "a23968865e744b4cea84b8b8816a8b175eaba35523aee69d8ccfe2a94a07f9d7",
+    "publicId": "meera/public/products/slik-1",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:33.105Z"
+  },
+  "products/velvet-1.webp": {
+    "hash": "6510bf467859fd9f5e9c959b06ea8f5c8a9f6e703993b3e8c30f10c04b3d0ce8",
+    "publicId": "meera/public/products/velvet-1",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:38.255Z"
+  },
+  "products/velvet-2.webp": {
+    "hash": "0a72df7933a3415956d6745260fab125f21a6e44b2eb05a0345bf0d77ec34e78",
+    "publicId": "meera/public/products/velvet-2",
+    "resourceType": "image",
+    "updatedAt": "2026-11-25T06:03:42.388Z"
   }
 }
