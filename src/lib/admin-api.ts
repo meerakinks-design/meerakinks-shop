@@ -4,6 +4,7 @@ import { ADMIN_ORDERS_API_PATH } from '@/lib/constants/admin-orders';
 import type { UploadKind } from '@/lib/constants/images';
 import type { DeliveryStatusValue } from '@/lib/constants/order-status';
 import type { CategoryFormInput } from '@/lib/validation/category.schema';
+import type { DeliveryNotesFormInput, DeliveryZoneFormInput } from '@/lib/validation/delivery-zone.schema';
 import type { ProductFormInput } from '@/lib/validation/product.schema';
 import type { DeliveryChangeResult, FeeResult, PaymentResult } from '@/server/services/orders-admin.service';
 
@@ -39,6 +40,15 @@ export const adminApi = {
     create: (input: CategoryFormInput) => postJson<{ id: string; slug: string }>(`${BASE}/categories`, input),
     update: (id: string, input: CategoryFormInput) => putJson<{ id: string; slug: string }>(`${BASE}/categories/${encodeURIComponent(id)}`, input),
     remove: (id: string) => deleteJson<Record<string, never>>(`${BASE}/categories/${encodeURIComponent(id)}`),
+  },
+  // Zones de livraison et textes de délais (écran /admin/livraison, propriétaire).
+  deliveryZones: {
+    create: (input: DeliveryZoneFormInput) => postJson<{ id: string }>(`${BASE}/delivery-zones`, input),
+    update: (id: string, input: DeliveryZoneFormInput) => putJson<{ id: string }>(`${BASE}/delivery-zones/${encodeURIComponent(id)}`, input),
+    remove: (id: string) => deleteJson<Record<string, never>>(`${BASE}/delivery-zones/${encodeURIComponent(id)}`),
+  },
+  deliveryNotes: {
+    update: (input: DeliveryNotesFormInput) => putJson<Record<string, never>>(`${BASE}/delivery-notes`, input),
   },
   orders: {
     changeStatus: (id: string, status: DeliveryStatusValue, note?: string) =>
