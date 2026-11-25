@@ -4,10 +4,11 @@ import type { ShopCategory, ShopProduct } from '@/lib/shop/sections';
 import type { ShopParams } from '@/lib/shop/search';
 import { whatsappLink } from '@/lib/shop/whatsapp';
 import { emptyZones, type PublicZones } from '@/lib/shop/zones';
-import type { FocusProduct, PublicSettings } from '@/server/services/catalog.queries';
+import { DEFAULT_DELAYS, NO_DELIVERY_NOTES } from '@/lib/shop/delivery-delay';
+import type { FocusProduct, LegalIdentity, PublicDelivery, PublicSettings } from '@/server/services/catalog.queries';
 import { FIXTURE_CATEGORIES, FIXTURE_DEPOSIT, FIXTURE_PRODUCTS, FIXTURE_STORE_NAME, findCategory, findProduct, imageUrl, type FixtureProduct } from '../fixtures';
 
-export type { FocusProduct, PublicSettings };
+export type { FocusProduct, LegalIdentity, PublicDelivery, PublicSettings };
 
 const toShop = (product: FixtureProduct, now: Date): ShopProduct => {
   const category = findCategory(product.categorySlug);
@@ -46,6 +47,16 @@ export async function getPublicZones(): Promise<PublicZones> {
   const zones = emptyZones();
   zones.ABIDJAN.push({ id: 'zone-cocody', name: 'Cocody', fee: 1500 }, { id: 'zone-marcory', name: 'Marcory', fee: 1500 });
   return zones;
+}
+
+export const DEFAULT_DELIVERY: PublicDelivery = { summary: { ...DEFAULT_DELAYS }, notes: { ...NO_DELIVERY_NOTES } };
+
+export async function getPublicDelivery(): Promise<PublicDelivery> {
+  return DEFAULT_DELIVERY;
+}
+
+export async function getLegalIdentity(): Promise<LegalIdentity> {
+  return { legalName: null, address: null };
 }
 
 export async function hasCollections(): Promise<boolean> {

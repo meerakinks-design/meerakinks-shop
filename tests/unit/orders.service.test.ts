@@ -241,7 +241,7 @@ describe('createOrder — zones et frais', () => {
     tx.deliveryZone.findFirst.mockResolvedValue({ id: 'zone_cocody', name: 'Cocody', fee: 1500 });
     await createOrder(input({ placeName: '', deliveryZoneId: 'zone_cocody' }));
     const { data } = createdArgs();
-    expect(tx.deliveryZone.findFirst).toHaveBeenCalledWith({ where: { id: 'zone_cocody', type: 'ABIDJAN', isActive: true }, select: { id: true, name: true, fee: true } });
+    expect(tx.deliveryZone.findFirst).toHaveBeenCalledWith({ where: { id: 'zone_cocody', type: 'ABIDJAN', isActive: true }, select: { id: true, name: true, fee: true, deliveryMinHours: true, deliveryMaxHours: true } });
     expect(data.deliveryZoneId).toBe('zone_cocody');
     expect(data.shippingCity).toBe('Cocody');
     expect(data.deliveryFee).toBe(1500);

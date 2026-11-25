@@ -8,8 +8,8 @@ export interface PublicZone {
   /** null = frais à confirmer. */
   fee: number | null;
   /** Délai propre à la zone (heures), null = celui de son type (RM-47). */
-  deliveryMinHours: number | null;
-  deliveryMaxHours: number | null;
+  deliveryMinHours?: number | null;
+  deliveryMaxHours?: number | null;
 }
 
 export type PublicZones = Record<ZoneTypeValue, PublicZone[]>;

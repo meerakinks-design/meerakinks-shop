@@ -7,6 +7,7 @@ config/security-headers.mjs
 docs/AVANCEMENT-V0_11-EN-COURS.md
 docs/CONFORMITE-LEGALE.md
 docs/MERGE-SCROLL3D-V0_11.md
+e2e/fakes/catalog.queries.ts
 package.json
 public/assets/smash/README.md
 public/assets/smash/bottle-cut.glb
@@ -111,11 +112,11 @@ src/styles/ui.css
 tests/unit/analytics-classify.test.ts
 tests/unit/analytics.service.test.ts
 tests/unit/csp.test.ts
-tests/unit/customer-data.service.test.ts
 tests/unit/delivery-delay.test.ts
 tests/unit/email-templates.test.ts
 tests/unit/legal-content.test.ts
 tests/unit/legal-pages.test.ts
+tests/unit/orders.service.test.ts
 tests/unit/shop-render.test.tsx
 tests/unit/smash-3d.test.ts
 tools/optimize-smash-glb.py
