@@ -8,6 +8,8 @@ interface ModalLinkProps {
   className?: string;
   children: ReactNode;
   'aria-label'?: string;
+  /** Identifiant de bouton pour l'analytique maison (liste fermée `TRACK_TARGETS`). */
+  'data-track'?: string;
   onNavigate?: () => void;
 }
 
@@ -20,7 +22,7 @@ export function ModalLink({ hash, className, children, onNavigate, ...rest }: Mo
     openModal(hash);
   }
   return (
-    <a href={hash} className={className} onClick={handleClick} aria-haspopup="dialog" aria-label={rest['aria-label']}>
+    <a href={hash} className={className} onClick={handleClick} aria-haspopup="dialog" aria-label={rest['aria-label']} data-track={rest['data-track']}>
       {children}
     </a>
   );

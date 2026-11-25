@@ -47,8 +47,9 @@ html[data-stage='off'] .stage-slot { display: none; }
 .cta-btn:focus-visible, .cta-link:focus-visible { outline: 3px solid var(--color-gold-orange); outline-offset: 3px; }
 .cta-note { margin: 0; text-align: center; color: color-mix(in srgb, var(--color-beige) 64%, transparent); font-size: 0.9375rem; }
 @media (min-width: 900px) {
-  .cta-card { max-width: 68rem; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: center; border-radius: 2.75rem; }
+  .cta-card { max-width: none; grid-template-columns: minmax(0, 34rem) minmax(0, 1fr); align-items: center; border-radius: 2.75rem; }
   .cta-photo::after { background: linear-gradient(to right, transparent 55%, color-mix(in srgb, var(--cta-bg) 55%, transparent) 78%, var(--cta-bg) 99%); }
-  .cta-body { margin-top: 0; padding: clamp(2rem, 4vw, 3.5rem) clamp(2rem, 4vw, 3.5rem) clamp(2rem, 4vw, 3.5rem) 0; }
+  .cta-body { max-width: 40rem; margin-top: 0; padding: clamp(2rem, 4vw, 3.5rem) clamp(2rem, 5vw, 4rem) clamp(2rem, 4vw, 3.5rem) 0; }
 }
+@media (min-width: 900px) { .hero-stage { width: 100%; max-width: 40rem; } }
 @media (prefers-reduced-motion: reduce) { .cta-btn { transition: none; } .cta-btn:hover { transform: none; } }

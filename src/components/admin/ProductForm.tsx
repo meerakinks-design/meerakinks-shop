@@ -199,180 +199,182 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
         </p>
       )}
 
-      <section className="card form-section">
-        <h2>Informations</h2>
+      <div className="form-columns">
+        <section className="card form-section">
+          <h2>Informations</h2>
 
-        <div className="field">
-          <label htmlFor={`${formId}-name`}>Nom du produit</label>
-          <input id={`${formId}-name`} value={values.name} onChange={(event) => handleNameChange(event.target.value)} maxLength={120} required {...errorProps('name')} />
-          {renderError('name')}
-        </div>
-
-        <div className="field">
-          <label htmlFor={`${formId}-slug`}>Lien de la page</label>
-          <input
-            id={`${formId}-slug`}
-            value={values.slug}
-            onChange={(event) => {
-              setSlugEdited(true);
-              setValue('slug', event.target.value);
-            }}
-            maxLength={80}
-            autoCapitalize="none"
-            spellCheck={false}
-            {...errorProps('slug')}
-          />
-          <p className="help-text">
-            Adresse : {productPath(values.slug || '…')}
-            {isEdit && initial.status !== 'DRAFT' && ' — si tu le changes, l’ancien lien redirige automatiquement vers le nouveau.'}
-          </p>
-          {renderError('slug')}
-        </div>
-
-        <div className="field">
-          <label htmlFor={`${formId}-category`}>Catégorie</label>
-          <select id={`${formId}-category`} value={values.categoryId} onChange={(event) => setValue('categoryId', event.target.value)} {...errorProps('categoryId')}>
-            <option value="">Aucune catégorie</option>
-            {selectableCategories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-                {category.isArchived ? ' (archivée)' : ''}
-              </option>
-            ))}
-          </select>
-          {renderError('categoryId')}
-        </div>
-
-        <div className="field">
-          <label htmlFor={`${formId}-description`}>Description</label>
-          <textarea id={`${formId}-description`} rows={5} value={values.description} onChange={(event) => setValue('description', event.target.value)} maxLength={5000} required {...errorProps('description')} />
-          {renderError('description')}
-        </div>
-
-        <div className="field">
-          <label htmlFor={`${formId}-characteristics`}>Caractéristiques</label>
-          <textarea id={`${formId}-characteristics`} rows={4} value={values.characteristics} onChange={(event) => setValue('characteristics', event.target.value)} {...errorProps('characteristics')} />
-          <p className="help-text">Une caractéristique par ligne (matière, taille, entretien…).</p>
-          {renderError('characteristics')}
-        </div>
-
-        <div className="field">
-          <label htmlFor={`${formId}-usage`}>Mode d’utilisation (facultatif)</label>
-          <textarea id={`${formId}-usage`} rows={3} value={values.usageAdvice} onChange={(event) => setValue('usageAdvice', event.target.value)} maxLength={3000} {...errorProps('usageAdvice')} />
-          {renderError('usageAdvice')}
-        </div>
-      </section>
-
-      <section className="card form-section">
-        <h2>Prix, stock et références</h2>
-
-        <div className="field">
-          <label htmlFor={`${formId}-price`}>Prix (FCFA)</label>
-          <input id={`${formId}-price`} inputMode="numeric" autoComplete="off" value={values.price} onChange={(event) => setValue('price', event.target.value)} required {...errorProps('price')} />
-          {renderError('price')}
-        </div>
-
-        <div className="field">
-          <label htmlFor={`${formId}-sale`}>Prix promotionnel (FCFA, facultatif)</label>
-          <input id={`${formId}-sale`} inputMode="numeric" autoComplete="off" value={values.salePrice} onChange={(event) => setValue('salePrice', event.target.value)} {...errorProps('salePrice')} />
-          <p className="help-text">S’il est rempli, c’est ce prix que le client paie. Il doit être inférieur au prix normal.</p>
-          {renderError('salePrice')}
-        </div>
-
-        <div className="field">
-          <label className="check-row">
-            <input type="checkbox" checked={values.trackStock} onChange={(event) => setValue('trackStock', event.target.checked)} />
-            <span>Suivre le stock de ce produit</span>
-          </label>
-          <p className="help-text">Désactivé : le produit n’est jamais affiché « épuisé ».</p>
-        </div>
-
-        {values.trackStock && (
           <div className="field">
-            <label htmlFor={`${formId}-stock`}>Quantité en stock</label>
-            <input id={`${formId}-stock`} inputMode="numeric" autoComplete="off" value={values.stock} onChange={(event) => setValue('stock', event.target.value)} {...errorProps('stock')} />
-            {renderError('stock')}
+            <label htmlFor={`${formId}-name`}>Nom du produit</label>
+            <input id={`${formId}-name`} value={values.name} onChange={(event) => handleNameChange(event.target.value)} maxLength={120} required {...errorProps('name')} />
+            {renderError('name')}
           </div>
-        )}
 
-        <div className="field">
-          <label htmlFor={`${formId}-weight`}>Poids (facultatif)</label>
-          <div className="inline-fields">
-            <input id={`${formId}-weight`} inputMode="decimal" autoComplete="off" value={values.weight} onChange={(event) => setValue('weight', event.target.value)} {...errorProps('weight')} />
-            <select aria-label="Unité de poids" value={values.weightUnit} onChange={(event) => setValue('weightUnit', event.target.value as WeightUnit)}>
-              <option value="g">g</option>
-              <option value="kg">kg</option>
+          <div className="field">
+            <label htmlFor={`${formId}-slug`}>Lien de la page</label>
+            <input
+              id={`${formId}-slug`}
+              value={values.slug}
+              onChange={(event) => {
+                setSlugEdited(true);
+                setValue('slug', event.target.value);
+              }}
+              maxLength={80}
+              autoCapitalize="none"
+              spellCheck={false}
+              {...errorProps('slug')}
+            />
+            <p className="help-text">
+              Adresse : {productPath(values.slug || '…')}
+              {isEdit && initial.status !== 'DRAFT' && ' — si tu le changes, l’ancien lien redirige automatiquement vers le nouveau.'}
+            </p>
+            {renderError('slug')}
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${formId}-category`}>Catégorie</label>
+            <select id={`${formId}-category`} value={values.categoryId} onChange={(event) => setValue('categoryId', event.target.value)} {...errorProps('categoryId')}>
+              <option value="">Aucune catégorie</option>
+              {selectableCategories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                  {category.isArchived ? ' (archivée)' : ''}
+                </option>
+              ))}
             </select>
+            {renderError('categoryId')}
           </div>
-          {renderError('weight')}
-        </div>
 
-        <div className="field">
-          <label htmlFor={`${formId}-sku`}>Référence interne (facultatif)</label>
-          <input id={`${formId}-sku`} value={values.sku} onChange={(event) => setValue('sku', event.target.value)} maxLength={40} autoCapitalize="characters" spellCheck={false} {...errorProps('sku')} />
-          {renderError('sku')}
-        </div>
-      </section>
+          <div className="field">
+            <label htmlFor={`${formId}-description`}>Description</label>
+            <textarea id={`${formId}-description`} rows={5} value={values.description} onChange={(event) => setValue('description', event.target.value)} maxLength={5000} required {...errorProps('description')} />
+            {renderError('description')}
+          </div>
 
-      <section className="card form-section">
-        <h2>Photos</h2>
-        <ImageUploader
-          images={values.images}
-          onChange={(update) => setValues((current) => ({ ...current, images: update(current.images) }))}
-          defaultAlt={values.name.trim()}
-          error={fieldError('images')}
-        />
-      </section>
+          <div className="field">
+            <label htmlFor={`${formId}-characteristics`}>Caractéristiques</label>
+            <textarea id={`${formId}-characteristics`} rows={4} value={values.characteristics} onChange={(event) => setValue('characteristics', event.target.value)} {...errorProps('characteristics')} />
+            <p className="help-text">Une caractéristique par ligne (matière, taille, entretien…).</p>
+            {renderError('characteristics')}
+          </div>
 
-      <section className="card form-section">
-        <h2>Publication</h2>
-        <fieldset className="field">
-          <legend>Statut</legend>
-          {PRODUCT_STATUSES.map((status) => (
-            <label key={status} className="radio-row">
-              <input type="radio" name={`${formId}-status`} checked={values.status === status} onChange={() => setValue('status', status)} />
-              <span>
-                <strong>{PRODUCT_STATUS_LABELS[status]}</strong>
-                <span className="help-text"> {PRODUCT_STATUS_HELP[status]}</span>
-              </span>
+          <div className="field">
+            <label htmlFor={`${formId}-usage`}>Mode d’utilisation (facultatif)</label>
+            <textarea id={`${formId}-usage`} rows={3} value={values.usageAdvice} onChange={(event) => setValue('usageAdvice', event.target.value)} maxLength={3000} {...errorProps('usageAdvice')} />
+            {renderError('usageAdvice')}
+          </div>
+        </section>
+
+        <section className="card form-section">
+          <h2>Prix, stock et références</h2>
+
+          <div className="field">
+            <label htmlFor={`${formId}-price`}>Prix (FCFA)</label>
+            <input id={`${formId}-price`} inputMode="numeric" autoComplete="off" value={values.price} onChange={(event) => setValue('price', event.target.value)} required {...errorProps('price')} />
+            {renderError('price')}
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${formId}-sale`}>Prix promotionnel (FCFA, facultatif)</label>
+            <input id={`${formId}-sale`} inputMode="numeric" autoComplete="off" value={values.salePrice} onChange={(event) => setValue('salePrice', event.target.value)} {...errorProps('salePrice')} />
+            <p className="help-text">S’il est rempli, c’est ce prix que le client paie. Il doit être inférieur au prix normal.</p>
+            {renderError('salePrice')}
+          </div>
+
+          <div className="field">
+            <label className="check-row">
+              <input type="checkbox" checked={values.trackStock} onChange={(event) => setValue('trackStock', event.target.checked)} />
+              <span>Suivre le stock de ce produit</span>
             </label>
-          ))}
-          {renderError('status')}
-        </fieldset>
+            <p className="help-text">Désactivé : le produit n’est jamais affiché « épuisé ».</p>
+          </div>
 
-        <div className="field">
-          <label className="check-row">
-            <input type="checkbox" checked={values.isFeatured} onChange={(event) => setValue('isFeatured', event.target.checked)} />
-            <span>Mettre en avant sur la landing</span>
-          </label>
-          <p className="help-text">Les produits mis en avant forment la section « Best-sellers » (8 maximum, dans l’ordre d’affichage).</p>
-        </div>
+          {values.trackStock && (
+            <div className="field">
+              <label htmlFor={`${formId}-stock`}>Quantité en stock</label>
+              <input id={`${formId}-stock`} inputMode="numeric" autoComplete="off" value={values.stock} onChange={(event) => setValue('stock', event.target.value)} {...errorProps('stock')} />
+              {renderError('stock')}
+            </div>
+          )}
 
-        <div className="field">
-          <label htmlFor={`${formId}-order`}>Ordre d’affichage</label>
-          <input id={`${formId}-order`} inputMode="numeric" value={values.sortOrder} onChange={(event) => setValue('sortOrder', event.target.value)} {...errorProps('sortOrder')} />
-          <p className="help-text">0 s’affiche en premier.</p>
-        </div>
-      </section>
+          <div className="field">
+            <label htmlFor={`${formId}-weight`}>Poids (facultatif)</label>
+            <div className="inline-fields">
+              <input id={`${formId}-weight`} inputMode="decimal" autoComplete="off" value={values.weight} onChange={(event) => setValue('weight', event.target.value)} {...errorProps('weight')} />
+              <select aria-label="Unité de poids" value={values.weightUnit} onChange={(event) => setValue('weightUnit', event.target.value as WeightUnit)}>
+                <option value="g">g</option>
+                <option value="kg">kg</option>
+              </select>
+            </div>
+            {renderError('weight')}
+          </div>
 
-      <section className="card form-section">
-        <h2>Référencement (facultatif)</h2>
-        <p className="help-text">Si tu laisses vide, le site génère un titre et une description à partir du nom et de la description du produit.</p>
+          <div className="field">
+            <label htmlFor={`${formId}-sku`}>Référence interne (facultatif)</label>
+            <input id={`${formId}-sku`} value={values.sku} onChange={(event) => setValue('sku', event.target.value)} maxLength={40} autoCapitalize="characters" spellCheck={false} {...errorProps('sku')} />
+            {renderError('sku')}
+          </div>
+        </section>
 
-        <div className="field">
-          <label htmlFor={`${formId}-seo-title`}>Titre pour Google</label>
-          <input id={`${formId}-seo-title`} value={values.seoTitle} onChange={(event) => setValue('seoTitle', event.target.value)} maxLength={70} {...errorProps('seoTitle')} />
-          <p className="help-text">{values.seoTitle.length}/70 caractères</p>
-          {renderError('seoTitle')}
-        </div>
+        <section className="card form-section">
+          <h2>Photos</h2>
+          <ImageUploader
+            images={values.images}
+            onChange={(update) => setValues((current) => ({ ...current, images: update(current.images) }))}
+            defaultAlt={values.name.trim()}
+            error={fieldError('images')}
+          />
+        </section>
 
-        <div className="field">
-          <label htmlFor={`${formId}-meta`}>Description pour Google</label>
-          <textarea id={`${formId}-meta`} rows={3} value={values.metaDescription} onChange={(event) => setValue('metaDescription', event.target.value)} maxLength={160} {...errorProps('metaDescription')} />
-          <p className="help-text">{values.metaDescription.length}/160 caractères</p>
-          {renderError('metaDescription')}
-        </div>
-      </section>
+        <section className="card form-section">
+          <h2>Publication</h2>
+          <fieldset className="field">
+            <legend>Statut</legend>
+            {PRODUCT_STATUSES.map((status) => (
+              <label key={status} className="radio-row">
+                <input type="radio" name={`${formId}-status`} checked={values.status === status} onChange={() => setValue('status', status)} />
+                <span>
+                  <strong>{PRODUCT_STATUS_LABELS[status]}</strong>
+                  <span className="help-text"> {PRODUCT_STATUS_HELP[status]}</span>
+                </span>
+              </label>
+            ))}
+            {renderError('status')}
+          </fieldset>
+
+          <div className="field">
+            <label className="check-row">
+              <input type="checkbox" checked={values.isFeatured} onChange={(event) => setValue('isFeatured', event.target.checked)} />
+              <span>Mettre en avant sur la landing</span>
+            </label>
+            <p className="help-text">Les produits mis en avant forment la section « Best-sellers » (8 maximum, dans l’ordre d’affichage).</p>
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${formId}-order`}>Ordre d’affichage</label>
+            <input id={`${formId}-order`} inputMode="numeric" value={values.sortOrder} onChange={(event) => setValue('sortOrder', event.target.value)} {...errorProps('sortOrder')} />
+            <p className="help-text">0 s’affiche en premier.</p>
+          </div>
+        </section>
+
+        <section className="card form-section">
+          <h2>Référencement (facultatif)</h2>
+          <p className="help-text">Si tu laisses vide, le site génère un titre et une description à partir du nom et de la description du produit.</p>
+
+          <div className="field">
+            <label htmlFor={`${formId}-seo-title`}>Titre pour Google</label>
+            <input id={`${formId}-seo-title`} value={values.seoTitle} onChange={(event) => setValue('seoTitle', event.target.value)} maxLength={70} {...errorProps('seoTitle')} />
+            <p className="help-text">{values.seoTitle.length}/70 caractères</p>
+            {renderError('seoTitle')}
+          </div>
+
+          <div className="field">
+            <label htmlFor={`${formId}-meta`}>Description pour Google</label>
+            <textarea id={`${formId}-meta`} rows={3} value={values.metaDescription} onChange={(event) => setValue('metaDescription', event.target.value)} maxLength={160} {...errorProps('metaDescription')} />
+            <p className="help-text">{values.metaDescription.length}/160 caractères</p>
+            {renderError('metaDescription')}
+          </div>
+        </section>
+      </div>
 
       <div className="form-actions">
         <button className="btn" type="submit" disabled={isPending}>

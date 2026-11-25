@@ -1,3 +1,4 @@
+import { DEFAULT_DELAYS, NO_DELIVERY_NOTES, faqDelayAnswer, type DelaySummary, type DeliveryNotes } from '@/lib/shop/delivery-delay';
 import { formatFcfa } from '@/lib/money';
 
 export interface FaqItem {
@@ -7,7 +8,7 @@ export interface FaqItem {
 
 // Textes v1.0 (§2.12). Les montants viennent des paramètres, jamais écrits en dur. Les délais restent INDICATIFS :
 // ils ne sont jamais présentés comme une garantie.
-export function faqItems(depositAmount: number, storeName = 'Meëra Kinks'): FaqItem[] {
+export function faqItems(depositAmount: number, storeName = 'Meëra Kinks', delays: DelaySummary = DEFAULT_DELAYS, notes: DeliveryNotes = NO_DELIVERY_NOTES): FaqItem[] {
   const deposit = formatFcfa(depositAmount);
   return [
     {
@@ -40,8 +41,8 @@ export function faqItems(depositAmount: number, storeName = 'Meëra Kinks'): Faq
     },
     {
       question: 'Quels sont les délais de livraison ?',
-      answer:
-        'Les délais communiqués sont indicatifs : 24 h à Abidjan, 72 h à l’intérieur de la Côte d’Ivoire et 5 à 15 jours à l’international. Le délai applicable et son point de départ sont à confirmer avec l’équipe selon votre destination et votre commande.',
+      // Délais des zones actives (réglages de livraison) + précisions de la vendeuse : jamais présentés comme une garantie.
+      answer: [faqDelayAnswer(delays), notes.leadTimeNote, notes.rules].filter(Boolean).join(' '),
     },
     {
       question: 'Puis-je modifier ou annuler ma commande ?',

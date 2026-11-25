@@ -4,7 +4,7 @@ import { PRIVACY_TEXTS_VALIDATED } from '@/content/legal-status';
 import { PRIVACY_TITLE, privacyIntro, privacySections } from '@/content/privacy';
 import { PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { HOME_ANALYTICS_ENABLED } from '@/lib/constants/features';
-import { getPublicSettings } from '@/server/services/catalog.queries';
+import { getLegalIdentity, getPublicSettings } from '@/server/services/catalog.queries';
 
 export const revalidate = 3600;
 // Pas indexée tant que le texte n'est pas validé par la cliente et un professionnel (P-22, cahier §14.2).
@@ -15,13 +15,14 @@ export const metadata: Metadata = {
 };
 
 export default async function PrivacyPage() {
-  const settings = await getPublicSettings();
+  const [settings, identity] = await Promise.all([getPublicSettings(), getLegalIdentity()]);
   return (
     <LegalDocument
       title={PRIVACY_TITLE}
       intro={privacyIntro(settings.storeName)}
       sections={privacySections({ homeAnalytics: HOME_ANALYTICS_ENABLED })}
       settings={settings}
+      identity={{ storeName: settings.storeName, legalName: identity.legalName, address: identity.address, contactPhone: settings.contactPhone }}
     />
   );
 }

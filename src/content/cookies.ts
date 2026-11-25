@@ -1,6 +1,7 @@
 import { CART_STORAGE_KEY, CART_TTL_MS } from '@/lib/shop/cart';
 import { CONSENT_COOKIE_DAYS, CONSENT_COOKIE_NAME, type ConsentState } from '@/lib/consent';
-import { ANALYTICS_DETAIL_RETENTION_DAYS } from '@/lib/constants/retention';
+import { ANALYTICS_STORAGE_KEYS } from '@/lib/consent';
+import { ANALYTICS_DETAIL_RETENTION_DAYS, ANALYTICS_VISITOR_COOKIE_DAYS } from '@/lib/constants/retention';
 import { PUBLIC_ROUTES } from '@/lib/constants/routes';
 
 // Textes de la bannière et de la page /cookies (landing §27, v1.3). 🟡 PROPOSÉS : à valider par la cliente et par un
@@ -16,6 +17,8 @@ export interface LegalSection {
   showContact?: boolean;
   /** Lien interne sous la section. */
   link?: { href: string; label: string };
+  /** Affiche, sous la section, l'identité du vendeur : seulement les éléments confirmés (jamais inventés). */
+  showIdentity?: boolean;
 }
 
 export const COOKIES_TITLE = 'Gérer mes cookies';
@@ -54,7 +57,8 @@ export function cookiesSections(options: { homeAnalytics: boolean }): LegalSecti
     paragraphs: homeAnalytics
       ? [
           'Avec votre accord, la boutique mesure l’audience du site : pays, région ou province et ville approximatifs, appareil, navigateur, provenance de la visite, pages vues, boutons touchés et durée de visite.',
-          'La boutique reçoit un email indiquant le pays, la province et la provenance (Google, Instagram, Facebook…) de chaque nouveau visiteur, sans adresse IP.',
+          'Le pays, la région et la ville sont déduits de votre connexion par l’hébergeur du site : la boutique n’en conserve pas votre adresse IP, et ces statistiques ne sont pas reliées à votre commande ni à votre identité.',
+          'À la première visite d’un navigateur qui a accepté, la boutique reçoit un email d’alerte : zone approximative, provenance (Google, Instagram, Facebook…), page d’arrivée, type d’appareil et heure. Il ne contient ni adresse IP ni identité, et le nombre d’alertes est plafonné chaque jour.',
           'Un second outil, Vercel Web Analytics, mesure aussi les pages vues et le pays ; il suit le même choix.',
         ]
       : [
@@ -67,7 +71,7 @@ export function cookiesSections(options: { homeAnalytics: boolean }): LegalSecti
     id: 'choix',
     title: 'Ce que fait chaque choix',
     paragraphs: [
-      '« Accepter » active la mesure. « Refuser » la coupe : rien n’est mesuré et, si des données de mesure avaient été enregistrées dans ce navigateur, elles sont effacées.',
+      `« Accepter » active la mesure. « Refuser » la coupe : rien n’est mesuré et, si des données de mesure avaient été enregistrées pour ce navigateur, elles sont effacées${homeAnalytics ? ' (dans le navigateur et sur le serveur de la boutique)' : ''}.`,
       'Votre choix n’a aucune conséquence sur la navigation, le panier ou la commande.',
     ],
   };
@@ -81,7 +85,10 @@ export function cookiesSections(options: { homeAnalytics: boolean }): LegalSecti
       `Votre panier (« ${CART_STORAGE_KEY} ») : les produits et les quantités, conservés ${days(CART_TTL_MS)} jours pour que vous les retrouviez. Il est nécessaire au fonctionnement de la boutique et ne dépend pas de votre choix.`,
       'Un repère temporaire, effacé à la fermeture de l’onglet, qui permet de télécharger votre reçu juste après la commande.',
       ...(homeAnalytics
-        ? ['Si vous acceptez : un identifiant aléatoire de visiteur, qui permet de reconnaître un navigateur qui revient. Il est effacé si vous refusez.']
+        ? [
+            `Si vous acceptez : un identifiant aléatoire de visiteur (« ${ANALYTICS_STORAGE_KEYS[0]} »), conservé ${ANALYTICS_VISITOR_COOKIE_DAYS} jours, qui permet de reconnaître un navigateur qui revient. Il est effacé si vous refusez.`,
+            `Si vous acceptez : un repère temporaire (« ${ANALYTICS_STORAGE_KEYS[1]} »), effacé à la fermeture de l’onglet, qui évite de signaler deux fois la même arrivée à la boutique.`,
+          ]
         : []),
       'Vercel Web Analytics ne dépose pas de cookie tiers : il reconnaît un visiteur par une empreinte calculée à partir de sa requête, supprimée automatiquement au bout de 24 heures.',
     ],
@@ -93,7 +100,7 @@ export function cookiesSections(options: { homeAnalytics: boolean }): LegalSecti
     paragraphs: [
       'Vercel Web Analytics ne garde pas d’identifiant de visiteur au-delà de 24 heures ; les statistiques agrégées sont conservées par Vercel.',
       ...(homeAnalytics
-        ? [`Le détail des visites enregistrées par la boutique est supprimé au bout de ${ANALYTICS_DETAIL_RETENTION_DAYS} jours ; seuls des compteurs sans identifiant sont conservés.`]
+        ? [`Le détail des visites enregistrées par la boutique (visites, pages vues, boutons touchés) est supprimé au bout de ${ANALYTICS_DETAIL_RETENTION_DAYS} jours.`]
         : []),
     ],
   };

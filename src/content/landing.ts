@@ -6,7 +6,6 @@
 
 export const LANDING = {
   hero: {
-    eyebrow: 'VOTRE TEXTURE, VOTRE FIERTÉ',
     // Titre en deux temps (graisse très forte + cursive Great Vibes). H1 des textes v1.0.
     title: 'Vos kinks méritent le meilleur de votre routine.',
     titleMain: 'Vos kinks méritent le meilleur de',
@@ -20,7 +19,6 @@ export const LANDING = {
   },
   marquee: ['CHEVEUX CRÉPUS', 'NATURELLEMENT VOUS', 'HYDRATATION', 'NUTRITION', 'FIERTÉ', 'EMBRASSEZ VOS KINKS'],
   collections: {
-    eyebrow: 'TROUVEZ LE SOIN QUI VOUS CORRESPOND',
     title: 'Chaque besoin a sa couleur.',
     titleGhost: ['besoin'],
     text: 'Vos cheveux ont leurs propres besoins. Repérez la couleur qui vous guide et découvrez les soins pensés pour votre routine.',
@@ -30,7 +28,6 @@ export const LANDING = {
     offersCta: 'Voir les promotions',
   },
   shop: {
-    eyebrow: 'LA SÉLECTION MEËRA KINKS',
     title: 'Vos prochains essentiels sont ici.',
     titleGhost: ['essentiels'],
     text: 'Parcourez les soins disponibles et choisissez ceux qui correspondent aux besoins de vos cheveux.',
@@ -39,7 +36,6 @@ export const LANDING = {
   },
   // La section ne prétend pas être « populaire » : aucune vente réelle ne fonde le classement (textes v1.0, §2.6).
   bestSellers: {
-    eyebrow: 'LA SÉLECTION DU MOMENT',
     title: 'À découvrir en ce moment.',
     titleGhost: ['découvrir'],
     text: 'Découvrez une sélection de soins mis en avant par l’équipe et trouvez peut-être votre prochain indispensable.',
@@ -47,7 +43,6 @@ export const LANDING = {
     added: 'Ajouté à votre panier ✓',
   },
   story: {
-    eyebrow: 'DERRIÈRE MEËRA KINKS',
     title: 'Une autre façon de prendre soin de vos kinks.',
     titleGhost: ['kinks'],
     intro: [
@@ -62,7 +57,6 @@ export const LANDING = {
     closeCta: 'Découvrir nos soins',
   },
   focus: {
-    eyebrow: 'LE SOIN À DÉCOUVRIR',
     title: 'Un essentiel à intégrer à votre routine.',
     titleGhost: ['routine'],
     text: 'Découvrez ce soin, ses caractéristiques et les conseils d’utilisation pour savoir s’il correspond à vos besoins.',
@@ -70,7 +64,6 @@ export const LANDING = {
     secondaryCta: 'Ajouter au panier',
   },
   why: {
-    eyebrow: 'LE SOIN EN TOUTE SIMPLICITÉ',
     title: 'Vos cheveux ont des besoins. Notre gamme vous guide.',
     titleGhost: ['cheveux', 'gamme'],
     intro: 'Choisir un soin ne devrait pas être compliqué. {storeName} organise ses produits par besoin pour vous aider à composer une routine plus facilement.',
@@ -85,7 +78,6 @@ export const LANDING = {
     ],
   },
   reviews: {
-    eyebrow: 'VOS MOTS COMPTENT',
     title: 'Vos retours nous font avancer.',
     titleGhost: ['retours'],
     text: 'Votre expérience peut aider d’autres personnes à découvrir {storeName}. Merci de prendre le temps de la partager.',
@@ -94,7 +86,6 @@ export const LANDING = {
     emptyText: 'Vous avez déjà commandé chez {storeName} ? Votre retour peut aider d’autres personnes à faire leur choix.',
   },
   instagram: {
-    eyebrow: 'RESTONS CONNECTÉS',
     title: 'La beauté de vos kinks, au quotidien.',
     titleGhost: ['kinks'],
     text: 'Retrouvez {storeName} sur les réseaux pour découvrir les soins, les nouveautés et des inspirations autour des cheveux crépus.',
@@ -102,14 +93,12 @@ export const LANDING = {
     caption: 'Retrouvez toutes nos actualités sur Instagram.',
   },
   faq: {
-    eyebrow: 'VOUS AVEZ DES QUESTIONS ?',
     title: 'Tout ce qu’il faut savoir avant de commander.',
     titleGhost: ['commander'],
     text: 'Retrouvez les réponses aux questions fréquentes sur les produits, les commandes, le paiement et la livraison.',
     cta: 'Une autre question ? Écrivez-nous sur WhatsApp.',
   },
   contact: {
-    eyebrow: 'NOUS SOMMES À VOTRE ÉCOUTE',
     title: 'Parlons de votre routine.',
     titleGhost: ['routine'],
     text: 'Une question sur un soin, une disponibilité ou une commande ? Écrivez-nous. Notre équipe vous répond et vous accompagne.',
@@ -148,7 +137,6 @@ export const LANDING = {
     },
   },
   finalCta: {
-    eyebrow: 'VOS KINKS, VOTRE ROUTINE',
     title: 'Et si vous commenciez par le bon soin ?',
     titleGhost: ['bon', 'soin'],
     text: 'Explorez les gammes, découvrez les produits et choisissez les soins qui correspondent aux besoins de vos cheveux.',
@@ -170,6 +158,9 @@ export const LANDING = {
     over: 'Bien joué ! Envie de refaire une partie ?',
     replay: 'Rejouer',
     reducedMotion: 'Le jeu est désactivé car vous avez demandé moins d’animations.',
+    // 🟡 Libellés du bouton « Son » (à valider).
+    soundOn: 'Son activé',
+    soundOff: 'Son coupé',
     resume: 'Reprendre',
     // 🟡 Libellés techniques ajoutés par le code, absents des textes v1.0 : À VALIDER.
     boardLabel: 'Zone de jeu Cosmetic Smash',

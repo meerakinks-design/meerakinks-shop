@@ -1,6 +1,7 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import { PAYMENT_KIND_LABELS, PAYMENT_METHOD_LABELS, type PaymentKindValue, type PaymentMethodValue } from '@/lib/constants/payment';
 import { formatFcfa } from '@/lib/money';
+import { delaySentence, effectiveDelay } from '@/lib/shop/delivery-delay';
 import { formatPlaceLabel } from '@/lib/shop/order-types';
 import { netPaid, remainingToPay } from '@/lib/shop/payments';
 import { formatPhoneDisplay } from '@/lib/shop/phone';
@@ -228,6 +229,7 @@ export async function renderReceiptPdf(input: ReceiptPdfInput): Promise<Uint8Arr
   writer.heading('Livraison');
   writer.write(formatPlaceLabel(receipt.delivery.zoneType, receipt.delivery.city, receipt.delivery.country), { bold: true });
   writer.paragraph(receipt.delivery.address);
+  writer.write(delaySentence(receipt.delivery.delay ?? effectiveDelay(receipt.delivery.zoneType, null, null)), { size: 9, color: MUTED });
 
   writer.heading('Articles');
   writer.tableRow({ designation: 'Désignation', quantity: 'Qté', unitPrice: 'Prix unitaire', total: 'Total' }, { bold: true, size: 9 });

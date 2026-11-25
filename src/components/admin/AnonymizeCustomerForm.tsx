@@ -84,7 +84,7 @@ export function AnonymizeCustomerForm() {
       </div>
 
       <div className="field">
-        <label htmlFor="confirm" style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-start' }}>
+        <label htmlFor="confirm" className="check-row check-row-top">
           <input
             id="confirm"
             name="confirm"

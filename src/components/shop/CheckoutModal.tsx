@@ -24,6 +24,7 @@ import type { OrderCreated } from '@/lib/shop/order-types';
 import type { PublicZones } from '@/lib/shop/zones';
 import { orderInputSchema } from '@/lib/validation/order.schema';
 import { useCart } from './CartProvider';
+import type { DeliveryNotes } from '@/lib/shop/delivery-delay';
 import { CheckoutForm, type CheckoutAlert, type CheckoutStatus } from './CheckoutForm';
 import { CurtainModal } from './CurtainModal';
 import { useModal } from './useModal';
@@ -34,9 +35,10 @@ const ORDER_TIMEOUT_MS = 20_000;
 interface CheckoutModalProps {
   depositAmount: number;
   zones: PublicZones;
+  deliveryNotes?: DeliveryNotes;
 }
 
-export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
+export function CheckoutModal({ depositAmount, zones, deliveryNotes }: CheckoutModalProps) {
   const { hydrated, cart, quote, quoteIsCurrent, quoteStatus, clear, retryQuote } = useCart();
   const { isOpen, close } = useModal(MODAL_HASHES.checkout);
   const idPrefix = useId();
@@ -190,6 +192,7 @@ export function CheckoutModal({ depositAmount, zones }: CheckoutModalProps) {
           values={values}
           errors={errors}
           zones={zones}
+          {...(deliveryNotes ? { deliveryNotes } : {})}
           depositAmount={depositAmount}
           recap={{ lines: billableLines.map(({ productId, name, quantity, lineTotal }) => ({ productId, name, quantity, lineTotal })), subtotal }}
           amounts={amounts}

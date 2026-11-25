@@ -3,6 +3,7 @@ import { SEO } from '@/content/seo';
 import { CartModal } from '@/components/shop/CartModal';
 import { CartProvider } from '@/components/shop/CartProvider';
 import { CheckoutModal } from '@/components/shop/CheckoutModal';
+import { AnalyticsTracker } from '@/components/shop/AnalyticsTracker';
 import { ConsentGatedAnalytics } from '@/components/shop/ConsentGatedAnalytics';
 import { CookieBanner } from '@/components/shop/CookieBanner';
 import { Footer } from '@/components/shop/Footer';
@@ -15,7 +16,8 @@ import { ModalRouteSync } from '@/components/shop/ModalRouteSync';
 import { cld } from '@/lib/cloudinary-static';
 import { CHECKOUT_ENABLED, HOME_ANALYTICS_ENABLED } from '@/lib/constants/features';
 import { hasContactSection } from '@/lib/shop/contact';
-import { getCategoryAccents, getPublicSettings, getPublicZones, hasCollections } from '@/server/services/catalog.queries';
+import { buildSocialLinks } from '@/lib/shop/socials';
+import { getCategoryAccents, getPublicDelivery, getPublicSettings, getPublicZones, hasCollections } from '@/server/services/catalog.queries';
 import '@/styles/shop.css';
 import '@/styles/smash.css';
 import '@/styles/spaghetti.css';
@@ -34,13 +36,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ShopLayout({ children }: { children: React.ReactNode }) {
-  const [settings, showCollections, zones, accents] = await Promise.all([getPublicSettings(), hasCollections(), getPublicZones(), getCategoryAccents()]);
+  const [settings, showCollections, zones, accents, delivery] = await Promise.all([getPublicSettings(), hasCollections(), getPublicZones(), getCategoryAccents(), getPublicDelivery()]);
   const showContact = hasContactSection(settings);
-  const socials = [
-    { label: 'Instagram', href: settings.instagramUrl },
-    { label: 'TikTok', href: settings.tiktokUrl },
-    { label: 'Facebook', href: settings.facebookUrl },
-  ].filter((social): social is { label: string; href: string } => Boolean(social.href));
+  const socials = buildSocialLinks(settings);
 
   return (
     <CartProvider>
@@ -55,13 +53,14 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       {/* Les modals (menu, panier, commande, confirmation) vivent dans le layout, entrent par la droite et partagent le même mécanisme. */}
       <MenuModal storeName={settings.storeName} showCollections={showCollections} showContact={showContact} socials={socials} />
       <CartModal depositAmount={settings.depositAmount} />
-      {CHECKOUT_ENABLED && <CheckoutModal depositAmount={settings.depositAmount} zones={zones} />}
-      <ConfirmationModal depositAmount={settings.depositAmount} storeName={settings.storeName} />
+      {CHECKOUT_ENABLED && <CheckoutModal depositAmount={settings.depositAmount} zones={zones} deliveryNotes={delivery.notes} />}
+      <ConfirmationModal depositAmount={settings.depositAmount} storeName={settings.storeName} deliveryNotes={delivery.notes} />
       <ModalRouteSync />
       <PageTransition />
       <IntroLoader logoSrc={cld('/brand/logo-meera-kinks.png', { width: 500 })} iconSrc={cld('/brand/favicon-icon.png')} storeName={settings.storeName} />
       <CookieBanner homeAnalytics={HOME_ANALYTICS_ENABLED} />
       <ConsentGatedAnalytics />
+      {HOME_ANALYTICS_ENABLED && <AnalyticsTracker />}
     </CartProvider>
   );
 }

@@ -24,7 +24,8 @@ export type ConsentState = 'pending' | 'unset' | ConsentChoice;
  * efface dès qu'ils existent. Vercel Web Analytics ne pose pas de cookie : rien à effacer pour lui.
  */
 export const ANALYTICS_COOKIE_NAMES = ['boutique_vid'] as const;
-export const ANALYTICS_STORAGE_KEYS = ['boutique_vid'] as const;
+/** `boutique_arrival` : repère de l'onglet (sessionStorage) indiquant que l'arrivée a déjà été signalée. */
+export const ANALYTICS_STORAGE_KEYS = ['boutique_vid', 'boutique_arrival'] as const;
 
 // ---------- Fonctions pures ----------
 
@@ -101,6 +102,30 @@ export function subscribeConsent(onChange: () => void): () => void {
   };
 }
 
+/** Identifiant du visiteur posé par l'analytique maison, s'il existe dans ce navigateur. */
+function readVisitorCookie(): string | null {
+  try {
+    const match = document.cookie.split(';').map((part) => part.trim()).find((part) => part.startsWith(`${ANALYTICS_COOKIE_NAMES[0]}=`));
+    return match ? decodeURIComponent(match.slice(ANALYTICS_COOKIE_NAMES[0].length + 1)) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Au refus, demande aussi au serveur d'effacer ce qu'il a enregistré pour CE navigateur (visite et événements). À
+ * appeler AVANT la suppression du cookie : c'est lui qui porte l'identifiant. Jamais bloquant, jamais d'erreur visible.
+ */
+function requestServerErasure(): void {
+  const visitorKey = readVisitorCookie();
+  if (!visitorKey || typeof fetch !== 'function') return;
+  try {
+    void fetch('/api/v1/track/forget', { method: 'POST', keepalive: true, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ visitorKey }) }).catch(() => undefined);
+  } catch {
+    /* l'effacement dans le navigateur a lieu quand même */
+  }
+}
+
 /** Efface ce que l'analytique maison a pu enregistrer dans ce navigateur (appelé au refus). */
 export function clearAnalyticsBrowserData(): void {
   if (typeof document === 'undefined') return;
@@ -134,6 +159,9 @@ export function setConsent(choice: ConsentChoice): void {
     stored = null;
   }
   memoryChoice = stored === choice ? null : choice;
-  if (choice === 'denied') clearAnalyticsBrowserData();
+  if (choice === 'denied') {
+    requestServerErasure();
+    clearAnalyticsBrowserData();
+  }
   window.dispatchEvent(new Event(CONSENT_CHANGE_EVENT));
 }

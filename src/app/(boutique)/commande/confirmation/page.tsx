@@ -6,7 +6,7 @@ import { ORDER_RATE_LIMITS, ORDER_REFERENCE_PATTERN } from '@/lib/constants/orde
 import { PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { hashIdentifier } from '@/server/auth/tokens';
 import { clientIpFromHeaders } from '@/server/http';
-import { getPublicSettings } from '@/server/services/catalog.queries';
+import { getPublicDelivery, getPublicSettings } from '@/server/services/catalog.queries';
 import { getOrderConfirmation } from '@/server/services/orders.service';
 import { consumeRateLimit } from '@/server/services/rate-limit';
 
@@ -36,7 +36,7 @@ export default async function OrderConfirmationPage({ searchParams }: { searchPa
     );
   }
 
-  const [order, settings] = await Promise.all([getOrderConfirmation(reference), getPublicSettings()]);
+  const [order, settings, delivery] = await Promise.all([getOrderConfirmation(reference), getPublicSettings(), getPublicDelivery()]);
   if (!order) redirect(PUBLIC_ROUTES.home);
-  return <OrderConfirmation order={order} depositAmount={settings.depositAmount} storeName={settings.storeName} />;
+  return <OrderConfirmation order={order} depositAmount={settings.depositAmount} storeName={settings.storeName} deliveryNotes={delivery.notes} />;
 }

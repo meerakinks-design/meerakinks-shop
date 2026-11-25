@@ -35,6 +35,9 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
   const [open, setOpen] = useState(false);
   const [hud, setHud] = useState<SmashHud>(START_HUD);
   const [announcement, setAnnouncement] = useState('');
+  // Le son se coupe à tout moment ; le choix n'est mémorisé nulle part (aucun cookie ni stockage de plus).
+  const [muted, setMuted] = useState(false);
+  const mutedRef = useRef(false);
   const previousStatus = useRef(hud.status);
 
   useEffect(() => setHydrated(true), []);
@@ -86,6 +89,7 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
     if (!module_ || !canvas) return;
     const controller = module_.createSmash({ canvas, accents: accentsRef.current, onChange: setHud });
     controllerRef.current = controller;
+    controller.setMuted(mutedRef.current);
     controller.start();
     controller.focus();
     return () => {
@@ -118,6 +122,13 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
     controllerRef.current?.focus();
   };
 
+  const toggleSound = useCallback(() => {
+    const next = !mutedRef.current;
+    mutedRef.current = next;
+    setMuted(next);
+    controllerRef.current?.setMuted(next);
+  }, []);
+
   const togglePause = () => {
     if (hud.status === 'paused') controllerRef.current?.resume();
     else controllerRef.current?.pause();
@@ -134,7 +145,7 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
 
       {!open && (
         <>
-          <button type="button" className="btn smash-play" onClick={play} disabled={!hydrated}>
+          <button type="button" className="btn smash-play" data-track="game_play" onClick={play} disabled={!hydrated}>
             {text.play}
           </button>
           <p className="smash-reduced">{text.reducedMotion}</p>
@@ -156,6 +167,9 @@ export function SmashGame({ accents }: { accents: readonly string[] }) {
               </button>
               <button type="button" className="btn btn-quiet" onClick={() => void play()}>
                 {text.restart}
+              </button>
+              <button type="button" className="btn btn-quiet" onClick={toggleSound}>
+                {muted ? text.soundOff : text.soundOn}
               </button>
             </div>
           </div>

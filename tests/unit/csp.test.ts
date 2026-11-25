@@ -38,6 +38,10 @@ describe('Content-Security-Policy (production)', () => {
     expect(csp['img-src']).toEqual(expect.arrayContaining(["'self'", 'blob:', 'data:']));
   });
 
+  it('autorise les textures blob: de la scène 3D (GLB servis en local)', () => {
+    expect(csp['connect-src']).toContain('blob:');
+  });
+
   it('couvre Vercel Web Analytics par la même origine (/_vercel/insights), sans ouvrir d’autre domaine', () => {
     expect(csp['script-src']).toContain("'self'");
     expect(csp['connect-src']).toContain("'self'");

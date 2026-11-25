@@ -13,10 +13,12 @@ export default async function NewProductPage() {
 
   return (
     <main>
-      <p>
-        <Link href="/admin/produits">← Retour aux produits</Link>
-      </p>
-      <h1>Nouveau produit</h1>
+      <Link className="back-link" href="/admin/produits">
+        ← Retour aux produits
+      </Link>
+      <div className="page-head">
+        <h1>Nouveau produit</h1>
+      </div>
       <ProductForm categories={categories.map(({ id, name, isArchived }) => ({ id, name, isArchived }))} />
     </main>
   );

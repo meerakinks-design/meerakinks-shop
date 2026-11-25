@@ -12,7 +12,7 @@ export type ReceiptData = {
   issuedAt: string;
   shop: { name: string; legalName: string | null; address: string | null; contactPhone: string | null; contactEmail: string | null };
   customer: { fullName: string; phone: string; email: string | null };
-  delivery: { zoneType: ZoneTypeValue; country: string; city: string; address: string };
+  delivery: { zoneType: ZoneTypeValue; country: string; city: string; address: string; delay?: { minHours: number; maxHours: number } };
   lines: { name: string; unitPrice: number; quantity: number; lineTotal: number }[];
   amounts: { currency: 'XOF'; subtotal: number; deliveryFee: number | null; total: number | null; upfrontAmount: number | null };
   paymentTerms: string;
@@ -73,7 +73,14 @@ const receiptDataSchema: z.ZodType<ReceiptData, z.ZodTypeDef, unknown> = z.objec
     contactEmail: z.string().nullable(),
   }),
   customer: customerSchema,
-  delivery: z.object({ zoneType: z.enum(ZONE_TYPES), country: z.string(), city: z.string(), address: z.string() }),
+  delivery: z.object({
+    zoneType: z.enum(ZONE_TYPES),
+    country: z.string(),
+    city: z.string(),
+    address: z.string(),
+    // Facultatif : les reçus enregistrés avant l'affichage des délais (RM-47) n'en ont pas.
+    delay: z.object({ minHours: money, maxHours: money }).optional(),
+  }),
   lines: z.array(z.object({ name: z.string(), unitPrice: money, quantity: money, lineTotal: money })),
   amounts: z.object({ currency: z.literal('XOF'), subtotal: money, deliveryFee: money.nullable(), total: money.nullable(), upfrontAmount: money.nullable() }),
   paymentTerms: z.string(),

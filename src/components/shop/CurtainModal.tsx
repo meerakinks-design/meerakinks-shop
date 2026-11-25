@@ -48,7 +48,15 @@ export function CurtainModal({ hash, title, ariaLabel, closeLabel = 'Fermer', br
     timeline.current?.kill();
 
     if (isOpen) {
-      if (!dialog.open) dialog.showModal();
+      if (!dialog.open) {
+        dialog.showModal();
+        // showModal() donne le focus à un élément du panneau. Dès la 2e ouverture, rideaux et panneau sont encore rangés hors
+        // écran (à droite) : le navigateur fait alors défiler le <dialog> (overflow: hidden) jusqu'au bouton ✕, ce qui annule
+        // le glissement (panneau déjà en place, rideaux qui partent à gauche). On remet donc le défilement à zéro, et le CSS
+        // utilise `overflow: clip` (aucun défilement possible) : les rideaux rejouent à CHAQUE ouverture et fermeture.
+        dialog.scrollLeft = 0;
+        dialog.scrollTop = 0;
+      }
       if (prefersReducedMotion()) {
         gsap.set(dialog.querySelectorAll('.curtain-layer, .curtain-panel, .menu-item-label, [data-rise]'), { clearProps: 'all' });
         return;

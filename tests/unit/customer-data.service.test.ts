@@ -22,6 +22,7 @@ const m = vi.hoisted(() => {
     auditEntry: vi.fn((entry: unknown, client: unknown) => ({ entry, client })),
     recordAudit: vi.fn(async () => undefined),
     purgeExpiredRateLimits: vi.fn(async () => undefined),
+    purgeExpiredAnalytics: vi.fn(async () => 7),
     logInfo: vi.fn(),
     logError: vi.fn(),
   };
@@ -29,6 +30,7 @@ const m = vi.hoisted(() => {
 vi.mock('@/server/db', () => ({ prisma: m.prisma }));
 vi.mock('@/server/services/audit.service', () => ({ auditEntry: m.auditEntry, recordAudit: m.recordAudit }));
 vi.mock('@/server/services/rate-limit', () => ({ purgeExpiredRateLimits: m.purgeExpiredRateLimits }));
+vi.mock('@/server/services/analytics.service', () => ({ purgeExpiredAnalytics: m.purgeExpiredAnalytics }));
 vi.mock('@/server/logger', () => ({ logInfo: m.logInfo, logError: m.logError }));
 
 const { anonymizeCustomerByPhone, purgeExpiredCustomers, runRetentionJob } = await import('@/server/services/customer-data.service');
@@ -37,7 +39,7 @@ const NOW = new Date('2026-11-20T10:00:00Z');
 const RECEIPT = {
   version: 1,
   issuedAt: '2026-01-01T10:00:00.000Z',
-  customer: { fullName: 'Awa Koné', phone: '+2250700000000', email: 'awa@example.com' },
+  customer: { firstName: 'Awa', lastName: 'Koné', phone: '+2250700000000', email: 'awa@example.com' },
   delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: 'Riviera 3, villa 12' },
   amounts: { currency: 'XOF', subtotal: 10000, deliveryFee: 1500, total: 11500, upfrontAmount: 2000 },
 };
@@ -91,14 +93,14 @@ describe('anonymizeCustomerByPhone — effacement sur demande', () => {
     });
     const receiptCall = m.tx.receipt.update.mock.calls[0]![0] as { where: unknown; data: { data: Record<string, any> } };
     expect(receiptCall.where).toEqual({ id: 'rec_1' });
-    expect(receiptCall.data.data.customer).toEqual({ fullName: 'Client anonymisé', phone: '', email: null });
+    expect(receiptCall.data.data.customer).toEqual({ firstName: 'Client', lastName: 'anonymisé', phone: '', email: null });
     expect(receiptCall.data.data.delivery.address).toBe('Adresse supprimée');
     expect(receiptCall.data.data.amounts).toEqual(RECEIPT.amounts);
     expect(m.tx.payment.updateMany).toHaveBeenCalledWith({ where: { orderId: { in: ['ord_1', 'ord_2'] } }, data: { note: null } });
     expect(m.tx.orderStatusHistory.updateMany).toHaveBeenCalledWith({ where: { orderId: { in: ['ord_1', 'ord_2'] } }, data: { note: null } });
     expect(m.tx.customer.update).toHaveBeenCalledWith({
       where: { id: 'cus_1' },
-      data: { fullName: 'Client anonymisé', phone: 'anon-cus_1', email: null, anonymizedAt: NOW },
+      data: { firstName: 'Client', lastName: 'anonymisé', phone: 'anon-cus_1', email: null, anonymizedAt: NOW },
     });
   });
 
@@ -253,7 +255,8 @@ describe('runRetentionJob', () => {
   it('supprime toujours les empreintes anti-abus expirées, même quand la purge des clients est fermée', async () => {
     const result = await runRetentionJob({ purgeCustomers: false });
     expect(m.purgeExpiredRateLimits).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ rateLimitsPurged: true, customers: { enabled: false } });
+    expect(m.purgeExpiredAnalytics).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ rateLimitsPurged: true, analyticsPurged: 7, customers: { enabled: false } });
     expect(m.prisma.customer.findMany).not.toHaveBeenCalled();
   });
 

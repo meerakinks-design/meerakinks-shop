@@ -16,6 +16,8 @@
 //    du site). Ce n'est pas un bon échange ici : la politique reste utile pour tout le reste (origines des images,
 //    connexions, formulaires, cadres, <base>, <object>). 'unsafe-inline' (styles) : les couleurs de section sont
 //    posées en attribut style.
+//  - `blob:` en connect-src : three.js (scène 3D de la landing) relit les textures embarquées dans les GLB via une URL
+//    blob: créée par le navigateur lui-même ; les GLB sont servis en local (`/models`, 'self').
 //  - Aucun joker (*) : chaque origine est nommée.
 
 const CLOUDINARY_IMAGES = 'https://res.cloudinary.com';
@@ -36,7 +38,7 @@ export function buildCsp({ isDev = false, allowMapTiles = false } = {}) {
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': ["'self'", 'data:', 'blob:', CLOUDINARY_IMAGES, ...(allowMapTiles ? [OSM_TILES] : [])],
     'font-src': ["'self'", 'data:'],
-    'connect-src': ["'self'", CLOUDINARY_UPLOAD, ...(isDev ? ['ws://localhost:*', 'http://localhost:*', VERCEL_ANALYTICS_DEBUG] : [])],
+    'connect-src': ["'self'", 'blob:', CLOUDINARY_UPLOAD, ...(isDev ? ['ws://localhost:*', 'http://localhost:*', VERCEL_ANALYTICS_DEBUG] : [])],
     'media-src': ["'self'", CLOUDINARY_IMAGES],
     'manifest-src': ["'self'"],
     'frame-src': ["'none'"],

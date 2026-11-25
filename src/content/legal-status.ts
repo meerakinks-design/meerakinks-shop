@@ -7,3 +7,6 @@
 export const PRIVACY_TEXTS_VALIDATED = false;
 
 export const PROVISIONAL_NOTICE = 'Version provisoire : ce texte est en cours de validation par la boutique.';
+
+/** Date de la dernière mise à jour des textes légaux (donnée, jamais écrite à la main dans un texte). */
+export const LEGAL_LAST_UPDATED = '24 novembre 2026';

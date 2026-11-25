@@ -10,7 +10,7 @@
 
 /* ---------- Marges (réf. capture : bloc de texte centré, grandes marges latérales et verticales) ---------- */
 .section { padding-block: clamp(3.5rem, 11vw, 8rem); }
-.section > .container > :is(.eyebrow, h2, .lead), .section-head :is(.eyebrow, h2, .lead) { text-align: center; margin-inline: auto; }
+.section > .container > :is(h2, .lead), .section-head :is(h2, .lead) { text-align: center; margin-inline: auto; }
 .section > .container > h2, .section-head h2 { max-width: 20ch; margin-bottom: var(--space-4); text-wrap: balance; }
 .section > .container > .lead, .section-head > .lead { max-width: 52rem; margin-bottom: clamp(2rem, 5vw, 3.5rem); text-wrap: balance; }
 
@@ -22,14 +22,23 @@
 .section-brand .lead, .section-brand .help-text { max-width: 40rem; margin-inline: auto; }
 
 /* ---------- En-tête : logo à gauche · Boutique · panier (badge) · menu ---------- */
-.site-header { border-bottom: 0; background: color-mix(in srgb, var(--color-bg) 94%, transparent); }
+/* L'en-tête n'a aucun fond (voir shop.css) : les boutons gardent le leur pour rester lisibles sur les sections colorées. */
 .header-inner { justify-content: space-between; min-height: 4.25rem; gap: var(--space-2); }
 .header-actions { margin-left: 0; gap: var(--space-2); }
 .header-shop { display: inline-flex; align-items: center; justify-content: center; min-height: 3rem; padding: 0 1.1rem; border-radius: 12px; background: var(--color-orange); color: var(--color-brown); font-size: 1.1875rem; font-weight: 800; text-decoration: none; white-space: nowrap; }
-.header-icon-btn { position: relative; display: inline-grid; place-items: center; width: 3rem; min-width: 3rem; height: 3rem; min-height: 3rem; padding: 0; border: 2px solid var(--color-brown); border-radius: 12px; background: transparent; color: var(--color-brown); cursor: pointer; text-decoration: none; }
+.header-icon-btn { position: relative; display: inline-grid; place-items: center; width: 3rem; min-width: 3rem; height: 3rem; min-height: 3rem; padding: 0; border: 2px solid var(--color-brown); border-radius: 12px; background: var(--color-bg); color: var(--color-brown); cursor: pointer; text-decoration: none; }
 .header-icon-btn:hover { background: var(--color-brown); color: var(--color-beige); }
 .menu-toggle { display: inline-grid !important; }
 .cart-badge { top: -0.45rem; right: -0.45rem; background: var(--color-orange); color: var(--color-brown); border: 2px solid var(--color-bg); }
+/* Petits téléphones : l'en-tête tient dans 360 px sans déborder. Sous 336 px, « Commander » quitte l'en-tête : le menu propose déjà la boutique. */
+@media (max-width: 25rem) {
+  .brand-logo { height: 2.25rem; }
+  .header-inner { gap: 0.25rem; }
+  .header-actions { gap: 0.375rem; }
+  .header-shop { min-height: 2.75rem; padding: 0 0.7rem; font-size: 1rem; }
+  .header-icon-btn { width: 2.75rem; min-width: 2.75rem; height: 2.75rem; min-height: 2.75rem; }
+}
+@media (max-width: 21rem) { .header-shop { display: none; } }
 @media (min-width: 900px) { .header-inner { min-height: 5rem; } .header-shop { min-height: 3.25rem; padding-inline: 1.5rem; } .header-icon-btn { width: 3.25rem; height: 3.25rem; } }
 
 /* ---------- Loader d'entrée ---------- */
@@ -61,7 +70,7 @@ html.is-intro { overflow: hidden; }
    UN SEUL mécanisme (CurtainModal) : deux rideaux de couleur glissent depuis la droite, puis le panneau beige ; ensuite
    les liens (ou les lignes du panier, les champs) montent un à un. Ordinateur : le panneau reste collé à droite, largeur
    fixe. Téléphone : il occupe tout l'écran (voir la requête max-width: 699px plus bas) ; seul le bouton ✕ ou Retour le referme. */
-.curtain-dialog { --drawer-w: calc(100% - 3.5rem); border: 0; padding: 0; margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: transparent; overflow: hidden; color: var(--color-brown); }
+.curtain-dialog { --drawer-w: calc(100% - 3.5rem); border: 0; padding: 0; margin: 0; width: 100%; height: 100%; max-width: none; max-height: none; background: transparent; overflow: hidden; overflow: clip; color: var(--color-brown); }
 .curtain-dialog:not([open]) { display: none; }
 .curtain-dialog::backdrop { background: rgb(127 63 32 / 0.55); }
 .curtain-dialog[open]::backdrop { animation: curtain-fade 0.35s ease-out both; }
@@ -99,15 +108,14 @@ html.is-intro { overflow: hidden; }
 .menu-item::after { content: counter(menuItem, decimal-leading-zero); margin-left: auto; color: var(--color-terracotta); font-size: 1rem; font-weight: 600; letter-spacing: 0; }
 .menu-item:hover .menu-item-label { color: var(--color-terracotta); }
 .menu-item-label { display: inline-block; will-change: transform; transform-origin: 50% 100%; }
-.menu-socials { list-style: none; margin: auto 0 0; padding: 1.5rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--space-3); }
-.menu-social { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 3.5rem; padding: 0 1rem; border: 2px solid var(--color-brown); border-radius: 14px; color: var(--color-brown); font-size: 1.125rem; font-weight: 800; text-decoration: none; }
+.menu-socials { list-style: none; margin: auto 0 0; padding: 1.5rem 0 0; display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.menu-social { display: inline-grid; place-items: center; width: 3.5rem; height: 3.5rem; border: 2px solid var(--color-brown); border-radius: 50%; color: var(--color-brown); text-decoration: none; }
 .menu-social:hover { background: var(--color-brown); color: var(--color-beige); }
 
 /* ---------- Héros ---------- */
-.hero { position: relative; padding-block: clamp(1rem, 4vw, 2.5rem) 0; overflow: hidden; }
+.hero { position: relative; padding-block: clamp(2.5rem, 8vw, 4rem) 0; overflow: hidden; }
 .hero-inner { display: grid; justify-items: center; text-align: center; }
-.hero-eyebrow { margin: 0; }
-.hero-title { max-width: none; margin: var(--space-3) 0 0; font-size: var(--text-hero); font-weight: 800; line-height: 0.92; letter-spacing: -0.035em; text-transform: none; }
+.hero-title { max-width: none; margin: 0; font-size: var(--text-hero); font-weight: 800; line-height: 0.92; letter-spacing: -0.035em; text-transform: none; }
 .hero-title-main { display: block; }
 .hero-title-script { display: block; margin-top: -0.06em; font-family: var(--font-brand); font-size: var(--text-hero-script); font-weight: 400; line-height: 0.85; letter-spacing: 0; color: var(--color-terracotta); transform: rotate(-4deg); }
 .hero-reassurance { margin: var(--space-2) 0 0; max-width: 30rem; font-size: 0.9375rem; font-weight: 600; }
@@ -236,7 +244,7 @@ li:nth-child(5n + 5) > .product-card { --card-bg: var(--color-terracotta); --car
 
 /* Partie 3 : nom de la marque en grand (texte, jamais un logo) puis copyright et crédit */
 .footer-bottom { position: relative; }
-.footer-watermark { margin: 0; overflow: hidden; color: var(--color-peach); opacity: 0.4; font-size: clamp(2.2rem, 14.5vw, 10.25rem); font-weight: 800; letter-spacing: -0.04em; line-height: 1.02; text-align: center; white-space: nowrap; -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); user-select: none; pointer-events: none; }
+.footer-watermark { margin: 0; overflow: hidden; color: var(--color-peach); opacity: 0.4; font-family: var(--font-logo); font-size: clamp(2.2rem, 14.5vw, 11.5rem); font-weight: 400; font-synthesis: none; letter-spacing: 0; line-height: 1.02; text-align: center; white-space: nowrap; -webkit-mask-image: linear-gradient(#000 55%, transparent); mask-image: linear-gradient(#000 55%, transparent); user-select: none; pointer-events: none; }
 .footer-credit-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.25rem 1.5rem; padding-block: var(--space-3) var(--space-6); border-top: 1px solid rgb(255 255 255 / 0.18); font-size: 0.875rem; }
 .footer-credit-row p { margin: 0; }
 
@@ -329,3 +337,17 @@ li:nth-child(5n + 5) > .product-card { --card-bg: var(--color-terracotta); --car
 .field :is(input, select, textarea):focus-visible, .shop-search input:focus-visible, .search-form input:focus-visible { border-style: solid; border-color: var(--color-brown); }
 .field [aria-invalid='true'] { border-style: solid; border-color: var(--color-danger); }
 .field .dial-group, .dial-group { border: 1px dashed var(--form-line); border-radius: var(--field-r); background: transparent; }
+
+/* ---------- Marges latérales : le contenu va jusqu'aux limites de l'écran ----------
+   Plus de largeur maximale : une simple gouttière de part et d'autre. Les pages de lecture (mentions légales, à propos…)
+   gardent des lignes de texte lisibles, mais leurs blocs ne sont plus enfermés dans une colonne étroite au centre. */
+:root { --gutter: clamp(0.75rem, 1.8vw, 1.5rem); }
+.container { width: calc(100% - 2 * var(--gutter)); max-width: none; }
+.page-narrow { max-width: none; }
+.page-narrow :is(p, li, dd) { max-width: 78ch; }
+.why-steps { max-width: none; margin-inline: 0; }
+.category-feature { max-width: none; }
+.product-story { max-width: none; }
+
+/* Délai de livraison indicatif sous la destination (formulaire de commande) */
+.checkout-delay { display: grid; gap: var(--space-1); }

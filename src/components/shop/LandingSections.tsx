@@ -2,6 +2,7 @@ import type { CSSProperties } from 'react';
 import Link from 'next/link';
 import { INSTAGRAM_POSTS, MAX_INSTAGRAM_POSTS, MIN_INSTAGRAM_POSTS } from '@/content/instagram';
 import { faqItems } from '@/content/faq';
+import type { DelaySummary, DeliveryNotes } from '@/lib/shop/delivery-delay';
 import { LANDING } from '@/content/landing';
 import { REVIEWS } from '@/content/avis';
 import { categoryPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
@@ -23,8 +24,8 @@ import { summarize } from '@/lib/shop/seo';
 
 /**
  * Héros (référence My Frida + Bucks) : gros titre en deux temps (la fin passe en cursive), bouton pastille incliné,
- * badge circulaire qui tourne, disque orange derrière les produits qui flottent. Le surtitre et le titre jouent l'effet
- * élastique dès l'affichage ; la description reste fixe. Les produits viennent du catalogue ; sans photo, la tête aux
+ * badge circulaire qui tourne, disque orange derrière les produits qui flottent. Le titre joue l'effet élastique dès
+ * l'affichage ; la description reste fixe. Aucun surtitre au-dessus des titres. Les produits viennent du catalogue ; sans photo, la tête aux
  * deux puffs de la marque tient la scène.
  */
 export function Hero({ showCollections, iconSrc }: { showCollections: boolean; products?: readonly ShopProduct[]; iconSrc: string }) {
@@ -32,7 +33,6 @@ export function Hero({ showCollections, iconSrc }: { showCollections: boolean; p
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="container hero-inner">
-        <Spaghetti as="p" trigger="mount" className="eyebrow hero-eyebrow">{hero.eyebrow}</Spaghetti>
         <h1 id="hero-title" className="hero-title" aria-label={hero.title}>
           <Spaghetti as="span" mode="chars" trigger="mount" className="hero-title-main">{hero.titleMain}</Spaghetti>{' '}
           <Spaghetti as="span" mode="chars" trigger="mount" className="hero-title-script">{hero.titleScript}</Spaghetti>
@@ -104,7 +104,6 @@ export function Collections({ sections, hasOffers }: { sections: readonly Catego
   return (
     <section id="collections" className="section" aria-labelledby="collections-title">
       <div className="container">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="collections-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
         <ul className="collection-cards">
@@ -133,7 +132,6 @@ export function BestSellers({ products }: { products: readonly ShopProduct[] }) 
   return (
     <section id="best-sellers" className="section" aria-labelledby="best-sellers-title">
       <div className="container">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="best-sellers-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
         <ul className="row-scroll">
@@ -158,7 +156,6 @@ export function StoryTeaser({ storeName }: { storeName: string }) {
   return (
     <section className="section section-brand" aria-labelledby="story-title">
       <div className="container page-narrow">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="story-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.intro[0], { storeName })}</p>
         <Link href={PUBLIC_ROUTES.about} className="btn btn-quiet">
@@ -178,7 +175,6 @@ export function Focus({ product }: { product: FocusProduct }) {
           <ProductImage image={product.image} sizes="(min-width: 900px) 40vw, 90vw" />
         </div>
         <div>
-          <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
           <Spaghetti as="h2" id="focus-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
           <p className="lead">{copy.text}</p>
           <Spaghetti as="h3">{product.name}</Spaghetti>
@@ -212,7 +208,6 @@ export function Why({ storeName }: { storeName: string }) {
   return (
     <section id="pourquoi-nous" className="section section-brand" aria-labelledby="why-title">
       <div className="container">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="why-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.intro, { storeName })}</p>
         <div className="stage-split">
@@ -251,7 +246,6 @@ export function Reviews({ settings }: { settings: PublicSettings }) {
   return (
     <section id="avis" className="section" aria-labelledby="reviews-title">
       <div className="container">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="reviews-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         {reviews.length > 0 ? (
           <>
@@ -291,7 +285,6 @@ export function Instagram({ settings }: { settings: PublicSettings }) {
   return (
     <section id="instagram" className="section section-tinted" aria-labelledby="instagram-title">
       <div className="container">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="instagram-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.text, { storeName: settings.storeName })}</p>
         <ul className="instagram-grid">
@@ -316,9 +309,9 @@ export function Instagram({ settings }: { settings: PublicSettings }) {
   );
 }
 
-export function Faq({ settings }: { settings: PublicSettings }) {
+export function Faq({ settings, delays, notes }: { settings: PublicSettings; delays?: DelaySummary; notes?: DeliveryNotes }) {
   const copy = LANDING.faq;
-  const items = faqItems(settings.depositAmount, settings.storeName);
+  const items = faqItems(settings.depositAmount, settings.storeName, delays, notes);
   const askLink = whatsappLink(settings.whatsappNumber, fill(LANDING.contact.whatsappMessage, { storeName: settings.storeName }));
   return (
     <section id="faq" className="section" aria-labelledby="faq-title">
@@ -378,7 +371,6 @@ export function Contact({ settings }: { settings: PublicSettings }) {
   return (
     <section id="contact" className="section section-tinted" aria-labelledby="contact-title">
       <div className="container page-narrow">
-        <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
         <Spaghetti as="h2" id="contact-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
         {hasChannels && (

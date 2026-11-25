@@ -22,7 +22,6 @@ export default async function AboutPage() {
 
   return (
     <article className="container section about-page page-narrow" aria-labelledby="about-title">
-      <Spaghetti as="p" className="eyebrow">{copy.eyebrow}</Spaghetti>
       <Spaghetti as="h1" id="about-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
       {copy.intro.map((paragraph) => (
         <p key={paragraph} className="lead">

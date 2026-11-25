@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ORDER_THANKS } from '@/content/livraison';
 import { PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { formatFcfa } from '@/lib/money';
+import { deliveryNoticeLines, type DeliveryNotes } from '@/lib/shop/delivery-delay';
 import type { OrderCreated, OrderRecap } from '@/lib/shop/order-types';
 import { OrderNotice, OrderTotals } from './OrderSummary';
 import { ReceiptPrinter } from './ReceiptPrinter';
@@ -15,12 +16,15 @@ export function OrderConfirmation({
   order,
   depositAmount,
   storeName,
+  deliveryNotes,
   variant = 'page',
   onContinue,
 }: {
   order: OrderCreated;
   depositAmount: number;
   storeName?: string;
+  /** Précisions de la vendeuse sur les délais (réglages de livraison). */
+  deliveryNotes?: DeliveryNotes;
   /** `page` : page /commande/confirmation (titre h1). `modal` : même contenu dans le modal de droite (titre porté par l'en-tête du modal). */
   variant?: 'page' | 'modal';
   /** Modal : appelé par « Continuer mes achats » pour fermer avant de changer de page. */
@@ -40,7 +44,6 @@ export function OrderConfirmation({
   };
   return (
     <article className={inModal ? 'order-confirmation is-modal' : 'container order-confirmation'}>
-      <p className="eyebrow">Commande enregistrée</p>
       {inModal ? null : <h1>{ORDER_THANKS}</h1>}
       <p>
         Votre référence : <strong className="order-reference">{order.reference}</strong>. Gardez-la, elle vous sera utile pour toute question.
@@ -61,6 +64,12 @@ export function OrderConfirmation({
           ))}
         </ul>
         <p className="help-text">Livraison : {order.placeLabel}</p>
+        {order.deliveryDelay &&
+          deliveryNoticeLines(order.deliveryDelay, deliveryNotes).map((line) => (
+            <p key={line} className="help-text">
+              {line}
+            </p>
+          ))}
         <OrderTotals subtotal={order.subtotal} deliveryFee={order.deliveryFee} total={order.total} upfrontAmount={order.upfrontAmount} zoneType={order.zoneType} />
       </section>
 

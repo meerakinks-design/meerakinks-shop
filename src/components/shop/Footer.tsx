@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { cld } from '@/lib/cloudinary-static';
 import { PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { hasContactSection } from '@/lib/shop/contact';
+import { buildSocialLinks } from '@/lib/shop/socials';
 import type { PublicSettings } from '@/server/services/catalog.queries';
 import { FooterCredit } from './FooterCredit';
 import { SmashGame } from './SmashGame';
@@ -24,13 +25,11 @@ interface FooterIcon {
  */
 export function Footer({ settings, showCollections, accents = [] }: { settings: PublicSettings; showCollections: boolean; accents?: readonly string[] }) {
   const { storeName } = settings;
+  // WhatsApp, Instagram, TikTok, Facebook (mêmes liens et même ordre que le pied du menu), puis l'e-mail.
   const icons: FooterIcon[] = [
-    settings.whatsappLink ? { name: 'whatsapp' as const, label: 'WhatsApp', href: settings.whatsappLink } : null,
-    settings.contactEmail ? { name: 'mail' as const, label: 'Nous écrire par e-mail', href: `mailto:${settings.contactEmail}` } : null,
-    settings.instagramUrl ? { name: 'instagram' as const, label: 'Instagram', href: settings.instagramUrl } : null,
-    settings.tiktokUrl ? { name: 'tiktok' as const, label: 'TikTok', href: settings.tiktokUrl } : null,
-    settings.facebookUrl ? { name: 'facebook' as const, label: 'Facebook', href: settings.facebookUrl } : null,
-  ].filter((icon): icon is FooterIcon => icon !== null);
+    ...buildSocialLinks(settings),
+    ...(settings.contactEmail ? [{ name: 'mail' as const, label: 'Nous écrire par e-mail', href: `mailto:${settings.contactEmail}` }] : []),
+  ];
   const showContact = hasContactSection(settings);
 
   return (

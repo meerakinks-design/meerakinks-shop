@@ -21,6 +21,9 @@ export default async function AdminLoginPage() {
         <div className="login-brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/brand/logo-meera-kinks-beige.png" alt="Meëra Kinks" width={240} height={94} />
+          <p className="login-script" aria-hidden="true">
+            Bienvenue
+          </p>
           <p>Espace de gestion de la boutique</p>
         </div>
         <div className="card login-card">

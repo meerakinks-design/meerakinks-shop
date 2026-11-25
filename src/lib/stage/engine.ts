@@ -122,7 +122,10 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
   let elixir: Group | null = null;
   let brume: Group | null = null;
   let disposed = false;
-  const idle = (cb: () => void) => ('requestIdleCallback' in window ? window.requestIdleCallback(cb, { timeout: 1500 }) : window.setTimeout(cb, 300));
+  const idle = (cb: () => void) => {
+    const w = window as Window & { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number };
+    return w.requestIdleCallback ? w.requestIdleCallback(cb, { timeout: 1500 }) : window.setTimeout(cb, 300);
+  };
   idle(() => {
     loadModel(STAGE.models.elixir.url).then((m) => { if (!disposed) elixir = m; }).catch(() => undefined);
     loadModel(STAGE.models.brume.url).then((m) => { if (!disposed) brume = m; }).catch(() => undefined);
@@ -207,7 +210,7 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
 
   // ---------- Boucle : Lenis → ScrollTrigger → rendu ----------
   const lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
-  lenis.on('scroll', ScrollTrigger.update);
+  lenis.on('scroll', () => ScrollTrigger.update());
   const tick = (time: number) => {
     lenis.raf(time * 1000);
     if (document.hidden) return;
@@ -225,14 +228,15 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
 
   // Un ScrollTrigger recale les mesures à chaque « refresh » (images, polices, redimensionnement).
   ScrollTrigger.addEventListener('refresh', layout);
-  const refreshTrigger = ScrollTrigger.create({ start: 0, end: 'max' });
-  const revealCheck = gsap.from('.cta-checks li', {
-    autoAlpha: 0,
-    y: 18,
-    stagger: 0.08,
-    duration: 0.6,
-    ease: 'power2.out',
-    scrollTrigger: { trigger: '.cta-card', start: 'top 68%', once: true },
+  const ctx = gsap.context(() => {
+    gsap.from('.cta-checks li', {
+      autoAlpha: 0,
+      y: 18,
+      stagger: 0.08,
+      duration: 0.6,
+      ease: 'power2.out',
+      scrollTrigger: { trigger: '.cta-card', start: 'top 68%', once: true },
+    });
   });
 
   resize();
@@ -263,9 +267,7 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
     lockObserver.disconnect();
     gsap.ticker.remove(tick);
     ScrollTrigger.removeEventListener('refresh', layout);
-    refreshTrigger.kill();
-    revealCheck.scrollTrigger?.kill();
-    revealCheck.kill();
+    ctx.revert();
     lenis.destroy();
     scene.traverse((node) => {
       const mesh = node as Mesh;

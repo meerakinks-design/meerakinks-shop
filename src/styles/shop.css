@@ -11,7 +11,6 @@ main:focus { outline: none; }
 }
 .skip-link:focus { top: var(--space-3); }
 
-.eyebrow { font-size: 0.8125rem; letter-spacing: 0.12em; font-weight: 700; margin: 0 0 var(--space-3); color: var(--color-text-muted); }
 .lead { font-size: 1.125rem; max-width: 46rem; }
 .section { padding-block: clamp(2.5rem, 7vw, 5rem); }
 .section-tinted { background: color-mix(in srgb, var(--color-border) 45%, var(--color-bg)); }
@@ -22,7 +21,10 @@ main:focus { outline: none; }
 .section-link { font-weight: 600; }
 
 /* ---------- En-tête ---------- */
-.site-header { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--color-bg) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--color-border); }
+/* En-tête sans fond ni bordure ni flou : il se fond dans la page (le back-office garde son propre bandeau, voir admin.css).
+   Il reste collé en haut ; seuls le logo et les boutons captent les clics, le contenu qui passe dessous reste cliquable. */
+.site-header { position: sticky; top: 0; z-index: 40; background: none; border: 0; box-shadow: none; pointer-events: none; }
+.site-header a, .site-header button { pointer-events: auto; }
 .header-inner { display: flex; align-items: center; gap: var(--space-4); min-height: 4rem; }
 .brand { font-weight: 800; font-size: 1.25rem; text-decoration: none; letter-spacing: 0.02em; display: inline-flex; align-items: center; }
 .brand-logo { width: auto; height: clamp(2.5rem, 7vw, 3.25rem); aspect-ratio: 1600 / 624; object-fit: contain; }
@@ -414,10 +416,9 @@ body:has(dialog[open]) { overflow: hidden; }
 
 /* ---------- Répartition 40 % orange · 50 % beige · 10 % marron ----------
    Les sections « marque » posent l'orange en grand aplat. Titres et descriptions sont posés directement dessus, sans carte :
-   titres en marron de la charte, descriptions en marron profond (5,1:1 sur l'orange). Le surtitre garde sa pastille marron. */
+   titres en marron de la charte, descriptions en marron profond (5,1:1 sur l'orange). */
 .section-brand { background: var(--color-primary); color: var(--color-brown); }
 .section-brand h2, .section-brand h3 { font-weight: 800; }
-.section-brand .eyebrow { display: inline-block; padding: var(--space-1) var(--space-3); border-radius: 999px; background: var(--color-brown); color: var(--color-beige); }
 .section-brand .lead, .section-brand .help-text { padding: 0; background: none; color: var(--color-brown-deep); }
 .section-brand .btn:not(.btn-quiet) { background: var(--color-brown); color: var(--color-beige); }
 .section-brand .btn-quiet { background: var(--color-bg); border-color: var(--color-brown); color: var(--color-brown); }

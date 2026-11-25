@@ -2,27 +2,24 @@
 
 import Link from 'next/link';
 import { MODAL_HASHES, PUBLIC_ROUTES } from '@/lib/constants/routes';
+import type { SocialLink } from '@/lib/shop/socials';
 import { useCart } from './CartProvider';
 import { CurtainModal } from './CurtainModal';
 import { ModalLink } from './ModalLink';
+import { SocialIcon } from './SocialIcons';
 import { useModal } from './useModal';
-
-export interface MenuSocial {
-  label: string;
-  href: string;
-}
 
 interface MenuModalProps {
   storeName: string;
   showCollections: boolean;
   showContact: boolean;
-  socials: readonly MenuSocial[];
+  socials: readonly SocialLink[];
 }
 
 /**
  * Menu en modal : même mécanisme que le panier, la commande et la confirmation (CurtainModal) : deux rideaux de
  * couleur glissent depuis la droite, puis le panneau beige ; les liens montent un à un. Le panneau reste collé à droite
- * sur ordinateur, et occupe tout l'écran sur téléphone.
+ * sur ordinateur, et occupe tout l'écran sur téléphone. Au pied du menu : les icônes WhatsApp, Instagram, TikTok et Facebook.
  */
 export function MenuModal({ storeName, showCollections, showContact, socials }: MenuModalProps) {
   const { close } = useModal(MODAL_HASHES.menu);
@@ -69,12 +66,9 @@ export function MenuModal({ storeName, showCollections, showContact, socials }: 
       {socials.length > 0 && (
         <ul className="menu-socials" aria-label="Réseaux sociaux">
           {socials.map((social) => (
-            <li key={social.label} data-rise="">
-              <a className="menu-social" href={social.href} target="_blank" rel="noopener noreferrer">
-                <span>{social.label}</span>
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-                  <path d="M7 17L17 7M9 7h8v8" />
-                </svg>
+            <li key={social.name} data-rise="">
+              <a className="menu-social" href={social.href} aria-label={social.label} target="_blank" rel="noopener noreferrer">
+                <SocialIcon name={social.name} size={26} />
               </a>
             </li>
           ))}

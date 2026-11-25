@@ -5,6 +5,7 @@ import { whatsappLink } from '@/lib/shop/whatsapp';
 import type { ShopCategory, ShopProduct } from '@/lib/shop/sections';
 import type { ShopParams } from '@/lib/shop/search';
 import { emptyZones, type PublicZones } from '@/lib/shop/zones';
+import { DEFAULT_DELAYS, summarizeDelays, type DeliveryNotes, type DelaySummary } from '@/lib/shop/delivery-delay';
 import { prisma } from '@/server/db';
 
 // Lectures PUBLIQUES du catalogue : jamais un brouillon, un produit archivé ou une catégorie archivée.
@@ -78,8 +79,33 @@ const DEFAULT_SETTINGS: PublicSettings = {
   depositAmount: 2000,
 };
 
+/** Adresse https lue dans l'environnement (INSTAGRAM_URL…), sinon null : une valeur invalide est ignorée, jamais fabriquée. */
+function socialUrlFromEnv(name: 'INSTAGRAM_URL' | 'TIKTOK_URL' | 'FACEBOOK_URL'): string | null {
+  const value = process.env[name]?.trim();
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Les liens Instagram, TikTok et Facebook se saisissent dans les réglages (base). Tant qu'aucun écran ne permet de les
+ * saisir, INSTAGRAM_URL, TIKTOK_URL et FACEBOOK_URL (Vercel > Environment Variables) prennent le relais pour tout lien resté vide.
+ */
+function withSocialFallback(settings: PublicSettings): PublicSettings {
+  return {
+    ...settings,
+    instagramUrl: settings.instagramUrl ?? socialUrlFromEnv('INSTAGRAM_URL'),
+    tiktokUrl: settings.tiktokUrl ?? socialUrlFromEnv('TIKTOK_URL'),
+    facebookUrl: settings.facebookUrl ?? socialUrlFromEnv('FACEBOOK_URL'),
+  };
+}
+
 export async function getPublicSettings(): Promise<PublicSettings> {
-  if (skipDatabase()) return DEFAULT_SETTINGS;
+  if (skipDatabase()) return withSocialFallback(DEFAULT_SETTINGS);
   const settings = await prisma.storeSettings.findUnique({
     where: { id: STORE_SETTINGS_ID },
     select: {
@@ -94,9 +120,9 @@ export async function getPublicSettings(): Promise<PublicSettings> {
       depositAmount: true,
     },
   });
-  if (!settings) return DEFAULT_SETTINGS;
+  if (!settings) return withSocialFallback(DEFAULT_SETTINGS);
   const link = whatsappLink(settings.sellerWhatsApp);
-  return {
+  return withSocialFallback({
     storeName: settings.storeName,
     whatsappNumber: link ? settings.sellerWhatsApp : null,
     whatsappLink: link,
@@ -107,7 +133,7 @@ export async function getPublicSettings(): Promise<PublicSettings> {
     facebookUrl: settings.facebookUrl,
     focusProductId: settings.focusProductId,
     depositAmount: settings.depositAmount,
-  };
+  });
 }
 
 /**
@@ -120,10 +146,44 @@ export async function getPublicZones(): Promise<PublicZones> {
   const rows = await prisma.deliveryZone.findMany({
     where: { isActive: true },
     orderBy: [{ position: 'asc' }, { name: 'asc' }],
-    select: { id: true, name: true, type: true, fee: true },
+    select: { id: true, name: true, type: true, fee: true, deliveryMinHours: true, deliveryMaxHours: true },
   });
-  for (const row of rows) zones[row.type].push({ id: row.id, name: row.name, fee: row.fee });
+  for (const row of rows) {
+    zones[row.type].push({ id: row.id, name: row.name, fee: row.fee, deliveryMinHours: row.deliveryMinHours, deliveryMaxHours: row.deliveryMaxHours });
+  }
   return zones;
+}
+
+/** Délais et textes de livraison affichés partout : une SEULE lecture (RM-41), faite à partir des zones actives. */
+export interface PublicDelivery {
+  summary: DelaySummary;
+  notes: DeliveryNotes;
+}
+
+export const DEFAULT_DELIVERY: PublicDelivery = { summary: { ...DEFAULT_DELAYS }, notes: { leadTimeNote: null, rules: null } };
+
+export async function getPublicDelivery(): Promise<PublicDelivery> {
+  if (skipDatabase()) return DEFAULT_DELIVERY;
+  const [zones, settings] = await Promise.all([
+    prisma.deliveryZone.findMany({ where: { isActive: true }, select: { type: true, deliveryMinHours: true, deliveryMaxHours: true } }),
+    prisma.storeSettings.findUnique({ where: { id: STORE_SETTINGS_ID }, select: { deliveryLeadTimeNote: true, deliveryRules: true } }),
+  ]);
+  return {
+    summary: summarizeDelays(zones),
+    notes: { leadTimeNote: settings?.deliveryLeadTimeNote ?? null, rules: settings?.deliveryRules ?? null },
+  };
+}
+
+/** Identité légale du vendeur pour les mentions légales et les CGV (colonnes `legalName` et `address`). Absent = non affiché. */
+export interface LegalIdentity {
+  legalName: string | null;
+  address: string | null;
+}
+
+export async function getLegalIdentity(): Promise<LegalIdentity> {
+  if (skipDatabase()) return { legalName: null, address: null };
+  const settings = await prisma.storeSettings.findUnique({ where: { id: STORE_SETTINGS_ID }, select: { legalName: true, address: true } });
+  return { legalName: settings?.legalName?.trim() || null, address: settings?.address?.trim() || null };
 }
 
 // ---------------------------------------------------------------------------

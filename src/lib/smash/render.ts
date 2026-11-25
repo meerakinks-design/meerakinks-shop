@@ -1,19 +1,24 @@
 import type { Effects } from './effects';
 import { POT_KINDS, type PotKind, type SmashEngine } from './engine';
+import { hslToRgb, type Pose, type Pots3D, type Rgb } from './gl3d';
 import { tone, type PotPalette } from './palette';
+import { CUT, POT_SPAN, PITCH, cutCoreScale, cutFlashAlpha, cutHalfOpacity, cutHalfSpread, cutHalfYaw, potPose } from './pose';
 import { DESIGN, POT_MATERIAL, createPotSprite, type PotSprite } from './pots';
+import type { SlashTrail } from './trail';
 
 // Dessin d'une image du jeu sur le canvas. Le fond est celui de la page (CSS) : le canvas reste transparent.
 // Les pots sont pré-dessinés une fois (une image par contenant et par couleur) puis recopiés : le tour d'animation reste léger.
 
 const SPRITE_SCALE = 2.6;
-/** Un pot dessiné fait `radius × POT_SPAN` de haut. */
-const POT_SPAN = 2.4;
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 type MakeCanvas = (width: number, height: number) => HTMLCanvasElement | OffscreenCanvas;
 
 export class SmashRenderer {
   private readonly sprites = new Map<string, PotSprite>();
+  /** Pots en 3D (GLB) : absents tant qu'ils chargent ou si WebGL est indisponible, les pots dessinés prennent le relais. */
+  private three: Pots3D | null = null;
   private width = 0;
   private height = 0;
   private dpr = 1;
@@ -29,6 +34,29 @@ export class SmashRenderer {
     this.width = width;
     this.height = height;
     this.dpr = dpr;
+    this.three?.resize(width, height, dpr);
+  }
+
+  /** Branche (ou retire) le rendu 3D des pots. */
+  setThree(three: Pots3D | null): void {
+    this.three = three;
+    three?.resize(this.width, this.height, this.dpr);
+  }
+
+  /** Le rendu 3D est-il actif pour ce contenant ? */
+  private uses3d(kind: PotKind): boolean {
+    return Boolean(this.three && this.three.ready && this.three.hasModel(kind));
+  }
+
+  private tint(paletteIndex: number): Rgb {
+    const { h, s, l } = this.palette(paletteIndex);
+    return hslToRgb(h, s, l);
+  }
+
+  /** Crème : la couleur de la catégorie, éclaircie (même règle que l'éclaboussure). */
+  private creamTint(paletteIndex: number): Rgb {
+    const { h, s } = this.palette(paletteIndex);
+    return hslToRgb(h, clamp(s - 8, 30, 66), 86);
   }
 
   private palette(index: number): PotPalette {
@@ -50,10 +78,12 @@ export class SmashRenderer {
     for (const kind of POT_KINDS) for (let index = 0; index < this.palettes.length; index += 1) this.sprite(kind, index);
   }
 
-  draw(engine: SmashEngine, effects: Effects): void {
+  draw(engine: SmashEngine, effects: Effects, trail?: SlashTrail, now = 0): void {
     const { ctx } = this;
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     ctx.clearRect(0, 0, this.width, this.height);
+    // Secousse brève à chaque coupe (décor).
+    if (effects.shake > 0.05) ctx.translate(Math.sin(now * 0.11) * effects.shake, Math.cos(now * 0.13) * effects.shake * 0.8);
 
     // Ombres portées sur la « table » : plus le pot monte, plus son ombre est petite et claire.
     const floor = this.height - 12;
@@ -78,9 +108,10 @@ export class SmashRenderer {
 
     // Éclaboussures de crème au fond (sous les pots et les éclats).
     for (const splat of effects.splats) this.drawSplat(splat);
-    for (const half of effects.cutHalves) this.drawCutHalf(half);
+    for (const half of effects.cutHalves) if (!this.uses3d(half.kind)) this.drawCutHalf(half);
 
     for (const pot of engine.pots) {
+      if (this.uses3d(pot.kind)) continue;
       const scale = (pot.radius * POT_SPAN) / DESIGN.visualHeight;
       ctx.save();
       ctx.translate(pot.x, pot.y);
@@ -100,7 +131,105 @@ export class SmashRenderer {
     }
     for (const drop of effects.drops) this.drawDrop(drop);
     for (const shard of effects.shards) this.drawShard(shard);
+    // Les pots et les moitiés ouvertes passent devant les éclats et les gouttes : c'est la coupe qu'on veut voir.
+    this.draw3d(engine, effects);
+
     for (const popup of effects.popups) this.drawPopup(popup);
+    for (const flash of effects.flashes) this.drawFlash(flash);
+    if (trail) this.drawTrail(trail, now);
+  }
+
+  /** Pots, moitiés ouvertes et disque de crème en 3D, recopiés dans le canvas 2D à leur place dans les couches. */
+  private draw3d(engine: SmashEngine, effects: Effects): void {
+    const three = this.three;
+    if (!three || !three.ready) return;
+    let drawn = false;
+    const begin = () => {
+      if (drawn) return;
+      three.begin();
+      drawn = true;
+    };
+
+    for (const half of effects.cutHalves) {
+      if (!three.hasModel(half.kind)) continue;
+      begin();
+      const side = half.side === 'right' ? 'pos' : 'neg';
+      three.drawHalf(
+        half.kind,
+        side,
+        { x: half.x, y: half.y, size: half.radius * POT_SPAN, roll: half.angle, yaw: cutHalfYaw(half.side, half.yaw0, half.life), pitch: PITCH, opacity: cutHalfOpacity(half.life, half.maxLife), tint: this.tint(half.paletteIndex) },
+        cutHalfSpread(half.life),
+      );
+    }
+    for (const core of effects.cores) {
+      if (!three.hasModel(core.kind)) continue;
+      const grow = cutCoreScale(core.life);
+      if (grow <= 0.01) continue;
+      begin();
+      const pose: Pose = { x: core.x, y: core.y, size: core.radius * POT_SPAN, roll: core.angle, yaw: Math.PI / 2 + 0.12 * Math.sin(core.life * 0.012), pitch: PITCH * 0.5, opacity: clamp(1 - Math.max(0, core.life - CUT.coreHoldMs) / (CUT.coreOutMs - CUT.coreHoldMs), 0, 1), tint: this.creamTint(core.paletteIndex) };
+      three.drawCore(core.kind, pose, grow);
+    }
+    for (const pot of engine.pots) {
+      if (!three.hasModel(pot.kind)) continue;
+      begin();
+      three.drawWhole(pot.kind, { ...potPose(pot), opacity: 1, tint: this.tint(pot.paletteIndex) });
+    }
+    if (drawn) this.ctx.drawImage(three.end(), 0, 0, this.width, this.height);
+  }
+
+  /** Éclair le long de la coupe : un trait vif, très bref, et une lueur au centre. */
+  private drawFlash(flash: Effects['flashes'][number]) {
+    const { ctx } = this;
+    const alpha = cutFlashAlpha(flash.life);
+    if (alpha <= 0.01) return;
+    const length = flash.radius * 3;
+    const dx = Math.sin(flash.angle) * length * 0.5;
+    const dy = -Math.cos(flash.angle) * length * 0.5;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const glow = ctx.createRadialGradient(flash.x, flash.y, 0, flash.x, flash.y, flash.radius * 1.5);
+    glow.addColorStop(0, 'rgba(255,255,255,0.85)');
+    glow.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(flash.x, flash.y, flash.radius * 1.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = 'rgba(89,38,20,0.5)';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(flash.x - dx, flash.y - dy);
+    ctx.lineTo(flash.x + dx, flash.y + dy);
+    ctx.stroke();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2.4;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /** Traînée de coupe : un sillage blanc cerclé de brun chaud (lisible sur fond clair), fin et transparent vers la queue. */
+  private drawTrail(trail: SlashTrail, now: number) {
+    const { ctx } = this;
+    const segments = trail.segments(now);
+    if (segments.length === 0) return;
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    for (const layer of [
+      { color: (alpha: number) => `rgba(140,60,36,${0.32 * alpha})`, extra: 7 },
+      { color: (alpha: number) => `rgba(255,170,120,${0.62 * alpha})`, extra: 3.6 },
+      { color: (alpha: number) => `rgba(255,255,255,${0.98 * alpha})`, extra: 0 },
+    ]) {
+      for (const segment of segments) {
+        ctx.beginPath();
+        ctx.moveTo(segment.x0, segment.y0);
+        ctx.lineTo(segment.x1, segment.y1);
+        ctx.lineWidth = segment.width + layer.extra * segment.alpha;
+        ctx.strokeStyle = layer.color(segment.alpha);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
   }
 
   private drawCutHalf(half: Effects['cutHalves'][number]) {

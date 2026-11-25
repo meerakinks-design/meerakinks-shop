@@ -150,7 +150,12 @@ describe('en-tête et panier', () => {
 });
 
 describe('menu en modal', () => {
-  const socials = [{ label: 'Instagram', href: 'https://instagram.com/awa' }];
+  const socials = [
+    { name: 'whatsapp' as const, label: 'WhatsApp', href: 'https://wa.me/2250700000000' },
+    { name: 'instagram' as const, label: 'Instagram', href: 'https://instagram.com/awa' },
+    { name: 'tiktok' as const, label: 'TikTok', href: 'https://tiktok.com/@awa' },
+    { name: 'facebook' as const, label: 'Facebook', href: 'https://facebook.com/awa' },
+  ];
   it('liste Boutique, Notre histoire et Mon panier, et le contrôle de fermeture', () => {
     const html = wrap(<MenuModal storeName="Awa Beauty" showCollections={false} showContact={false} socials={[]} />);
     expect(html).toContain('<dialog');
@@ -174,6 +179,13 @@ describe('menu en modal', () => {
     expect(html).toContain('href="https://instagram.com/awa"');
     expect(html).toContain('rel="noopener noreferrer"');
   });
+  it('pied du menu : les icônes WhatsApp, Instagram, TikTok et Facebook, nommées pour les lecteurs d’écran', () => {
+    const html = wrap(<MenuModal storeName="Awa Beauty" showCollections showContact socials={socials} />);
+    for (const label of ['WhatsApp', 'Instagram', 'TikTok', 'Facebook']) expect(html).toContain(`aria-label="${label}"`);
+    expect(html.match(/class="menu-social"/g)).toHaveLength(4);
+    // les icônes sont des pictogrammes (svg), pas du texte : plus de libellé visible dans les liens
+    expect(html).not.toMatch(/<span>(WhatsApp|Instagram|TikTok|Facebook)<\/span>/);
+  });
 });
 
 describe('sections de la landing', () => {
@@ -184,23 +196,22 @@ describe('sections de la landing', () => {
     expect(without).toContain('href="/boutique"');
   });
 
-  it('Hero : titre en deux temps (slogan de la charte), badge qui tourne, et la tête de la marque tant qu’aucun produit n’a de photo', () => {
+  it('Hero : titre en deux temps (slogan de la charte), badge qui tourne, et l’affiche des soins à droite', () => {
     const html = renderToStaticMarkup(<Hero showCollections={false} iconSrc="/brand/favicon-icon.png" />);
     expect(html).toContain('hero-title-main');
     expect(html).toContain('hero-title-script');
     expect(html).toContain('aria-label="Vos kinks méritent le meilleur de votre routine."'); // titre complet pour les lecteurs d'écran et le référencement
     expect(html).toContain('Un besoin, une couleur.'); // phrase de réassurance, sous les boutons
     expect(html).toContain('class="hero-badge"');
-    expect(html).toContain('class="hero-icon"');
+    expect(html).toContain('src="/stage/hero2.webp"');
+    expect(html).toContain('data-stage-anchor="hero"'); // repère de l’élixir 3D (ScrollStage)
     expect(html).not.toContain('hero-main');
   });
 
-  it('Hero : les produits avec photo prennent la scène (un principal, trois qui flottent au plus) ; sans photo, ils sont ignorés', () => {
-    const products = [product('1'), product('2'), product('3'), product('4'), product('5'), product('6', { image: null })];
-    const html = renderToStaticMarkup(<Hero showCollections products={products} iconSrc="/brand/favicon-icon.png" />);
-    expect(html).toContain('href="/produit/slug-1"');
-    expect(html.match(/class="hero-float hero-float-\d"/g)).toHaveLength(3);
-    expect(html).not.toContain('slug-5');
+  it('Hero : l’affiche remplace le disque et les produits flottants ; ses produits ne dépendent plus du catalogue', () => {
+    const html = renderToStaticMarkup(<Hero showCollections iconSrc="/brand/favicon-icon.png" />);
+    expect(html).toContain('class="hero-poster-img"');
+    expect(html).not.toContain('hero-float');
     expect(html).not.toContain('class="hero-icon"');
   });
 

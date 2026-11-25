@@ -1,4 +1,5 @@
 import type { ZoneTypeValue } from '@/lib/constants/order';
+import type { DelayRange } from '@/lib/shop/delivery-delay';
 
 // Contrat partagé entre POST /api/v1/orders, la page de confirmation et le message WhatsApp.
 
@@ -27,6 +28,8 @@ export interface OrderRecap {
 export interface OrderCreated extends OrderRecap {
   /** Date d'enregistrement (ISO), imprimée sur le reçu ; absente si la lecture ne la fournit pas. */
   createdAt?: string;
+  /** Délai indicatif de la destination (RM-47) : celui de la zone, sinon celui de son type. Absent sur la réponse leurre. */
+  deliveryDelay?: DelayRange;
   /** Lien wa.me construit à partir de la commande ENREGISTRÉE ; null si le numéro de la vendeuse n'est pas configuré. */
   whatsappUrl: string | null;
 }

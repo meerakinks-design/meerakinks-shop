@@ -1,10 +1,12 @@
 import type { EmailType, Prisma } from '@prisma/client';
+import { formatAbidjanDateTime, sourceLabel } from '@/lib/analytics/classify';
 import { STORE_SETTINGS_ID } from '@/lib/constants/store';
 import { prisma } from '@/server/db';
 import { createResendTransport, getEmailConfig, EmailSendError, scrubError, type EmailConfig, type EmailTransport, type OutgoingEmail } from '@/server/integrations/resend';
 import { renderReceiptPdf } from '@/server/integrations/pdf';
 import { logError, logInfo } from '@/server/logger';
 import { buildCustomerReceivedEmail, buildNewVisitorEmail, buildSellerNewOrderEmail, buildStatusChangedEmail, type EmailContent } from '@/server/services/email-templates';
+import { sessionIdFromDedupeKey } from '@/server/services/analytics.service';
 import { loadOrderDocument } from '@/server/services/receipt-pdf.service';
 import { parseReceiptData } from '@/server/services/receipt.service';
 
@@ -42,6 +44,8 @@ export interface OutboxOptions {
   concurrency?: number;
   /** Se limiter aux emails d'une commande (tentative immédiate). */
   orderReference?: string;
+  /** Se limiter à une ligne précise (alerte « Nouvelle visite » : tentative immédiate). */
+  dedupeKey?: string;
   now?: () => Date;
   transport?: EmailTransport;
 }
@@ -72,8 +76,27 @@ interface ComposedEmail extends EmailContent {
 /** Construit l'email d'une ligne. Le reçu PDF n'est joint qu'à l'alerte de la vendeuse. */
 async function composeEmail(row: DueRow): Promise<ComposedEmail> {
   if (row.type === 'NEW_VISITOR') {
-    const settings = await prisma.storeSettings.findUnique({ where: { id: STORE_SETTINGS_ID }, select: { storeName: true } });
-    return buildNewVisitorEmail({ storeName: settings?.storeName ?? 'MEËRA KINKS', source: 'direct', landingPath: '/', country: null, region: null, city: null });
+    // La visite est retrouvée par la clé de déduplication (`NEW_VISITOR:<id de visite>`). Visite déjà purgée ou effacée
+    // (refus du visiteur entre-temps) : rien à envoyer, et réessayer ne servirait à rien.
+    const sessionId = sessionIdFromDedupeKey(row.dedupeKey);
+    const [settings, session] = await Promise.all([
+      prisma.storeSettings.findUnique({ where: { id: STORE_SETTINGS_ID }, select: { storeName: true } }),
+      sessionId
+        ? prisma.visitorSession.findUnique({ where: { id: sessionId }, select: { country: true, region: true, city: true, source: true, landingPath: true, device: true, browser: true, firstSeenAt: true } })
+        : Promise.resolve(null),
+    ]);
+    if (!session) throw new PermanentEmailError('Visite introuvable (effacée ou purgée).');
+    return buildNewVisitorEmail({
+      storeName: settings?.storeName ?? 'Meëra Kinks',
+      sourceLabel: sourceLabel(session.source),
+      landingPath: session.landingPath,
+      country: session.country,
+      region: session.region,
+      city: session.city,
+      device: session.device,
+      browser: session.browser,
+      arrivedAt: formatAbidjanDateTime(session.firstSeenAt),
+    });
   }
   if (!row.orderId) throw new PermanentEmailError('Email sans commande associée.');
   const order = await loadOrderDocument({ id: row.orderId });
@@ -198,6 +221,7 @@ export async function processOutbox(options: OutboxOptions = {}): Promise<Outbox
       status: { in: ['PENDING', 'PROCESSING'] },
       nextAttemptAt: { lte: clock() },
       ...(options.orderReference ? { order: { reference: options.orderReference } } : {}),
+      ...(options.dedupeKey ? { dedupeKey: options.dedupeKey } : {}),
     },
     orderBy: { nextAttemptAt: 'asc' },
     take: options.limit ?? CRON_LIMIT,
@@ -235,6 +259,16 @@ export async function sendOrderEmailsNow(reference: string): Promise<OutboxSumma
     });
   } catch (error) {
     logError('email.immediate_failed', { reference }, error);
+    return null;
+  }
+}
+
+/** Tentative immédiate de l'alerte « Nouvelle visite ». Ne lève JAMAIS : sans clé Resend, la ligne attend le cron. */
+export async function sendVisitorAlertNow(dedupeKey: string): Promise<OutboxSummary | null> {
+  try {
+    return await processOutbox({ dedupeKey, limit: 1, concurrency: 1, timeoutMs: IMMEDIATE_TIMEOUT_MS, timeBudgetMs: IMMEDIATE_TIME_BUDGET_MS });
+  } catch (error) {
+    logError('email.visitor_alert_failed', {}, error);
     return null;
   }
 }

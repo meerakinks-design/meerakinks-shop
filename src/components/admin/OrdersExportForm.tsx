@@ -13,8 +13,6 @@ import {
 } from '@/lib/constants/orders-export';
 import { buildOrdersExportUrl, EMPTY_ORDERS_EXPORT_FORM, toggleValue, type OrdersExportFormValues } from '@/lib/orders-export-form';
 
-const GROUP_STYLE = { border: 'none', padding: 0, margin: '0 0 var(--space-4)' } as const;
-const CHECK_STYLE = { display: 'flex', gap: 'var(--space-3)', alignItems: 'center', marginBottom: 'var(--space-2)' } as const;
 
 interface Outcome {
   filename: string;
@@ -61,10 +59,10 @@ export function OrdersExportForm() {
         </p>
       )}
 
-      <fieldset style={GROUP_STYLE}>
+      <fieldset className="field choice-group">
         <legend>Format</legend>
         {ORDERS_EXPORT_FORMATS.map((format) => (
-          <label key={format} style={CHECK_STYLE}>
+          <label key={format} className="check-row">
             <input
               type="radio"
               name="format"
@@ -77,7 +75,7 @@ export function OrdersExportForm() {
         ))}
       </fieldset>
 
-      <div style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+      <div className="field-row">
         <div className="field">
           <label htmlFor="export-from">Commandes passées à partir du</label>
           <input id="export-from" type="date" value={values.from} onChange={(event) => setValues((current) => ({ ...current, from: event.target.value }))} />
@@ -88,10 +86,10 @@ export function OrdersExportForm() {
         </div>
       </div>
 
-      <fieldset style={GROUP_STYLE}>
+      <fieldset className="field choice-group">
         <legend>Statut de livraison</legend>
         {DELIVERY_STATUSES.map((status) => (
-          <label key={status} style={CHECK_STYLE}>
+          <label key={status} className="check-row">
             <input
               type="checkbox"
               checked={values.deliveryStatuses.includes(status)}
@@ -102,10 +100,10 @@ export function OrdersExportForm() {
         ))}
       </fieldset>
 
-      <fieldset style={GROUP_STYLE}>
+      <fieldset className="field choice-group">
         <legend>Statut de paiement</legend>
         {PAYMENT_STATUSES.map((status) => (
-          <label key={status} style={CHECK_STYLE}>
+          <label key={status} className="check-row">
             <input
               type="checkbox"
               checked={values.paymentStatuses.includes(status)}
@@ -116,10 +114,10 @@ export function OrdersExportForm() {
         ))}
       </fieldset>
 
-      <fieldset style={GROUP_STYLE}>
+      <fieldset className="field choice-group">
         <legend>Zone</legend>
         {ZONE_TYPES.map((zone) => (
-          <label key={zone} style={CHECK_STYLE}>
+          <label key={zone} className="check-row">
             <input
               type="checkbox"
               checked={values.zones.includes(zone)}

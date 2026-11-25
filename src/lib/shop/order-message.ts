@@ -1,4 +1,5 @@
 import { paymentTerms } from '@/content/livraison';
+import { delaySentence, type DelayRange } from '@/lib/shop/delivery-delay';
 import { formatFcfa } from '@/lib/money';
 import type { OrderRecap } from '@/lib/shop/order-types';
 
@@ -11,6 +12,8 @@ export interface OrderMessageInput extends OrderRecap {
   note: string | null;
   /** Acompte annoncé pour une commande à Abidjan (celui de CETTE commande). */
   depositAmount: number;
+  /** Délai indicatif annoncé au client pour cette destination (RM-47). */
+  deliveryDelay?: DelayRange;
 }
 
 /**
@@ -32,6 +35,7 @@ export function buildOrderMessage(input: OrderMessageInput): string {
     `Sous-total : ${formatFcfa(input.subtotal)}`,
     `Frais de livraison : ${input.deliveryFee === null ? 'à confirmer' : formatFcfa(input.deliveryFee)}`,
     `Total : ${input.total === null ? 'à confirmer (sous-total + frais de livraison)' : formatFcfa(input.total)}`,
+    ...(input.deliveryDelay ? [delaySentence(input.deliveryDelay)] : []),
     '',
     `Paiement : ${paymentTerms(input.zoneType, input.depositAmount)}`,
   ];

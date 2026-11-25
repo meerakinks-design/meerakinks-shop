@@ -113,3 +113,45 @@ Le patch (11 fichiers) était basé sur le zip d'origine. Je l'ai fusionné avec
 **Créés** : `src/components/shop/PhoneInput.tsx`, `prisma/migrations/20261124000000_store_name_meera_kinks/migration.sql`, `tests/unit/contact-form-render.test.tsx`, `RAPPORT_MODIFICATIONS.md`
 
 **Modifiés** : `README.md`, `TODO.md`, `docs/REFONTE-RIDEAUX-FOOTER-CONTACT.md`, `prisma/seed.ts`, `src/components/shop/{CheckoutForm,ContactForm,CurtainModal,Header,MenuModal}.tsx`, `src/content/landing.ts`, `src/lib/shop/{checkout-form,phone}.ts`, `src/lib/validation/contact.schema.ts`, `src/server/services/{catalog.queries,notifications.service}.ts`, `src/styles/{shop,ui}.css`, `tests/unit/{catalog.queries,checkout-form,checkout-render,contact.schema,phone,product-cart-render,shop-render}.test.ts(x)`
+
+---
+
+# Suite du 24 novembre 2026 : eyebrows, rideaux, filigrane, icônes
+
+## 10. Retrait complet des eyebrows
+
+- Plus aucun surtitre au-dessus des titres : la clé `eyebrow` est retirée de chaque section de `src/content/landing.ts`, et les balises correspondantes de `LandingSections.tsx`, `(boutique)/page.tsx`, `a-propos/page.tsx`, `NotFoundContent.tsx` (« ERREUR 404 ») et `OrderConfirmation.tsx` (« Commande enregistrée »).
+- CSS : règles `.eyebrow`, `.hero-eyebrow` et la pastille marron `.section-brand .eyebrow` supprimées (`shop.css`, `ui.css`).
+- Le haut du héros reçoit un peu plus d'air (`.hero` : `padding-block: clamp(2.5rem, 8vw, 4rem) 0`) puisque le surtitre n'est plus là.
+- La confirmation de commande en modal garde son titre (« Merci… ») dans l'en-tête du panneau ; rien n'est perdu.
+- Test `tests/unit/no-eyebrow.test.ts` : échoue si le mot « eyebrow » réapparaît dans `src/`.
+
+## 11. Rideaux (menu, panier, commande, confirmation) : l'animation rejoue à chaque fois
+
+- **Cause** : à la 2e ouverture d'un même modal, rideaux et panneau sont encore rangés hors écran à droite quand `showModal()` donne le focus au bouton ✕. Le navigateur faisait défiler le `<dialog>` (`overflow: hidden`) pour le montrer : le panneau semblait déjà en place et les rideaux partaient à gauche. La 1re ouverture de chaque modal marchait, les suivantes non.
+- **Correctif** : `CurtainModal.tsx` remet `scrollLeft`/`scrollTop` à 0 juste après `showModal()` ; `ui.css` ajoute `overflow: clip` (aucun défilement possible) avec `overflow: hidden` en repli.
+- **Vérifié dans Chromium** (vrai composant, vrai CSS, GSAP) : sur l'ancien code, échec dès la 2e ouverture du menu ; sur le nouveau, 5 ouvertures/fermetures alternées menu et panier + enchaînement menu → panier, sans décalage. Test de régression : `tests/unit/curtain-replay.test.ts`.
+- Non vérifié : sur un vrai téléphone, et dans l'application Next complète (banc d'essai isolé).
+
+## 12. Filigrane du pied de page dans la police du logo
+
+- Le logo est écrit en **Choret Fudyng Bubble** (Alit Design) : gratuite en usage personnel seulement, licence commerciale payante, fichier absent du projet. Je ne l'ai pas embarquée.
+- Police libre la plus proche : **Modak** (licence OFL, usage commercial libre), auto-hébergée : `public/fonts/modak-latin-400.woff2` + `modak-OFL.txt`. Variable `--font-logo` dans `tokens.css` ; le filigrane l'utilise (`.footer-watermark`).
+- Modak ressemble au lettrage « Meëra » mais n'est pas identique. Si la licence de Choret Fudyng Bubble est achetée : déposer le `.woff2` dans `public/fonts`, déclarer son `@font-face` dans `tokens.css` et placer son nom en tête de `--font-logo` (une seule ligne).
+- Taille : `clamp(2.2rem, 14.5vw, 11.5rem)`, le texte occupe environ 88 % de la largeur sur téléphone.
+
+## 13. Icônes WhatsApp, Instagram, TikTok, Facebook
+
+- Nouveau `src/lib/shop/socials.ts` (`buildSocialLinks`) : source unique, ordre WhatsApp, Instagram, TikTok, Facebook. Un réseau sans lien n'apparaît pas (aucun lien fabriqué).
+- **Pied de page** : sous le logo, mêmes icônes (l'e-mail reste en dernier s'il est renseigné).
+- **Menu hamburger** : rangée d'icônes rondes au pied du menu (remplace les liens texte Instagram/TikTok/Facebook ; WhatsApp y est ajouté). Chaque icône a un `aria-label`.
+- **Pourquoi elles ne s'affichaient pas chez toi** : les liens viennent des réglages en base, il n'existe pas d'écran pour les saisir et le seed ne réécrit jamais une base existante. Solution sans toucher à la base : variables `INSTAGRAM_URL`, `TIKTOK_URL`, `FACEBOOK_URL` (https://, Vercel > Environment Variables, puis redéployer). Elles ne comblent que les liens vides ; un lien saisi en base l'emporte. Le numéro WhatsApp vient toujours des réglages (`sellerWhatsApp`).
+- Tests : `tests/unit/socials.test.tsx` (ordre, pied de page, filigrane, repli par l'environnement) ; `shop-render.test.tsx` mis à jour.
+
+## 14. Tests
+
+- Suite complète : 914 réussis, 35 échecs. **Les 35 échecs existaient avant ces modifications** (`orders.service.test.ts` : 34, `orders-admin.service.test.ts` : 1, champ `infoConfirmed` absent des données de test) et ne sont pas touchés ici. Avant : 904 réussis, 35 échecs.
+- `npm run typecheck` : aucune erreur dans les fichiers modifiés ; les erreurs restantes viennent du client Prisma non généré hors ligne (`prisma generate` à lancer chez toi).
+- `npm run build` non lancé.
+
+**Fichiers modifiés** : `.env.example`, `public/fonts/` (+ `modak-latin-400.woff2`, `modak-OFL.txt`), `src/app/(boutique)/{layout,page}.tsx`, `src/app/(boutique)/a-propos/page.tsx`, `src/components/shop/{CurtainModal,Footer,LandingSections,MenuModal,NotFoundContent,OrderConfirmation}.tsx`, `src/content/landing.ts`, `src/lib/shop/socials.ts` (nouveau), `src/server/services/catalog.queries.ts`, `src/styles/{shop,tokens,ui}.css`, `tests/unit/{shop-render,spaghetti-render}.test.tsx`, nouveaux : `tests/unit/{no-eyebrow,curtain-replay,socials}.test(s)`.

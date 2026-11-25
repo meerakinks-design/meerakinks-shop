@@ -5,6 +5,7 @@ import { computeUpfrontAmount, initialPaymentStatus } from '@/lib/shop/order-amo
 import { buildOrderMessage } from '@/lib/shop/order-message';
 import { formatPlaceLabel, type OrderCreated, type OrderRecap } from '@/lib/shop/order-types';
 import { formatPhoneDisplay } from '@/lib/shop/phone';
+import { effectiveDelay, type DelayRange } from '@/lib/shop/delivery-delay';
 import { effectivePrice, isOutOfStock } from '@/lib/shop/product-display';
 import { whatsappLink } from '@/lib/shop/whatsapp';
 import type { OrderInput } from '@/lib/validation/order.schema';
@@ -35,6 +36,7 @@ const ORDER_SELECT = {
   deliveryFee: true,
   total: true,
   upfrontAmount: true,
+  deliveryZone: { select: { deliveryMinHours: true, deliveryMaxHours: true } },
   customer: { select: { fullName: true, phone: true } },
   items: { orderBy: { id: 'asc' }, select: { productId: true, variantId: true, variantLabelSnapshot: true, productNameSnapshot: true, unitPriceSnapshot: true, quantity: true, lineTotal: true } },
 } satisfies Prisma.OrderSelect;
@@ -86,8 +88,11 @@ function toRecap(row: OrderRow): OrderRecap {
 
 function toOrderCreated(row: OrderRow, settings: Pick<SettingsRow, 'storeName' | 'sellerWhatsApp' | 'depositAmount'>): OrderCreated {
   const recap = toRecap(row);
+  // Délai indicatif : celui de la zone choisie, sinon celui de son type (RM-47).
+  const deliveryDelay = effectiveDelay(row.zoneType, row.deliveryZone?.deliveryMinHours, row.deliveryZone?.deliveryMaxHours);
   const message = buildOrderMessage({
     ...recap,
+    deliveryDelay,
     storeName: settings.storeName,
     customerName: row.customer.fullName,
     phone: formatPhoneDisplay(row.customer.phone),
@@ -98,6 +103,7 @@ function toOrderCreated(row: OrderRow, settings: Pick<SettingsRow, 'storeName' |
   });
   return {
     ...recap,
+    deliveryDelay,
     whatsappUrl: whatsappLink(settings.sellerWhatsApp, message),
     ...(row.createdAt instanceof Date ? { createdAt: row.createdAt.toISOString() } : {}),
   };
@@ -174,6 +180,8 @@ interface Destination {
   country: string;
   city: string;
   fee: number | null;
+  /** Délai indicatif annoncé (celui de la zone, sinon celui de son type) : figé dans le reçu. */
+  delay: DelayRange;
 }
 
 async function insertOrder(tx: Prisma.TransactionClient, input: OrderInput): Promise<OrderCreated> {
@@ -202,7 +210,7 @@ async function insertOrder(tx: Prisma.TransactionClient, input: OrderInput): Pro
     shop: { name: settings.storeName, legalName: settings.legalName, address: settings.address, contactPhone: settings.contactPhone, contactEmail: settings.contactEmail },
     depositAmount: settings.depositAmount,
     customer: { fullName: input.fullName, phone: input.phoneE164, email: input.email ?? null },
-    delivery: { zoneType: input.zoneType, country: destination.country, city: destination.city, address: shippingAddress },
+    delivery: { zoneType: input.zoneType, country: destination.country, city: destination.city, address: shippingAddress, delay: destination.delay },
     lines: lines.map(({ name, unitPrice, quantity, lineTotal: total }) => ({ name, unitPrice, quantity, lineTotal: total })),
     subtotal,
     deliveryFee: destination.fee,
@@ -340,21 +348,23 @@ async function resolveDestination(tx: Prisma.TransactionClient, input: OrderInpu
   if (input.deliveryZoneId) {
     const zone = await tx.deliveryZone.findFirst({
       where: { id: input.deliveryZoneId, type: input.zoneType, isActive: true },
-      select: { id: true, name: true, fee: true },
+      select: { id: true, name: true, fee: true, deliveryMinHours: true, deliveryMaxHours: true },
     });
     if (!zone) throw invalidDestination('deliveryZoneId', 'Cette destination n’est plus desservie. Choisissez-en une autre.');
+    const delay = effectiveDelay(input.zoneType, zone.deliveryMinHours, zone.deliveryMaxHours);
     return input.zoneType === 'INTERNATIONAL'
-      ? { zoneId: zone.id, country: zone.name, city: input.city ?? '', fee: zone.fee }
-      : { zoneId: zone.id, country: HOME_COUNTRY, city: zone.name, fee: zone.fee };
+      ? { zoneId: zone.id, country: zone.name, city: input.city ?? '', fee: zone.fee, delay }
+      : { zoneId: zone.id, country: HOME_COUNTRY, city: zone.name, fee: zone.fee, delay };
   }
 
   const served = await tx.deliveryZone.count({ where: { type: input.zoneType, isActive: true } });
   if (served > 0) throw invalidDestination('deliveryZoneId', 'Choisissez votre destination dans la liste.');
 
   const place = input.placeName ?? '';
+  const delay = effectiveDelay(input.zoneType, null, null);
   return input.zoneType === 'INTERNATIONAL'
-    ? { zoneId: null, country: place, city: input.city ?? '', fee: null }
-    : { zoneId: null, country: HOME_COUNTRY, city: place, fee: null };
+    ? { zoneId: null, country: place, city: input.city ?? '', fee: null, delay }
+    : { zoneId: null, country: HOME_COUNTRY, city: place, fee: null, delay };
 }
 
 function uniqueViolationTargets(error: unknown): string[] | null {

@@ -32,6 +32,11 @@ describe('textes de confidentialité', () => {
     expect(without.cookies).toContain('Vercel Web Analytics');
     expect(withHome.cookies).toMatch(/boutons touchés/);
     expect(withHome.cookies).toContain('identifiant aléatoire');
+    expect(withHome.cookies).toContain('boutique_vid');
+    expect(withHome.cookies).toContain('boutique_arrival');
+    expect(withHome.cookies).toContain('déduits de votre connexion par l’hébergeur');
+    expect(withHome.cookies).not.toMatch(/seuls des compteurs/);
+    expect(without.cookies).not.toMatch(/boutique_vid|boutique_arrival/);
     expect(withHome.cookies).toContain(`${ANALYTICS_DETAIL_RETENTION_DAYS} jours`);
     expect(without.cookies).not.toContain(`${ANALYTICS_DETAIL_RETENTION_DAYS} jours`);
   });

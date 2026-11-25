@@ -10,6 +10,7 @@ import { DEFAULT_DIAL_CODE, normalizePhone } from '@/lib/shop/phone';
 import { prisma } from '@/server/db';
 import { HttpError } from '@/server/http';
 import { logError, logInfo } from '@/server/logger';
+import { purgeExpiredAnalytics } from '@/server/services/analytics.service';
 import { auditEntry, recordAudit } from '@/server/services/audit.service';
 import { purgeExpiredRateLimits } from '@/server/services/rate-limit';
 
@@ -166,8 +167,12 @@ export async function purgeExpiredCustomers(options: { now?: Date; months?: numb
 }
 
 /** Tâche planifiée quotidienne : empreintes anti-abus expirées (toujours) et fin de conservation des clients (si activée). */
-export async function runRetentionJob(options: { purgeCustomers: boolean; now?: Date }): Promise<{ rateLimitsPurged: true; customers: PurgeSummary | { enabled: false } }> {
+export async function runRetentionJob(
+  options: { purgeCustomers: boolean; now?: Date },
+): Promise<{ rateLimitsPurged: true; analyticsPurged: number; customers: PurgeSummary | { enabled: false } }> {
   await purgeExpiredRateLimits();
-  if (!options.purgeCustomers) return { rateLimitsPurged: true, customers: { enabled: false } };
-  return { rateLimitsPurged: true, customers: await purgeExpiredCustomers(options.now ? { now: options.now } : {}) };
+  // Le détail des visites (analytique maison) est supprimé au bout de ANALYTICS_DETAIL_RETENTION_DAYS, sans condition.
+  const analyticsPurged = await purgeExpiredAnalytics(options.now ? { now: options.now } : {});
+  if (!options.purgeCustomers) return { rateLimitsPurged: true, analyticsPurged, customers: { enabled: false } };
+  return { rateLimitsPurged: true, analyticsPurged, customers: await purgeExpiredCustomers(options.now ? { now: options.now } : {}) };
 }

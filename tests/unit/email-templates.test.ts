@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { formatFcfa } from '@/lib/money';
-import { buildCustomerReceivedEmail, buildSellerNewOrderEmail, buildStatusChangedEmail, escapeHtml, toSubject } from '@/server/services/email-templates';
+import { buildCustomerReceivedEmail, buildNewVisitorEmail, buildSellerNewOrderEmail, buildStatusChangedEmail, escapeHtml, toSubject } from '@/server/services/email-templates';
 import { buildReceiptData, type ReceiptData } from '@/server/services/receipt.service';
 
 const receipt = (overrides: Partial<Parameters<typeof buildReceiptData>[0]> = {}): ReceiptData =>
@@ -118,6 +118,12 @@ describe('accusé de réception au client', () => {
     expect(text).not.toMatch(/\d+\s*(heures|jours)|sous 24|sous 48|livraison express|garantie/);
   });
 
+  it('annonce le délai indicatif de la zone, figé dans le reçu, avec la confirmation par WhatsApp', () => {
+    const withDelay = receipt({ delivery: { zoneType: 'ABIDJAN', country: 'Côte d’Ivoire', city: 'Cocody', address: 'Rue 1', delay: { minHours: 24, maxHours: 24 } } });
+    expect(customer(withDelay).text).toContain('Délai indicatif : 24 h.');
+    expect(customer(withDelay).text).toContain('L’équipe vous confirme le délai exact sur WhatsApp.');
+  });
+
   it('n’ajoute les coordonnées de la boutique que si elles existent', () => {
     expect(customer().text).not.toContain('Une question ?');
     const withContact = receipt({ shop: { name: 'Awa Beauty', legalName: null, address: null, contactPhone: '+225 01 02 03 04 05', contactEmail: 'contact@awa.example' } });
@@ -150,5 +156,46 @@ describe('forme des emails', () => {
       expect(email.text.length).toBeGreaterThan(50);
       expect(email.text).not.toContain('<');
     }
+  });
+});
+
+describe('alerte « Nouvelle visite » (P-45)', () => {
+  const input = {
+    storeName: 'Meëra Kinks',
+    sourceLabel: 'Instagram',
+    landingPath: '/produit/serum',
+    country: 'Côte d’Ivoire',
+    region: 'Abidjan',
+    city: 'Abidjan',
+    device: 'mobile',
+    browser: 'Chrome (Android)',
+    arrivedAt: '23/11/2026 10:05',
+  };
+
+  it('annonce la zone dans l’objet et donne provenance, page d’arrivée, appareil et heure d’Abidjan', () => {
+    const email = buildNewVisitorEmail(input);
+    expect(email.subject).toBe('Nouvelle visite depuis Abidjan, Côte d’Ivoire');
+    for (const expected of ['Instagram', '/produit/serum', 'mobile · Chrome (Android)', '23/11/2026 10:05']) {
+      expect(email.html).toContain(expected);
+      expect(email.text).toContain(expected);
+    }
+  });
+
+  it('ne contient ni adresse IP ni donnée de commande, et le dit', () => {
+    const email = buildNewVisitorEmail(input);
+    expect(email.text).not.toMatch(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/);
+    expect(email.text).toContain('Aucune adresse IP');
+  });
+
+  it('une zone inconnue n’invente rien', () => {
+    const email = buildNewVisitorEmail({ ...input, country: null, region: null, city: null, device: null, browser: null });
+    expect(email.subject).toBe('Nouvelle visite depuis zone inconnue');
+    expect(email.text).toContain('Zone approximative : non précisée');
+    expect(email.text).toContain('Appareil : non précisé');
+  });
+
+  it('échappe le contenu venu du navigateur (page d’arrivée)', () => {
+    const email = buildNewVisitorEmail({ ...input, landingPath: '/<script>alert(1)</script>' });
+    expect(email.html).not.toContain('<script>');
   });
 });

@@ -1,6 +1,7 @@
 import { ORDER_NOTICE_CONFIRMATION_STEPS, ORDER_NOTICE_OUTSIDE, ORDER_THANKS, orderNoticeAbidjan } from '@/content/livraison';
 import { DELIVERY_STATUS_LABELS, type DeliveryStatusValue } from '@/lib/constants/order-status';
 import { formatFcfa } from '@/lib/money';
+import { DELAY_DISCLAIMER, delaySentence, effectiveDelay } from '@/lib/shop/delivery-delay';
 import { formatPlaceLabel } from '@/lib/shop/order-types';
 import { formatPhoneDisplay } from '@/lib/shop/phone';
 import { whatsappLink } from '@/lib/shop/whatsapp';
@@ -32,6 +33,11 @@ export function toSubject(value: string, max = 150): string {
 
 const money = (amount: number | null, fallback = 'à confirmer') => (amount === null ? fallback : formatFcfa(amount));
 const fullName = (receipt: ReceiptData) => receipt.customer.fullName;
+/** « Délai indicatif : 24 h. » : celui figé dans le reçu, sinon celui du type de zone (reçus plus anciens). */
+const delayOf = (receipt: ReceiptData): string => {
+  const { zoneType, delay } = receipt.delivery;
+  return delaySentence(delay ?? effectiveDelay(zoneType, null, null));
+};
 const placeOf = (receipt: ReceiptData) => formatPlaceLabel(receipt.delivery.zoneType, receipt.delivery.city, receipt.delivery.country);
 
 function noticeFor(receipt: ReceiptData): string {
@@ -98,7 +104,7 @@ export function buildSellerNewOrderEmail(input: SellerEmailInput): EmailContent 
     heading('Client'),
     paragraph(`${escapeHtml(name)}<br>${escapeHtml(phone)}${contactLink ? ` — <a href="${escapeHtml(contactLink)}" style="color:${INK}">écrire sur WhatsApp</a>` : ''}${receipt.customer.email ? `<br>${escapeHtml(receipt.customer.email)}` : ''}`),
     heading('Livraison'),
-    paragraph(`<strong>${escapeHtml(placeOf(receipt))}</strong><br>${escapeHtml(receipt.delivery.address).replace(/\n/g, '<br>')}`),
+    paragraph(`<strong>${escapeHtml(placeOf(receipt))}</strong><br>${escapeHtml(receipt.delivery.address).replace(/\n/g, '<br>')}<br><span style="color:${MUTED}">${escapeHtml(delayOf(receipt))}</span>`),
     heading('Articles'),
     linesTable(receipt),
     paragraph(`<span style="color:${MUTED}">${escapeHtml(upfrontLabel)} :</span> <strong>${escapeHtml(upfront)}</strong>`),
@@ -119,6 +125,7 @@ export function buildSellerNewOrderEmail(input: SellerEmailInput): EmailContent 
     '',
     `Livraison : ${placeOf(receipt)}`,
     `Adresse : ${receipt.delivery.address.replace(/\s*\n\s*/g, ', ')}`,
+    delayOf(receipt),
     '',
     'Articles :',
     ...textLines(receipt),
@@ -160,6 +167,7 @@ export function buildCustomerReceivedEmail(input: CustomerEmailInput): EmailCont
     paragraph(`<span style="color:${MUTED}">Livraison : ${escapeHtml(placeOf(receipt))}</span>`),
     heading('Paiement et livraison'),
     paragraph(escapeHtml(notice)),
+    paragraph(escapeHtml(`${delayOf(receipt)} ${DELAY_DISCLAIMER}`)),
     paragraph(`Après réception de la commande, l’équipe vous contacte sur WhatsApp afin de : ${escapeHtml(steps.join(' ; '))}.`),
     ...(contact.length > 0 ? [paragraph(`<span style="color:${MUTED}">Une question ? ${escapeHtml(contact.join(' · '))}</span>`)] : []),
   ].join('');
@@ -176,6 +184,7 @@ export function buildCustomerReceivedEmail(input: CustomerEmailInput): EmailCont
     `Livraison : ${placeOf(receipt)}`,
     '',
     notice,
+    `${delayOf(receipt)} ${DELAY_DISCLAIMER}`,
     `Après réception de la commande, l’équipe vous contacte sur WhatsApp afin de : ${steps.join(' ; ')}.`,
     ...(contact.length > 0 ? ['', `Une question ? ${contact.join(' · ')}`] : []),
   ].join('\n');
@@ -206,38 +215,51 @@ export function buildStatusChangedEmail(input: StatusEmailInput): EmailContent {
 }
 
 // ---------------------------------------------------------------------------
-// Alerte analytics — NEW_VISITOR (aucune donnée personnelle ni adresse IP)
+// Alerte analytics — NEW_VISITOR (P-45 : aucune donnée personnelle, aucune adresse IP)
 // ---------------------------------------------------------------------------
 
 export interface NewVisitorEmailInput {
   storeName: string;
-  source: string;
+  /** Provenance lisible (« Instagram », « Accès direct »…). */
+  sourceLabel: string;
   landingPath: string | null;
   country: string | null;
   region: string | null;
   city: string | null;
+  device: string | null;
+  browser: string | null;
+  /** Heure d'arrivée, déjà au format d'Abidjan. */
+  arrivedAt: string;
 }
 
 export function buildNewVisitorEmail(input: NewVisitorEmailInput): EmailContent {
-  const location = [input.city, input.region, input.country].filter(Boolean).join(', ') || 'non précisée';
+  const place = [input.region ?? input.city, input.country].filter(Boolean).join(', ') || 'zone inconnue';
+  const details = [input.city && input.city !== input.region ? input.city : null, input.region, input.country].filter(Boolean).join(', ') || 'non précisée';
+  const device = [input.device, input.browser].filter(Boolean).join(' · ') || 'non précisé';
   const body = [
-    paragraph('<strong>Un nouveau visiteur a accepté les statistiques anonymes.</strong>'),
-    heading('Première page'),
-    paragraph(escapeHtml(input.landingPath || '/')),
-    heading('Provenance'),
-    paragraph(escapeHtml(input.source || 'direct')),
+    paragraph('<strong>Un nouveau visiteur a accepté les statistiques anonymes et vient d’arriver sur le site.</strong>'),
     heading('Zone approximative'),
-    paragraph(escapeHtml(location)),
-    paragraph(`<span style="color:${MUTED}">Aucune adresse IP ni donnée de commande n’est enregistrée dans cette alerte.</span>`),
+    paragraph(escapeHtml(details)),
+    heading('Provenance'),
+    paragraph(escapeHtml(input.sourceLabel)),
+    heading('Page d’arrivée'),
+    paragraph(escapeHtml(input.landingPath || '/')),
+    heading('Appareil'),
+    paragraph(escapeHtml(device)),
+    heading('Heure (Abidjan)'),
+    paragraph(escapeHtml(input.arrivedAt)),
+    paragraph(`<span style="color:${MUTED}">Aucune adresse IP, aucune identité et aucune donnée de commande ne figurent dans cette alerte. Le détail est dans l’onglet Analytics du back-office.</span>`),
   ].join('');
   const text = [
-    'Nouveau visiteur',
+    'Nouvelle visite',
     '',
-    `Première page : ${input.landingPath || '/'}`,
-    `Provenance : ${input.source || 'direct'}`,
-    `Zone approximative : ${location}`,
+    `Zone approximative : ${details}`,
+    `Provenance : ${input.sourceLabel}`,
+    `Page d’arrivée : ${input.landingPath || '/'}`,
+    `Appareil : ${device}`,
+    `Heure (Abidjan) : ${input.arrivedAt}`,
     '',
-    'Aucune adresse IP ni donnée de commande n’est enregistrée dans cette alerte.',
+    'Aucune adresse IP, aucune identité et aucune donnée de commande ne figurent dans cette alerte.',
   ].join('\n');
-  return { subject: toSubject(`Nouveau visiteur — ${input.storeName}`), html: layout({ title: 'Nouveau visiteur', body, storeName: input.storeName }), text };
+  return { subject: toSubject(`Nouvelle visite depuis ${place}`), html: layout({ title: 'Nouvelle visite', body, storeName: input.storeName }), text };
 }

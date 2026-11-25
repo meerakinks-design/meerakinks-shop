@@ -12,6 +12,10 @@
 @font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiByp8kv8JHgFVrLCz7V1s.ttf') format('truetype'); font-weight: 700; font-display: swap; }
 @font-face { font-family: 'Poppins'; src: url('/fonts/poppins-pxiByp8kv8JHgFVrLDD4V1s.ttf') format('truetype'); font-weight: 800; font-display: swap; }
 @font-face { font-family: 'Great Vibes'; src: url('/fonts/great-vibes.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+/* Filigrane du pied de page : Modak (licence OFL, usage commercial libre), la police libre la plus proche du lettrage « Meëra » du logo.
+   Le logo est écrit en Choret Fudyng Bubble (Alit Design), payante en usage commercial et absente du projet. Si la licence est achetée :
+   déposer le .woff2 dans public/fonts, déclarer ici un @font-face 'Choret Fudyng Bubble' et placer ce nom en tête de --font-logo. */
+@font-face { font-family: 'Modak'; src: url('/fonts/modak-latin-400.woff2') format('woff2'); font-weight: 400; font-display: swap; }
 :root {
   --color-beige: #F8EEDC; --color-orange: #F47C26; --color-brown: #7F3F20;
   --color-brown-deep: #4A2210; /* texte courant posé sur l'orange */ --color-gold-orange: #FF9500; --color-terracotta: #D95525; --color-peach: #F2B590;
@@ -19,6 +23,7 @@
   --color-text-muted: #96664D; --color-border: #E8C8AD; --color-primary: var(--color-orange);
   --color-primary-contrast: var(--color-brown); /* texte posé sur l'orange */ --color-danger: var(--color-terracotta); --color-success: #6E8B45; --color-focus: var(--color-gold-orange);
   --font-body: 'Poppins', system-ui, sans-serif; --font-brand: 'Great Vibes', cursive;
+  --font-logo: 'Modak', 'Poppins', system-ui, sans-serif;
   /* Échelle typographique (repères des captures) — polices de la charte : Poppins (textes), Great Vibes (touches manuscrites).
      4 = héros · 1 = contenu des sections · 2 = titres de sections · 3 = descriptions */
   --text-hero: clamp(2.5rem, 11.5vw, 6.5rem);

@@ -16,10 +16,12 @@ export default async function EditProductPage({ params }: { params: { id: string
 
   return (
     <main>
-      <p>
-        <Link href="/admin/produits">← Retour aux produits</Link>
-      </p>
-      <h1>{product.name}</h1>
+      <Link className="back-link" href="/admin/produits">
+        ← Retour aux produits
+      </Link>
+      <div className="page-head">
+        <h1>{product.name}</h1>
+      </div>
       <ProductForm initial={product} categories={categories.map(({ id, name, isArchived }) => ({ id, name, isArchived }))} />
     </main>
   );

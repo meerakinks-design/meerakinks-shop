@@ -21,7 +21,9 @@ export const ANALYTICS_DETAIL_RETENTION_DAYS = 90;
 export const FINAL_DELIVERY_STATUSES = ['DELIVERED', 'CANCELLED'] as const;
 
 /** Textes qui remplacent les données effacées (jamais une valeur vide : les écrans et les reçus restent lisibles). */
-export const ANONYMIZED_FULL_NAME = 'Client anonymisé';
+export const ANONYMIZED_FULL_NAME = 'Client anonymisé'; // utilisé par lib/retention.ts (v0.10)
+export const ANONYMIZED_FIRST_NAME = 'Client';
+export const ANONYMIZED_LAST_NAME = 'anonymisé';
 export const ANONYMIZED_ADDRESS = 'Adresse supprimée';
 
 /** Le téléphone est unique en base : on le remplace par une valeur unique par fiche, qui ne correspond à aucun numéro réel. */
@@ -35,3 +37,19 @@ export const ADMIN_CUSTOMER_DATA_PATH = '/admin/donnees-clients';
  * quotidienne la supprime ; 2 jours laissent de la marge au décalage d'horaire de Vercel (offre Hobby : ±59 minutes).
  */
 export const RATE_LIMIT_FINGERPRINT_MAX_DAYS = 2;
+
+// ---------------------------------------------------------------------------
+// Analytique maison (cahier §7.6, P-43 à P-45) : durées et plafonds, lus aussi par les textes légaux.
+// ---------------------------------------------------------------------------
+
+/** Durée de vie du cookie d'identifiant de visiteur (posé APRÈS consentement seulement). Alignée sur la conservation du détail. */
+export const ANALYTICS_VISITOR_COOKIE_DAYS = 90;
+
+/** Une visite se termine après autant de minutes sans activité : l'activité suivante ouvre une nouvelle visite. 🟡 */
+export const ANALYTICS_SESSION_GAP_MINUTES = 30;
+
+/** Plafond d'alertes email « Nouvelle visite » par jour. Au-delà, la visite reste visible dans l'onglet Analytics, seul l'email est ignoré. 🟡 */
+export const ANALYTICS_ALERT_DAILY_CAP = 40;
+
+/** Signal d'activité envoyé tant que l'onglet est visible. */
+export const ANALYTICS_HEARTBEAT_SECONDS = 15;

@@ -4,7 +4,8 @@ import { ORDER_LIMITS, PLACE_LABELS, ZONE_TYPES, ZONE_TYPE_LABELS, type ZoneType
 import { PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { formatFcfa } from '@/lib/money';
 import { controlIdFor, type CheckoutAmounts, type CheckoutErrors, type CheckoutValues } from '@/lib/shop/checkout-form';
-import type { PublicZones } from '@/lib/shop/zones';
+import { deliveryNoticeLines, type DeliveryNotes } from '@/lib/shop/delivery-delay';
+import { delayForDestination, type PublicZones } from '@/lib/shop/zones';
 import { OrderNotice, OrderTotals } from './OrderSummary';
 import { PhoneInput } from './PhoneInput';
 
@@ -21,6 +22,8 @@ interface CheckoutFormProps {
   values: CheckoutValues;
   errors: CheckoutErrors;
   zones: PublicZones;
+  /** Précisions de la vendeuse sur les délais (réglages de livraison) ; absent = délai indicatif seul. */
+  deliveryNotes?: DeliveryNotes;
   depositAmount: number;
   recap: { lines: { productId: string; name: string; quantity: number; lineTotal: number }[]; subtotal: number };
   amounts: CheckoutAmounts;
@@ -81,7 +84,7 @@ const SENDING_LABELS: Record<CheckoutStatus, string> = {
 
 /** Formulaire de commande (§6.2). Présentationnel : l'état et l'envoi vivent dans CheckoutModal. */
 export function CheckoutForm(props: CheckoutFormProps) {
-  const { idPrefix, values, errors, zones, depositAmount, recap, amounts, alert, status, canSubmit, onChange, onZoneTypeChange, onSubmit, onEditCart } = props;
+  const { idPrefix, values, errors, zones, deliveryNotes, depositAmount, recap, amounts, alert, status, canSubmit, onChange, onZoneTypeChange, onSubmit, onEditCart } = props;
   const id = (name: string) => `${idPrefix}-${name}`;
   const text = (field: Exclude<keyof CheckoutValues, 'infoConfirmed'>) => ({
     name: field,
@@ -90,6 +93,9 @@ export function CheckoutForm(props: CheckoutFormProps) {
   });
 
   const zoneOptions = zones[values.zoneType];
+  // Délai de la zone choisie, sinon celui de son type : indicatif, toujours à confirmer sur WhatsApp (RM-47).
+  const chosenZone = zoneOptions.find((zone) => zone.id === values.deliveryZoneId) ?? null;
+  const delayLines = deliveryNoticeLines(delayForDestination(values.zoneType, chosenZone), deliveryNotes);
   const destinationError = errors.deliveryZoneId ?? errors.placeName;
   const destinationId = controlIdFor(idPrefix, 'placeName');
   const placeLabel = PLACE_LABELS[values.zoneType];
@@ -166,6 +172,14 @@ export function CheckoutForm(props: CheckoutFormProps) {
             <input type="text" autoComplete={international ? 'country-name' : 'address-level2'} maxLength={ORDER_LIMITS.place} {...text('placeName')} {...a11y(destinationId, destinationError)} />
           </Field>
         )}
+
+        <div className="checkout-delay" role="note" aria-label="Délai de livraison indicatif">
+          {delayLines.map((line) => (
+            <p key={line} className="help-text">
+              {line}
+            </p>
+          ))}
+        </div>
 
         {international && (
           <Field id={id('city')} label="Ville" error={errors.city}>

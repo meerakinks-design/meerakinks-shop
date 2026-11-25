@@ -134,9 +134,9 @@ describe('landing — l’effet est branché sur les titres, sans rien perdre du
     for (const answer of answers) expect(answer).not.toContain('sp-u');
   });
 
-  it('les descriptions de la landing n’ont plus l’effet élastique (titres et surtitres seulement)', () => {
+  it('les descriptions de la landing n’ont plus l’effet élastique (titres seulement : plus de surtitre)', () => {
     const source = readFileSync(path.resolve(__dirname, '../../src/components/shop/LandingSections.tsx'), 'utf-8');
-    expect(source).not.toMatch(/<Spaghetti as="p"(?![^>]*eyebrow)[^>]*>/);
+    expect(source).not.toMatch(/<Spaghetti as="p"/);
     expect(source).not.toMatch(/<Spaghetti as="p" className="lead"/);
   });
 

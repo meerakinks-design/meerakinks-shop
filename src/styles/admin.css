@@ -1,0 +1,440 @@
+/* Back-office Meëra Kinks — même langage visuel que la vitrine (charte v1.2, voir tokens.css).
+   Chargé uniquement par app/admin/layout.tsx ; TOUTES les règles sont préfixées par .admin-root pour ne jamais déborder sur la boutique.
+
+   Reprises de la vitrine : Poppins gras à titres serrés, Great Vibes en signature, boutons orange à texte marron,
+   rideaux de couleur du menu, festons du pied de page, séparateurs en pointillés, cartes aux grands arrondis.
+   Règle de contraste de la charte : le petit texte se pose sur du beige/crème ou du marron, jamais sur de l'orange.
+
+   Mise en page :
+   - ≥ 64rem (ordinateur) : menu latéral marron à gauche, contenu large à droite.
+   - < 64rem (téléphone, tablette) : barre du haut (logo + compte) et barre de navigation flottante en bas.
+   Chaque conteneur flex/grid porte min-width: 0 : aucun contenu ne doit jamais provoquer de défilement horizontal. */
+
+.admin-root {
+  --a-surface: #fffbf4;
+  --a-line: #e5c7aa;
+  --a-line-strong: #cfa583;
+  --a-muted: #84543a; /* 5,5:1 sur beige (le --color-text-muted de la vitrine n'atteint que 4,2:1) */
+  --a-danger: #b13e19;
+  --a-dashed: color-mix(in srgb, var(--color-brown) 32%, transparent);
+  --a-shadow: 0 1px 0 rgb(127 63 32 / 0.05), 0 0.75rem 1.75rem -1.1rem rgb(127 63 32 / 0.35);
+  --a-side-w: 17.5rem;
+  --a-gutter: clamp(1rem, 4vw, 2.5rem);
+  --a-tabbar-h: 4.75rem;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--color-beige);
+  color: var(--color-brown);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-root *, .admin-root *::before, .admin-root *::after { min-width: 0; }
+.admin-root img { max-width: 100%; }
+.admin-root .help-text { color: var(--a-muted); }
+.admin-root a { color: inherit; }
+
+.admin-skip { position: absolute; left: var(--space-4); top: -4rem; z-index: 100; padding: var(--space-3) var(--space-4); border-radius: var(--radius); background: var(--color-brown); color: var(--color-beige); }
+.admin-skip:focus { top: var(--space-3); }
+
+/* ============================ Coque : menu latéral + contenu ============================ */
+.admin-root .admin-app { display: block; min-height: 100dvh; }
+.admin-root .admin-body { display: block; min-width: 0; }
+.admin-root .admin-content { width: 100%; max-width: 78rem; margin-inline: auto; padding: clamp(1.25rem, 3vw, 2rem) var(--a-gutter) calc(var(--a-tabbar-h) + 2.5rem + env(safe-area-inset-bottom)); outline: none; }
+.admin-root .admin-content > main { display: block; }
+
+/* Barre du haut (téléphone, tablette) : bandeau marron + festons qui retombent, comme le pied de page de la vitrine à l'envers */
+.admin-root .admin-topbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 3.75rem; padding: 0.5rem var(--a-gutter); background: var(--color-brown); color: var(--color-beige); }
+.admin-root .admin-topbar::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 0.9rem; pointer-events: none; background: radial-gradient(circle at 50% 0, var(--color-brown) 0 0.84rem, transparent 0.88rem) 0 0 / 1.8rem 0.9rem repeat-x; }
+.admin-root .admin-brand { display: inline-flex; align-items: center; min-height: 2.75rem; text-decoration: none; }
+.admin-root .admin-brand img { display: block; width: auto; height: 2.1rem; }
+.admin-root .admin-account-btn { display: inline-grid; flex: none; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 2px solid var(--color-beige); border-radius: 50%; background: transparent; color: var(--color-beige); font: inherit; font-size: 1.125rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
+.admin-root .admin-account-btn:hover, .admin-root .admin-account-btn:focus-visible { background: var(--color-beige); color: var(--color-brown); }
+
+/* Menu latéral (ordinateur) */
+.admin-root .admin-side { display: none; }
+
+/* ============================ Navigation ============================ */
+.admin-root .admin-nav { margin: 0; }
+.admin-root .admin-nav ul { list-style: none; margin: 0; padding: 0; }
+.admin-root .admin-nav a { text-decoration: none; }
+.admin-root .admin-nav-icon { display: block; flex: none; width: 1.5rem; height: 1.5rem; }
+
+/* Barre du bas (téléphone) : flottante, 5 sections, la section ouverte passe en beige */
+.admin-root .admin-nav-tabs { position: fixed; left: 0.5rem; right: 0.5rem; bottom: calc(0.625rem + env(safe-area-inset-bottom)); z-index: 30; padding: 0.3rem; border-radius: 1.5rem; background: var(--color-brown); box-shadow: 0 0.75rem 2rem rgb(127 63 32 / 0.4); }
+.admin-root .admin-nav-tabs ul { display: grid; grid-template-columns: repeat(5, minmax(min-content, 1fr)); gap: 0.15rem; }
+.admin-root .admin-nav-tabs a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; min-height: 3.5rem; padding: 0.35rem 0.05rem; border-radius: 1.1rem; color: var(--color-beige); font-size: 0.6875rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; text-align: center; }
+.admin-root .admin-nav-tabs a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-root .admin-nav-tabs a[aria-current='page'] { background: var(--color-beige); color: var(--color-brown); }
+.admin-root .admin-nav-tabs a:not([aria-current='page']):active { background: rgb(248 238 220 / 0.16); }
+
+/* Compte : liens + déconnexion (menu latéral et rideau du téléphone) */
+.admin-root .admin-account { display: grid; gap: var(--space-3); }
+.admin-root .admin-account-name { margin: 0; font-size: 1.0625rem; font-weight: 800; overflow-wrap: anywhere; }
+.admin-root .admin-account-role { display: block; font-size: 0.8125rem; font-weight: 500; opacity: 0.8; }
+.admin-root .admin-account-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.125rem; }
+.admin-root .admin-account-links a { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 2.75rem; border-radius: 0.75rem; text-decoration: none; font-weight: 600; }
+.admin-root .admin-account .btn { width: 100%; }
+
+/* ============================ Ordinateur : menu latéral ============================ */
+@media (min-width: 64rem) {
+  .admin-root .admin-app { display: grid; grid-template-columns: var(--a-side-w) minmax(0, 1fr); align-items: start; }
+  .admin-root .admin-topbar, .admin-root .admin-nav-tabs { display: none; }
+  .admin-root .admin-content { padding-bottom: 4rem; padding-top: 2.25rem; }
+
+  .admin-root .admin-side { position: sticky; top: 0; z-index: 20; display: flex; flex-direction: column; gap: var(--space-6); height: 100vh; height: 100dvh; padding: 1.75rem 1.25rem 1.25rem 1.25rem; overflow-y: auto; background: var(--color-brown); color: var(--color-beige); }
+  /* Bord festonné vers le contenu : demi-cercles marron qui dépassent à droite */
+  .admin-root .admin-side-edge { position: sticky; top: 0; z-index: 20; grid-column: 1; grid-row: 1; width: 1.45rem; height: 100dvh; margin-left: calc(var(--a-side-w) - 0.05rem); pointer-events: none; background: radial-gradient(circle at 0 50%, var(--color-brown) 0 1.38rem, transparent 1.42rem) 0 0 / 1.45rem 2.8rem repeat-y; }
+  .admin-root .admin-side-edge + .admin-body { grid-column: 2; grid-row: 1; }
+  .admin-root .admin-side { grid-column: 1; grid-row: 1; }
+
+  .admin-root .admin-side .admin-brand { display: grid; gap: 0.1rem; justify-items: start; padding: 0 0.5rem; }
+  .admin-root .admin-side .admin-brand img { height: 3.6rem; }
+  .admin-root .admin-side-tag { margin-top: 0.3rem; font-family: var(--font-brand); font-size: 1.75rem; line-height: 1; color: var(--color-peach); }
+
+  .admin-root .admin-nav-side ul { display: grid; gap: 0.25rem; }
+  .admin-root .admin-nav-side a { display: flex; align-items: center; gap: 0.85rem; min-height: 3rem; padding: 0 0.9rem; border-radius: 0.85rem; color: var(--color-beige); font-size: 1rem; font-weight: 700; transition: background-color 0.15s ease; }
+  .admin-root .admin-nav-side a:hover { background: rgb(248 238 220 / 0.14); }
+  .admin-root .admin-nav-side a[aria-current='page'] { background: var(--color-beige); color: var(--color-brown); }
+  .admin-root .admin-nav-side a[aria-current='page'] .admin-nav-icon { color: var(--color-terracotta); }
+
+  .admin-root .admin-side-foot { margin-top: auto; padding-top: var(--space-4); border-top: 1.5px dashed rgb(248 238 220 / 0.35); }
+  .admin-root .admin-side .admin-account-links a { padding: 0 0.6rem; color: var(--color-beige); font-size: 0.9375rem; }
+  .admin-root .admin-side .admin-account-links a:hover { background: rgb(248 238 220 / 0.14); }
+  .admin-root .admin-side .btn-quiet { border-color: var(--color-beige); color: var(--color-beige); }
+  .admin-root .admin-side .btn-quiet:hover { background: var(--color-beige); color: var(--color-brown); }
+}
+@media (max-width: 63.999rem) { .admin-root .admin-side-edge { display: none; } }
+
+/* ============================ Rideau du compte (téléphone) : même mécanisme que le menu de la vitrine ============================ */
+.admin-root .admin-sheet { --sheet-w: min(22rem, calc(100% - 1.5rem)); width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; overflow: hidden; color: var(--color-brown); }
+.admin-root .admin-sheet:not([open]) { display: none; }
+.admin-root .admin-sheet::backdrop { background: rgb(127 63 32 / 0.55); }
+.admin-root .admin-sheet[open]::backdrop { animation: admin-fade 0.3s ease-out both; }
+.admin-root .admin-sheet-layer, .admin-root .admin-sheet-panel { position: absolute; top: 0.5rem; right: 0.5rem; bottom: 0.5rem; border-radius: 1.25rem; }
+.admin-root .admin-sheet[open] .admin-sheet-layer, .admin-root .admin-sheet[open] .admin-sheet-panel { animation: admin-slide 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.admin-root .admin-sheet[open] .admin-sheet-layer-2 { animation-delay: 0.05s; }
+.admin-root .admin-sheet[open] .admin-sheet-panel { animation-delay: 0.1s; }
+.admin-root .admin-sheet-layer-1 { width: calc(var(--sheet-w) + 0.9rem); background: var(--color-terracotta); }
+.admin-root .admin-sheet-layer-2 { width: calc(var(--sheet-w) + 0.45rem); background: var(--color-orange); }
+.admin-root .admin-sheet-panel { display: flex; flex-direction: column; gap: var(--space-4); width: var(--sheet-w); padding: 1rem 1.25rem 1.25rem; overflow-y: auto; background: var(--color-beige); }
+.admin-root .admin-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.admin-root .admin-sheet-title { margin: 0; font-family: var(--font-brand); font-size: 2.25rem; line-height: 1; color: var(--color-terracotta); }
+.admin-root .admin-sheet-close { display: inline-grid; flex: none; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 2px solid var(--color-brown); border-radius: 0.75rem; background: transparent; color: var(--color-brown); cursor: pointer; }
+.admin-root .admin-sheet-close:hover { background: var(--color-brown); color: var(--color-beige); }
+.admin-root .admin-sheet .admin-account-name { font-size: 1.5rem; letter-spacing: -0.01em; }
+.admin-root .admin-sheet .admin-account-links { margin-top: var(--space-2); border-top: 1.5px dashed var(--a-dashed); }
+.admin-root .admin-sheet .admin-account-links li { border-bottom: 1.5px dashed var(--a-dashed); }
+.admin-root .admin-sheet .admin-account-links a { min-height: 3.5rem; padding: 0 0.25rem; font-size: 1.125rem; font-weight: 800; }
+.admin-root .admin-sheet .admin-account-links a:hover { color: var(--color-terracotta); }
+@keyframes admin-fade { from { opacity: 0; } }
+@keyframes admin-slide { from { transform: translateX(110%); } }
+@media (prefers-reduced-motion: reduce) {
+  .admin-root .admin-sheet[open]::backdrop, .admin-root .admin-sheet[open] .admin-sheet-layer, .admin-root .admin-sheet[open] .admin-sheet-panel { animation: none; }
+}
+
+/* ============================ Titres, en-têtes de page ============================ */
+.admin-root h1, .admin-root h2, .admin-root h3 { margin: 0 0 var(--space-3); color: var(--color-brown); line-height: 1.12; letter-spacing: -0.015em; overflow-wrap: anywhere; }
+.admin-root h1 { font-size: clamp(1.75rem, 1.2rem + 2.4vw, 2.75rem); font-weight: 800; letter-spacing: -0.025em; line-height: 1.05; }
+.admin-root h2 { font-size: clamp(1.25rem, 1.1rem + 0.7vw, 1.5rem); font-weight: 800; }
+.admin-root h3 { font-size: 1.125rem; font-weight: 700; }
+.admin-root .admin-content > main > h2 { margin-top: var(--space-8); }
+
+.admin-root .page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-2) var(--space-4); margin: 0 0 var(--space-6); padding-bottom: var(--space-4); border-bottom: 1.5px dashed var(--a-dashed); }
+.admin-root .page-head h1 { margin: 0; }
+.admin-root .page-head > .help-text { margin: 0; font-weight: 600; }
+.admin-root .page-head > .btn { flex: none; }
+@media (max-width: 29.999rem) { .admin-root .page-head > .btn { width: 100%; } }
+
+.admin-root .back-link { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 2.75rem; margin: 0 0 var(--space-2); font-weight: 700; text-decoration: none; }
+.admin-root .back-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ============================ Boutons ============================ */
+.admin-root .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 3rem; padding: 0 1.5rem; border: 2px solid transparent; border-radius: 0.85rem; background: var(--color-orange); color: var(--color-brown); font: inherit; font-size: 1.0625rem; font-weight: 800; line-height: 1.1; text-align: center; text-decoration: none; cursor: pointer; transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease; }
+.admin-root .btn:hover { background: var(--color-gold-orange); box-shadow: 0 0.35rem 0.9rem -0.45rem rgb(127 63 32 / 0.55); }
+.admin-root .btn:active { transform: translateY(1px); box-shadow: none; }
+.admin-root .btn:disabled { opacity: 0.55; cursor: progress; box-shadow: none; transform: none; }
+.admin-root .btn-quiet { background: transparent; border-color: var(--color-brown); color: var(--color-brown); font-size: 1rem; }
+.admin-root .btn-quiet:hover { background: var(--color-brown); color: var(--color-beige); box-shadow: none; }
+.admin-root .btn-danger { background: var(--a-danger); border-color: var(--a-danger); color: #fff; }
+.admin-root .btn-danger:hover { background: #8e2b0d; border-color: #8e2b0d; }
+.admin-root .btn-small { min-height: 2.75rem; padding: 0 1rem; font-size: 0.9375rem; }
+.admin-root .btn-link { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0; border: 0; background: none; color: var(--color-brown); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.admin-root .btn-link:hover { color: var(--color-terracotta); }
+
+.admin-root .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.admin-root .confirm-delete { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3); border: 1.5px dashed var(--color-brown); border-radius: 0.85rem; background: var(--a-surface); }
+@media (max-width: 39.999rem) {
+  .admin-root .form-actions > .btn { flex: 1 1 100%; }
+  .admin-root .confirm-delete { width: 100%; }
+  .admin-root .confirm-delete > .btn { flex: 1 1 100%; }
+}
+
+/* ============================ Cartes, messages ============================ */
+.admin-root .card { padding: clamp(1rem, 2.5vw, 1.5rem); border: 1px solid var(--a-line); border-radius: 1.25rem; background: var(--a-surface); box-shadow: var(--a-shadow); color: var(--color-brown); }
+.admin-root .card > :first-child { margin-top: 0; }
+.admin-root .card > :last-child { margin-bottom: 0; }
+.admin-root .card h2 { font-size: 1.25rem; }
+.admin-root .stack { display: grid; gap: var(--space-4); }
+.admin-root .plain-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+
+.admin-root .alert-error, .admin-root .alert-success, .admin-root .alert-note, .admin-root .notice { margin: 0 0 var(--space-4); padding: var(--space-3) var(--space-4); border-radius: 0.85rem; font-size: 0.9375rem; line-height: 1.45; }
+.admin-root .alert-error { border: 1.5px solid var(--a-danger); background: #fce9e1; color: #8e2b0d; font-weight: 600; }
+.admin-root .alert-success { border: 1.5px solid #6e8b45; background: #e4efd6; color: #2f4a14; font-weight: 600; }
+.admin-root .alert-note { border: 1.5px dashed var(--color-brown); background: var(--a-surface); }
+.admin-root .notice { border: 1px solid var(--a-line); border-left: 0.3rem solid var(--color-orange); background: var(--a-surface); }
+.admin-root .notice strong { font-weight: 800; }
+.admin-root .field-error { margin: 0; color: #8e2b0d; font-size: 0.875rem; font-weight: 600; }
+
+.admin-root .empty-state { padding: clamp(1.75rem, 5vw, 3rem) var(--space-4); border: 1.5px dashed var(--color-brown); border-radius: 1.25rem; background: var(--a-surface); text-align: center; }
+.admin-root .empty-state::before { content: ''; display: block; width: 3.25rem; height: 3.25rem; margin: 0 auto var(--space-4); border-radius: 50%; background: var(--color-orange); box-shadow: 0 0 0 0.5rem color-mix(in srgb, var(--color-orange) 24%, transparent); }
+.admin-root .empty-state h2, .admin-root .empty-state h3 { margin-bottom: var(--space-2); font-size: 1.375rem; }
+.admin-root .empty-state p { max-width: 34rem; margin: 0 auto var(--space-4); color: var(--a-muted); }
+.admin-root .empty-state p:last-child { margin-bottom: 0; }
+
+.admin-root .skeleton { height: 5.5rem; border-radius: 1rem; background: var(--a-line); }
+
+/* ============================ Formulaires ============================ */
+.admin-root .field { display: grid; gap: 0.4rem; margin: 0 0 var(--space-4); }
+.admin-root .field:last-child { margin-bottom: 0; }
+.admin-root .field label, .admin-root fieldset.field legend { font-size: 0.9375rem; font-weight: 700; }
+.admin-root .field input:not([type='checkbox']):not([type='radio']):not([type='color']):not([type='file']),
+.admin-root .field select, .admin-root .field textarea, .admin-root .search-form input, .admin-root .inline-fields select, .admin-root .image-card input {
+  width: 100%; min-height: 3rem; padding: 0 0.9rem; border: 1.5px solid var(--a-line-strong); border-radius: 0.85rem; background: #fff; color: var(--color-brown); font: inherit; font-size: 1rem; line-height: 1.3; transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.admin-root .field textarea { min-height: 6rem; padding: 0.75rem 0.9rem; resize: vertical; line-height: 1.5; }
+.admin-root .field select, .admin-root .inline-fields select { appearance: none; -webkit-appearance: none; padding-right: 2.5rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9' fill='none' stroke='%237F3F20' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1.5 1.5 7 7l5.5-5.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.95rem center; cursor: pointer; }
+.admin-root .inline-fields select { width: auto; }
+.admin-root .field input::placeholder, .admin-root .field textarea::placeholder, .admin-root .search-form input::placeholder { color: color-mix(in srgb, var(--color-brown) 52%, #fff); }
+.admin-root .field input:hover:not(:disabled), .admin-root .field select:hover:not(:disabled), .admin-root .field textarea:hover:not(:disabled), .admin-root .search-form input:hover { border-color: var(--color-brown); }
+.admin-root .field input:focus-visible, .admin-root .field select:focus-visible, .admin-root .field textarea:focus-visible, .admin-root .search-form input:focus-visible, .admin-root .image-card input:focus-visible { outline: 0; border-color: var(--color-brown); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-gold-orange) 55%, transparent); }
+.admin-root .field [aria-invalid='true'] { border-color: var(--a-danger); background: #fffaf8; }
+.admin-root .field input:disabled, .admin-root .field select:disabled, .admin-root .field textarea:disabled { background: #f4e7d4; color: var(--a-muted); }
+.admin-root .field-narrow input { max-width: 8rem; }
+.admin-root .inline-fields { display: flex; gap: var(--space-2); align-items: stretch; }
+.admin-root .inline-fields input { flex: 1; }
+.admin-root .inline-fields .color-input { flex: none; }
+.admin-root .inline-fields .color-sample { flex: 1; }
+.admin-root .inline-fields .btn { flex: none; min-height: 3rem; padding: 0 1rem; font-size: 1rem; }
+.admin-root .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0 var(--space-4); align-items: start; }
+.admin-root .field-row > .field, .admin-root .field-row > .field:last-child { margin-bottom: var(--space-4); }
+
+.admin-root fieldset.field { border: 0; padding: 0; min-width: 0; }
+.admin-root fieldset.field legend { padding: 0; margin-bottom: 0.4rem; }
+.admin-root .choice-group { gap: 0.35rem; }
+
+/* Cases à cocher, boutons radio : grandes zones tactiles, la case choisie s'entoure de marron */
+.admin-root input[type='checkbox'], .admin-root input[type='radio'] { flex: none; width: 1.4rem; height: 1.4rem; margin: 0; accent-color: var(--color-orange); cursor: pointer; }
+.admin-root .check-row, .admin-root .radio-row { display: flex; align-items: center; gap: 0.75rem; min-height: 2.75rem; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.admin-root .check-row-top { align-items: flex-start; font-weight: 500; }
+.admin-root .check-row-top input { margin-top: 0.15rem; }
+.admin-root .radio-row { align-items: flex-start; padding: 0.7rem 0.9rem; border: 1.5px solid var(--a-line); border-radius: 0.85rem; background: #fff; font-weight: 500; transition: border-color 0.12s ease, background-color 0.12s ease; }
+.admin-root .radio-row input { margin-top: 0.1rem; }
+.admin-root .radio-row:hover { border-color: var(--color-brown); }
+.admin-root .radio-row:has(input:checked) { border-color: var(--color-brown); background: color-mix(in srgb, var(--color-orange) 14%, #fff); box-shadow: inset 0 0 0 1px var(--color-brown); }
+.admin-root .radio-row:has(input:focus-visible) { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.admin-root .radio-row strong { display: block; }
+.admin-root .choice-group .check-row { padding: 0.2rem 0; }
+
+.admin-root .color-input { width: 3rem; height: 3rem; padding: 3px; border: 1.5px solid var(--a-line-strong); border-radius: 0.85rem; background: #fff; cursor: pointer; }
+.admin-root .color-sample { display: inline-flex; align-items: center; min-height: 3rem; padding: 0 var(--space-4); border-radius: 999px; font-weight: 700; }
+.admin-root .file-button { cursor: pointer; }
+
+/* Barre de recherche et filtres */
+.admin-root .toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3) var(--space-4); margin-bottom: var(--space-4); }
+.admin-root .search-form { display: flex; gap: var(--space-2); width: 100%; }
+.admin-root .search-form input { flex: 1; }
+.admin-root .search-form .btn { flex: none; min-height: 3rem; padding: 0 1.1rem; font-size: 1rem; }
+@media (min-width: 48rem) { .admin-root .search-form { width: min(100%, 26rem); } }
+
+/* Filtres : une rangée défilante au doigt sur téléphone (jamais 4 lignes de pastilles), qui revient à la ligne sur ordinateur */
+.admin-root .filter-links { display: flex; gap: var(--space-2); max-width: 100%; margin-inline: calc(var(--a-gutter) * -1); padding: 0.2rem var(--a-gutter); overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-padding-inline: var(--a-gutter); -webkit-overflow-scrolling: touch; }
+.admin-root .filter-links::-webkit-scrollbar { display: none; }
+.admin-root .filter-links a { display: inline-flex; flex: none; align-items: center; min-height: 2.75rem; padding: 0 1.1rem; border: 1.5px solid var(--a-line-strong); border-radius: 999px; background: var(--a-surface); font-size: 0.9375rem; font-weight: 700; text-decoration: none; white-space: nowrap; transition: border-color 0.12s ease, background-color 0.12s ease; }
+.admin-root .filter-links a:hover { border-color: var(--color-brown); }
+.admin-root .filter-links a[aria-current='page'] { border-color: var(--color-brown); background: var(--color-brown); color: var(--color-beige); }
+.admin-root .toolbar > .filter-links { flex: 1 1 100%; }
+@media (min-width: 48rem) {
+  .admin-root .filter-links { flex-wrap: wrap; margin-inline: 0; padding: 0; overflow: visible; }
+  .admin-root .toolbar > .filter-links { flex: 1 1 auto; }
+}
+
+/* ============================ Pastilles de statut ============================ */
+.admin-root .badge { min-width: max-content; display: inline-flex; align-items: center; gap: 0.4rem; flex: none; padding: 0.2rem 0.7rem; border: 1.5px solid transparent; border-radius: 999px; font-size: 0.8125rem; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+.admin-root .badge::before { content: ''; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; }
+.admin-root .badge-ok { background: #e4efd6; color: #2f4a14; }
+.admin-root .badge-ok::before { background: #5d7d33; }
+.admin-root .badge-warn { background: #fde6bc; color: #6b3a00; }
+.admin-root .badge-warn::before { background: var(--color-orange); }
+.admin-root .badge-muted { background: #efdcc6; color: var(--a-muted); }
+.admin-root .badge-outline { background: transparent; border-color: var(--color-brown); color: var(--color-brown); }
+.admin-root .badge-solid { background: var(--color-brown); color: var(--color-beige); }
+.admin-root .badge-solid::before { background: var(--color-peach); }
+.admin-root .badge-void { background: transparent; border: 1.5px dashed var(--a-muted); color: var(--a-muted); text-decoration: line-through; }
+.admin-root .badge-void::before { display: none; }
+.admin-root .badge-row { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.admin-root .money { min-width: max-content; font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap; }
+
+/* ============================ Tableau de bord : tuiles colorées (cartes produit de la vitrine) ============================ */
+.admin-root .stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-8); }
+@media (min-width: 64rem) { .admin-root .stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); } }
+@media (max-width: 21.25rem) { .admin-root .stat-grid { grid-template-columns: minmax(0, 1fr); } }
+.admin-root .stat { position: relative; display: grid; align-content: space-between; gap: 0.25rem; min-height: 6.5rem; padding: 1rem 1.1rem; overflow: hidden; border: 1px solid var(--a-line); border-radius: 1.25rem; background: var(--a-surface); box-shadow: var(--a-shadow); }
+.admin-root .stat::before { content: ''; position: absolute; top: -1.1rem; right: -1.1rem; width: 3.6rem; height: 3.6rem; border-radius: 50%; background: var(--color-peach); }
+.admin-root .stat:nth-child(2)::before { background: var(--color-gold-orange); }
+.admin-root .stat:nth-child(3)::before { background: var(--color-orange); }
+.admin-root .stat:nth-child(4)::before { background: var(--color-terracotta); }
+.admin-root .stat strong { position: relative; padding-right: 1.25rem; font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.625rem); font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.admin-root .stat .help-text { position: relative; font-size: 0.875rem; font-weight: 600; line-height: 1.3; }
+.admin-root .stat.is-main { border-color: var(--color-brown); background: var(--color-brown); color: var(--color-beige); }
+.admin-root .stat.is-main::before { background: var(--color-orange); }
+.admin-root .stat.is-main .help-text { color: var(--color-peach); }
+
+.admin-root .todo-block { margin-bottom: var(--space-8); }
+.admin-root .todo-block h3 { display: flex; align-items: center; gap: var(--space-2); margin-bottom: 0.15rem; font-size: 1.1875rem; font-weight: 800; }
+.admin-root .todo-count { display: inline-grid; place-items: center; min-width: 1.9rem; height: 1.9rem; padding: 0 0.5rem; border-radius: 999px; background: var(--color-brown); color: var(--color-beige); font-size: 0.875rem; font-weight: 800; }
+.admin-root .todo-block > .help-text { margin: 0 0 var(--space-3); }
+
+/* ============================ Listes : commandes, clients ============================ */
+.admin-root .order-list, .admin-root .product-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.admin-root .order-row { position: relative; display: grid; gap: 0.6rem; padding: 0.95rem 1.1rem; border: 1px solid var(--a-line); border-radius: 1.1rem; background: var(--a-surface); box-shadow: var(--a-shadow); text-decoration: none; transition: transform 0.15s ease, border-color 0.15s ease; }
+.admin-root .order-row:hover { transform: translateY(-2px); border-color: var(--color-brown); }
+.admin-root .order-row:active { transform: none; }
+.admin-root .order-row-head { display: grid; gap: 0.1rem; }
+.admin-root .order-row-head strong { font-size: 1.0625rem; font-weight: 800; overflow-wrap: anywhere; }
+.admin-root .order-row-head .help-text { font-size: 0.875rem; }
+.admin-root .order-row-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); }
+.admin-root .order-row > .help-text { margin: 0; font-size: 0.875rem; }
+.admin-root .order-row .money { font-size: 1.0625rem; }
+@media (min-width: 48rem) {
+  .admin-root .order-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); align-items: center; gap: 0.35rem var(--space-6); padding: 1rem 1.35rem; }
+  .admin-root .order-row > .help-text { grid-column: 1 / -1; padding-top: 0.45rem; border-top: 1.5px dashed var(--a-dashed); }
+}
+
+/* Produits : lignes sur téléphone, grille de cartes sur ordinateur */
+.admin-root .product-row { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: 0.7rem 0.9rem 0.7rem 0.7rem; border: 1px solid var(--a-line); border-radius: 1.1rem; background: var(--a-surface); box-shadow: var(--a-shadow); text-decoration: none; transition: transform 0.15s ease, border-color 0.15s ease; }
+.admin-root .product-row:hover { transform: translateY(-2px); border-color: var(--color-brown); }
+.admin-root .product-row img, .admin-root .product-placeholder { display: block; width: 4.5rem; height: 4.5rem; border-radius: 0.8rem; object-fit: cover; background: var(--a-line); }
+.admin-root .product-placeholder { background: repeating-linear-gradient(135deg, var(--a-line) 0 0.5rem, #efd9c3 0.5rem 1rem); }
+.admin-root .product-info { display: grid; gap: 0.15rem; }
+.admin-root .product-info strong { font-size: 1.0625rem; font-weight: 800; overflow-wrap: anywhere; }
+.admin-root .product-info .help-text { font-size: 0.875rem; line-height: 1.35; }
+@media (max-width: 29.999rem) {
+  .admin-root .product-row { grid-template-columns: 4rem minmax(0, 1fr); }
+  .admin-root .product-row img, .admin-root .product-placeholder { width: 4rem; height: 4rem; }
+  .admin-root .product-row .badge { grid-column: 2; justify-self: start; }
+}
+@media (min-width: 48rem) { .admin-root .product-list { grid-template-columns: repeat(auto-fill, minmax(min(100%, 25rem), 1fr)); gap: var(--space-4); } }
+.admin-root .product-list > li { display: flex; }
+.admin-root .product-list > li > .product-row { flex: 1; }
+
+.admin-root .pagination { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-6); }
+.admin-root .pagination .help-text { margin: 0; font-weight: 600; text-align: center; }
+
+/* ============================ Détail d'une commande ============================ */
+.admin-root .detail-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+@media (min-width: 52rem) { .admin-root .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: var(--space-5, 1.25rem); } .admin-root .detail-grid .span-2 { grid-column: 1 / -1; } }
+.admin-root .kv { display: grid; grid-template-columns: minmax(6.5rem, 0.85fr) minmax(0, 1.4fr); gap: 0.45rem var(--space-4); margin: 0; }
+.admin-root .kv dt { color: var(--a-muted); font-size: 0.9375rem; }
+.admin-root .kv dd { margin: 0; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.admin-root .kv .is-total, .admin-root .kv .is-total + dd { margin-top: 0.2rem; padding-top: 0.6rem; border-top: 1.5px dashed var(--a-dashed); font-size: 1.125rem; font-weight: 800; }
+.admin-root .kv .is-total { color: var(--color-brown); }
+
+.admin-root .line-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.admin-root .line-list li { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); padding: 0.7rem 0; border-bottom: 1.5px dashed var(--a-dashed); }
+.admin-root .line-list li:first-child { padding-top: 0; }
+.admin-root .line-list li:last-child { padding-bottom: 0; border-bottom: 0; }
+.admin-root .line-list .is-voided { color: var(--a-muted); text-decoration: line-through; }
+.admin-root .line-list .is-voided .help-text { text-decoration: none; }
+
+.admin-root .timeline { list-style: none; margin: 0; padding: 0 0 0 1.35rem; border-left: 2px solid var(--a-line-strong); display: grid; gap: var(--space-4); }
+.admin-root .timeline li { position: relative; }
+.admin-root .timeline li::before { content: ''; position: absolute; left: calc(-1.35rem - 7px); top: 0.35rem; width: 12px; height: 12px; border: 2px solid var(--color-beige); border-radius: 50%; background: var(--color-orange); box-shadow: 0 0 0 2px var(--color-brown); }
+.admin-root .timeline li:first-child::before { background: var(--color-brown); }
+
+.admin-root .action-panel { border: 2px solid var(--color-brown); background: var(--a-surface); }
+.admin-root .action-panel h2 { margin-bottom: var(--space-3); }
+.admin-root .confirm-box { display: grid; gap: var(--space-3); margin-top: var(--space-3); padding: var(--space-4); border: 1.5px dashed var(--color-brown); border-radius: 1rem; background: #fff; }
+.admin-root .pay-form { display: grid; gap: var(--space-3); margin-top: var(--space-5, 1.25rem); padding-top: var(--space-5, 1.25rem); border-top: 1.5px dashed var(--a-dashed); }
+.admin-root .pay-form .field { margin: 0; }
+.admin-root .pay-form h3 { font-size: 1.0625rem; }
+.admin-root .pay-form-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); }
+
+/* ============================ Produits : formulaire ============================ */
+.admin-root .product-form { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); max-width: 46rem; }
+.admin-root .form-section h2 { margin-bottom: var(--space-4); font-size: 1.25rem; }
+.admin-root .form-section .help-text { font-size: 0.875rem; }
+.admin-root .product-form > .form-actions { position: sticky; bottom: calc(var(--a-tabbar-h) + 0.75rem + env(safe-area-inset-bottom)); z-index: 10; padding: 0.75rem; border: 1.5px solid var(--color-brown); border-radius: 1.1rem; background: var(--a-surface); box-shadow: 0 0.75rem 2rem -0.75rem rgb(127 63 32 / 0.5); }
+
+.admin-root .image-grid { list-style: none; margin: 0 0 var(--space-3); padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9.5rem), 1fr)); gap: var(--space-3); }
+.admin-root .image-card { position: relative; display: grid; gap: var(--space-2); padding: 0.5rem; border: 1px solid var(--a-line); border-radius: 1rem; background: #fff; }
+.admin-root .image-card img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 0.7rem; }
+.admin-root .image-card .badge { position: absolute; top: 0.9rem; left: 0.9rem; box-shadow: 0 0.2rem 0.6rem rgb(0 0 0 / 0.2); }
+.admin-root .image-card input { min-height: 2.75rem; padding: 0 0.6rem; border-radius: 0.7rem; font-size: 0.9375rem; }
+.admin-root .image-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.35rem; }
+.admin-root .image-actions .btn { min-height: 2.75rem; padding: 0; font-size: 1rem; }
+
+.admin-root .variant-row { display: grid; gap: var(--space-3); margin: 0; padding: var(--space-4); border: 1.5px solid var(--a-line); border-radius: 1rem; background: #fff; }
+.admin-root .variant-row legend { padding: 0 var(--space-2); font-weight: 800; }
+.admin-root .variant-row.is-inactive { opacity: 0.6; }
+.admin-root .variant-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.admin-root .inline-form { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: flex-end; }
+.admin-root .inline-form .field { flex: 1 1 14rem; margin: 0; }
+.admin-root .inline-form .btn { flex: none; }
+@media (max-width: 29.999rem) { .admin-root .inline-form .btn { flex: 1 1 100%; } }
+.admin-root .category-row { display: grid; gap: var(--space-3); }
+.admin-root .category-row .field { margin-bottom: 0; }
+
+/* Ordinateur : les cartes du formulaire produit se répartissent sur deux colonnes équilibrées (ordre de lecture inchangé :
+   clavier, lecteur d'écran et téléphone suivent le même ordre). */
+.admin-root .form-columns { display: grid; gap: var(--space-4); }
+@media (min-width: 64rem) {
+  .admin-root .product-form { max-width: none; }
+  .admin-root .form-columns { display: block; column-count: 2; column-gap: var(--space-4); }
+  .admin-root .form-columns > .form-section { break-inside: avoid; margin-bottom: var(--space-4); }
+  .admin-root .product-form > .form-actions { bottom: 1rem; }
+  .admin-root .category-row { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-4); }
+  .admin-root .category-row > .form-actions, .admin-root .category-row > .help-text, .admin-root .category-row > .field-error { grid-column: 1 / -1; }
+}
+
+/* Pages à formulaire unique (mot de passe, export, données clients) : carte lisible, jamais étirée sur tout l'écran */
+.admin-root .admin-content > main > .card { max-width: 40rem; }
+
+/* ============================ Connexion ============================ */
+.admin-root .login-wrap { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 26rem); justify-content: center; align-content: center; min-height: 100vh; min-height: 100dvh; padding: 1.5rem var(--space-4); overflow: hidden; background: var(--color-brown); }
+.admin-root .login-wrap::before, .admin-root .login-wrap::after { content: ''; position: absolute; z-index: -1; border-radius: 50%; pointer-events: none; }
+.admin-root .login-wrap::before { left: -22%; bottom: -16%; width: min(82vw, 30rem); aspect-ratio: 1; background: var(--color-orange); }
+.admin-root .login-wrap::after { right: -14%; top: -12%; width: min(52vw, 20rem); aspect-ratio: 1; background: var(--color-terracotta); }
+.admin-root .login-portal { display: grid; gap: var(--space-5, 1.25rem); justify-items: center; width: 100%; }
+.admin-root .login-brand { display: grid; justify-items: center; gap: 0.25rem; text-align: center; color: var(--color-beige); }
+.admin-root .login-brand img { display: block; width: min(15rem, 68%); height: auto; max-width: none; }
+.admin-root .login-script { margin: 0.4rem 0 0; font-family: var(--font-brand); font-size: 2.5rem; font-weight: 400; line-height: 1; color: var(--color-peach); }
+.admin-root .login-brand p:not(.login-script) { margin: 0; font-size: 0.9375rem; font-weight: 500; letter-spacing: 0.01em; }
+.admin-root .login-card { position: relative; width: 100%; padding: clamp(1.25rem, 5vw, 1.75rem); border: 0; border-radius: 1.5rem; background: var(--color-beige); box-shadow: 0 1.5rem 3rem -1rem rgb(0 0 0 / 0.5); }
+.admin-root .login-card::before { content: ''; position: absolute; inset: 0.5rem; border: 1.5px dashed var(--a-dashed); border-radius: 1.1rem; pointer-events: none; }
+.admin-root .login-card > * { position: relative; }
+.admin-root .login-card h1 { margin-bottom: 0.25rem; font-size: 2rem; }
+.admin-root .login-card button[type='submit'] { width: 100%; margin-top: var(--space-2); }
+.admin-root .login-back { margin: 0; }
+.admin-root .login-back a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 1.1rem; border-radius: 999px; background: var(--color-brown); color: var(--color-beige); font-weight: 700; text-decoration: none; }
+.admin-root .login-back a:hover { background: #3a1c0e; }
+
+/* ---------- Écrans Livraison et Analytics (v0.11), habillés avec les jetons du back-office ---------- */
+.admin-root .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.admin-root .table-scroll { overflow-x: auto; }
+.admin-root .zone-section { display: grid; gap: var(--space-3); }
+.admin-root .zone-section h2 { margin: 0; }
+.admin-root .zone-item { border-top: 1px solid var(--a-line); padding-top: var(--space-3); }
+.admin-root .zone-fields { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); align-items: start; }
+.admin-root .stat-value { font-size: 1.75rem; font-weight: 800; margin: 0; }
+.admin-root .rank-list { display: grid; gap: var(--space-2); }
+.admin-root .rank-list li { display: grid; grid-template-columns: minmax(0, 1fr) 6rem 2.5rem; gap: var(--space-2); align-items: center; }
+.admin-root .rank-label { overflow-wrap: anywhere; }
+.admin-root .rank-bar { background: var(--a-line); border-radius: 999px; height: 0.5rem; overflow: hidden; }
+.admin-root .rank-bar > span { display: block; height: 100%; background: currentColor; border-radius: 999px; }
+.admin-root .rank-count { text-align: right; font-variant-numeric: tabular-nums; }
+.admin-root .day-chart { display: flex; align-items: flex-end; gap: 2px; height: 8rem; }
+.admin-root .day-bar { flex: 1 1 0; min-width: 2px; background: currentColor; border-radius: 2px 2px 0 0; opacity: 0.8; }
+.admin-root .funnel li { display: grid; grid-template-columns: minmax(0, 1fr) 4rem auto; gap: var(--space-3); align-items: baseline; }
+.admin-root .journey { display: grid; gap: var(--space-2); padding-left: var(--space-5); }
+.admin-root .journey li { display: grid; gap: var(--space-1); }
+.admin-root .utm-link { overflow-wrap: anywhere; }

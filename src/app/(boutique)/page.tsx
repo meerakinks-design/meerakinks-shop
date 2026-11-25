@@ -11,7 +11,7 @@ import { cld } from '@/lib/cloudinary-static';
 import { hasPromotion } from '@/lib/shop/product-display';
 import { buildShopLayout } from '@/lib/shop/sections';
 import { absoluteUrl } from '@/lib/shop/seo';
-import { getPublicSettings, getShopData } from '@/server/services/catalog.queries';
+import { getPublicDelivery, getPublicSettings, getShopData } from '@/server/services/catalog.queries';
 
 // Page statique régénérée toutes les heures, et immédiatement après chaque modification du back-office.
 export const revalidate = 3600;
@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: { absolute: SEO.home.title }, descrip
 
 export default async function HomePage() {
   const settings = await getPublicSettings();
-  const { categories, products } = await getShopData();
+  const [{ categories, products }, delivery] = await Promise.all([getShopData(), getPublicDelivery()]);
   const layout = buildShopLayout(categories, products);
   const siteUrl = absoluteUrl('/');
   const sameAs = [settings.instagramUrl, settings.tiktokUrl, settings.facebookUrl].filter(Boolean);
@@ -60,7 +60,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      <Faq settings={settings} />
+      <Faq settings={settings} delays={delivery.summary} notes={delivery.notes} />
       <FinalCta />
       <Contact settings={settings} />
 
