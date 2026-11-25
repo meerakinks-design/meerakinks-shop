@@ -36,10 +36,10 @@
     "updatedAt": "2026-11-25T00:04:20.421Z"
   },
   "stage/hero2.webp": {
-    "hash": "a3f6c323a09a8b4f305dc71c75621c159972c4dc95b6e8f34d4b6820f8866ffa",
+    "hash": "1930522b63478df1ab401aa423101a6b43e0580d148d6663e5baa4ac8c109852",
     "publicId": "meera/public/stage/hero2",
     "resourceType": "image",
-    "updatedAt": "2026-11-25T00:04:23.776Z"
+    "updatedAt": "2026-11-25T06:44:37.941Z"
   },
   "products/brume-1.webp": {
     "hash": "6b6401fc55ebcf4ddefda850c3e7c552c49db9b0711356978aa56dfaf88a5469",
@@ -94,5 +94,11 @@
     "publicId": "meera/public/products/velvet-2",
     "resourceType": "image",
     "updatedAt": "2026-11-25T06:03:42.388Z"
+  },
+  "models/fluffy-kinks-jar.glb": {
+    "hash": "bf3828b2774850dfab4674441526cedeeed8e3996fbcfd71c1d7433985d780c6",
+    "publicId": "meera/public/models/fluffy-kinks-jar.glb",
+    "resourceType": "raw",
+    "updatedAt": "2026-11-25T06:44:31.203Z"
   }
 }
