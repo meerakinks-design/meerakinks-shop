@@ -9,7 +9,6 @@ type MaybeSlug = string | null | undefined;
  */
 export function revalidateCatalog(options: { products?: MaybeSlug[]; categories?: MaybeSlug[] } = {}): void {
   revalidatePath(PUBLIC_ROUTES.home);
-  revalidatePath(PUBLIC_ROUTES.shop);
   revalidatePath(PUBLIC_ROUTES.categories);
   for (const slug of new Set(options.products ?? [])) if (slug) revalidatePath(productPath(slug));
   for (const slug of new Set(options.categories ?? [])) if (slug) revalidatePath(categoryPath(slug));

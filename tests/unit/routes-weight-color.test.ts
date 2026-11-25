@@ -7,7 +7,7 @@ describe('routes publiques', () => {
   it('suivent la structure validée', () => {
     expect(productPath('beurre-de-karite')).toBe('/produit/beurre-de-karite');
     expect(categoryPath('soins-capillaires')).toBe('/categorie/soins-capillaires');
-    expect(PUBLIC_ROUTES.shop).toBe('/boutique');
+    expect(PUBLIC_ROUTES.shop).toBe('/#boutique'); // le catalogue est une section de la landing
     expect(PUBLIC_ROUTES.orderConfirmation).toBe('/commande/confirmation');
     expect(PUBLIC_ROUTES.about).toBe('/a-propos'); // « Notre histoire » : page dédiée
     expect(PUBLIC_ROUTES.credits).toBe('/credits');

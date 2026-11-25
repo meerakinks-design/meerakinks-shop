@@ -17,7 +17,6 @@ vi.mock('next/link', () => ({ default: ({ children }: { children: React.ReactNod
 
 const { default: sitemap } = await import('@/app/sitemap');
 const { default: robots } = await import('@/app/robots');
-const { generateMetadata: shopMetadata } = await import('@/app/(boutique)/boutique/page');
 const { metadata: categoriesMetadata } = await import('@/app/(boutique)/categories/page');
 const { metadata: cgvMetadata } = await import('@/app/(boutique)/cgv/page');
 const { metadata: cguMetadata } = await import('@/app/(boutique)/cgu/page');
@@ -52,18 +51,17 @@ describe('siteBaseUrl', () => {
 });
 
 describe('sitemap.xml', () => {
-  it('liste accueil, boutique, catégories, à propos, catégories actives et produits publiés, en adresses absolues', async () => {
+  it('liste accueil (catalogue compris), catégories, à propos, catégories actives et produits publiés, en adresses absolues', async () => {
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', 'https://boutique.ci/');
     const entries = await sitemap();
     expect(entries.map((entry) => entry.url)).toEqual([
       'https://boutique.ci/',
-      'https://boutique.ci/boutique',
       'https://boutique.ci/categories',
       'https://boutique.ci/a-propos',
       'https://boutique.ci/categorie/soins',
       'https://boutique.ci/produit/beurre-de-karite',
     ]);
-    expect(entries[5]?.lastModified).toEqual(new Date('2026-11-01T10:00:00Z'));
+    expect(entries[4]?.lastModified).toEqual(new Date('2026-11-01T10:00:00Z'));
   });
 
   it('ne contient ni le back-office, ni la commande, ni les pages légales encore provisoires', async () => {
@@ -94,30 +92,6 @@ describe('robots.txt', () => {
     vi.stubEnv('NEXT_PUBLIC_SITE_URL', '');
     vi.stubEnv('NODE_ENV', 'production');
     expect(robots()).not.toHaveProperty('sitemap');
-  });
-});
-
-describe('/boutique : pas de contenu dupliqué', () => {
-  it('catalogue complet : canonique /boutique, indexable', () => {
-    const metadata = shopMetadata({ searchParams: {} });
-    expect(metadata.alternates?.canonical).toBe('/boutique');
-    expect(metadata.robots).toBeUndefined();
-  });
-
-  it('catégorie, tri ou offres : canonique /boutique (la page « canonique » est le catalogue complet)', () => {
-    for (const searchParams of [{ categorie: 'soins' }, { tri: 'prix-croissant' }, { filtre: 'offres' }]) {
-      expect(shopMetadata({ searchParams }).alternates?.canonical).toBe('/boutique');
-    }
-  });
-
-  it('recherche libre : noindex, sans canonique (les deux ensemble se contredisent)', () => {
-    const metadata = shopMetadata({ searchParams: { q: 'karité' } });
-    expect(metadata.robots).toEqual({ index: false, follow: true });
-    expect(metadata.alternates).toBeUndefined();
-  });
-
-  it('une recherche vide n’est pas une recherche', () => {
-    expect(shopMetadata({ searchParams: { q: '   ' } }).alternates?.canonical).toBe('/boutique');
   });
 });
 

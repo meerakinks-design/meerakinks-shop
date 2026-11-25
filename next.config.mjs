@@ -33,6 +33,11 @@ const nextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
+  // La boutique est une section de la landing : l'ancienne page /boutique (et ses filtres ?categorie=, ?filtre=offres, ?tri=, ?q=)
+  // est redirigée de façon permanente vers /#boutique ; Next.js conserve la requête (/boutique?filtre=offres → /?filtre=offres#boutique).
+  async redirects() {
+    return [{ source: '/boutique', destination: '/#boutique', permanent: true }];
+  },
 };
 
 export default nextConfig;

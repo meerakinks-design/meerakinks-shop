@@ -1,0 +1,42 @@
+/* Titres en Modak : la police du filigrane du pied de page (--font-logo, licence OFL), la plus proche du lettrage « Meëra » du logo.
+   Elle sert au grand titre du héros et à tous les titres de sections. Chargée EN DERNIER (après stage.css) : à spécificité égale,
+   ces règles remplacent celles de shop.css, ui.css et stage.css (Poppins 800, Great Vibes).
+   Modak n'existe qu'en graisse 400 : font-weight 400 + font-synthesis none, sinon le navigateur fabriquerait un faux gras. */
+
+/* Échelle du héros : Modak est plus étroit que Poppins 800, mais bien plus dense ; le second temps du titre (terracotta, incliné)
+   est un peu plus grand que le premier. « votre routine. » tient sur une ligne dans la colonne du héros. */
+:root {
+  --text-hero: clamp(2.75rem, 13vw, 5.25rem);
+  --text-hero-script: clamp(2.5rem, 12.4vw, 5.25rem);
+}
+@media (min-width: 900px) {
+  :root {
+    --text-hero: clamp(3.25rem, 6.4vw, 7rem);
+    --text-hero-script: clamp(3.4rem, 6.8vw, 7.4rem);
+  }
+}
+/* `.hero h1` (shop.css, 0,1,1) l'emportait sur `.hero-title` (ui.css, 0,1,0) : la taille du héros ne venait jamais de --text-hero.
+   Ici la règle est plus précise (0,2,0) : le titre prend enfin la taille prévue, sans largeur maximale. */
+.hero .hero-title { font-size: var(--text-hero); max-width: none; }
+
+.hero-title,
+.hero-title-main,
+.hero-title-script,
+.section > .container > h2,
+.container.section > h2,
+.section-head h2,
+.contact-intro h2,
+.category-title,
+.focus-grid h2,
+.about-block h2,
+.product-story h2,
+.cta-body h2 {
+  font-family: var(--font-logo);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
+}
+.hero-title { line-height: 0.95; }
+.hero-title-script { margin-top: -0.02em; line-height: 0.9; }
+.section > .container > h2, .container.section > h2, .section-head h2, .contact-intro h2 { line-height: 1; }
+.cta-body h2 { line-height: 1; }

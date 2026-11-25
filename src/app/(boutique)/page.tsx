@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { JsonLd } from '@/components/shop/JsonLd';
 import { CategorySections } from '@/components/shop/CategorySections';
+import { ShopCatalog } from '@/components/shop/ShopCatalog';
 import { ShopGrid } from '@/components/shop/ShopGrid';
 import { ShowcaseGrid } from '@/components/shop/ShowcaseGrid';
 import Spaghetti from '@/components/shop/Spaghetti';
@@ -9,7 +10,6 @@ import { ScrollStage } from '@/components/shop/ScrollStage';
 import { LANDING } from '@/content/landing';
 import { SEO } from '@/content/seo';
 import { SHOWCASE_ENABLED } from '@/content/vitrine';
-import Link from 'next/link';
 import { cld } from '@/lib/cloudinary-static';
 import { hasPromotion } from '@/lib/shop/product-display';
 import { buildShopLayout } from '@/lib/shop/sections';
@@ -29,18 +29,23 @@ export default async function HomePage() {
   const layout = buildShopLayout(categories, products);
   const siteUrl = absoluteUrl('/');
   const sameAs = [settings.instagramUrl, settings.tiktokUrl, settings.facebookUrl].filter(Boolean);
+  // Pastilles du catalogue : seulement les catégories qui ont au moins un produit publié.
+  const catalogCategories = categories
+    .filter((category) => products.some((product) => product.category?.id === category.id))
+    .map(({ id, name, slug }) => ({ id, name, slug }));
 
   return (
     <>
-      {/* Parcours : héros (l'élixir 3D sort de l'affiche) → « Le soin en toute simplicité » → produits par catégorie →
-          FAQ (la brume prend le relais) → CTA (la brume se pose sur la photo) → contact. Avis et témoignages retirés pour l'instant. */}
+      {/* Parcours : héros (le pot Fluffy Kinks 3D sort de l'affiche) → section « guide » (Vos cheveux ont des besoins…) → boutique
+          (l'ancienne page /boutique, déplacée ici : vitrine photo tant que SHOWCASE_ENABLED, sinon catalogue avec recherche, catégories,
+          offres, tri) → collections par besoin → produits par catégorie → FAQ (la brume prend le relais) → contact (titre fixe à gauche,
+          formulaire à droite) → CTA (la brume glisse sous sa carte). Avis et témoignages retirés pour l'instant. */}
       <ScrollStage />
       <Hero showCollections={layout.mode === 'categories'} iconSrc={cld('/brand/favicon-icon.png')} />
       <Marquee />
       <Why storeName={settings.storeName} />
-      {layout.mode === 'categories' && <Collections sections={layout.sections} hasOffers={products.some(hasPromotion)} />}
 
-      {/* Vitrine photo : les soins en grille asymétrique (réf. Hello Hello), sans prix pour l'instant. */}
+      {/* Vitrine photo : les soins en grille asymétrique (réf. Hello Hello), sans prix pour l'instant. /boutique renvoie ici (#boutique). */}
       {SHOWCASE_ENABLED && (
         <section id="boutique" className="shop-section" aria-label={LANDING.shop.title}>
           <div className="container section">
@@ -49,43 +54,31 @@ export default async function HomePage() {
               <p className="lead">{LANDING.shop.text}</p>
             </div>
             <ShowcaseGrid />
-            <div className="showcase-more">
-              <Link className="btn btn-pill" href="/boutique">
-                {LANDING.shop.cta}
-              </Link>
-            </div>
           </div>
         </section>
       )}
 
-      {/* Section Boutique (décision D-12) : sections sticky par catégorie, sinon grille. Rien sans produit publié. */}
-      {!SHOWCASE_ENABLED && products.length > 0 && (
-        <section id="boutique" className="shop-section" aria-label={LANDING.shop.title}>
-          {layout.mode === 'categories' ? (
-            <>
-              <CategorySections sections={layout.sections} />
-              {layout.others.length > 0 && (
-                <div className="container section">
-                  <Spaghetti as="h2">{LANDING.shop.othersTitle}</Spaghetti>
-                  <ShopGrid products={layout.others} />
-                </div>
-              )}
-            </>
-          ) : (
+      {/* Catalogue de la base (l'ancienne page /boutique) : recherche, catégories, offres, tri. Rien sans produit publié. */}
+      {!SHOWCASE_ENABLED && products.length > 0 && <ShopCatalog products={products} categories={catalogCategories} />}
+
+      {layout.mode === 'categories' && <Collections sections={layout.sections} hasOffers={products.some(hasPromotion)} />}
+
+      {/* Produits par catégorie (décision D-12) : sections sticky par catégorie. Rien sans produit publié. */}
+      {!SHOWCASE_ENABLED && products.length > 0 && layout.mode === 'categories' && (
+        <section id="par-categorie" className="shop-section" aria-label={LANDING.collections.title}>
+          <CategorySections sections={layout.sections} />
+          {layout.others.length > 0 && (
             <div className="container section">
-              <div className="section-head">
-                <Spaghetti as="h2" ghost={LANDING.shop.titleGhost}>{LANDING.shop.title}</Spaghetti>
-                <p className="lead">{LANDING.shop.text}</p>
-              </div>
-              <ShopGrid products={layout.products} />
+              <Spaghetti as="h2">{LANDING.shop.othersTitle}</Spaghetti>
+              <ShopGrid products={layout.others} />
             </div>
           )}
         </section>
       )}
 
       <Faq settings={settings} delays={delivery.summary} notes={delivery.notes} />
-      <FinalCta />
       <Contact settings={settings} />
+      <FinalCta />
 
       <JsonLd
         data={{

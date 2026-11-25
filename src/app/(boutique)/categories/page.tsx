@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SEO } from '@/content/seo';
 import { readableTextColor } from '@/lib/color';
-import { categoryPath } from '@/lib/constants/routes';
+import { categoryPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { FALLBACK_ACCENTS } from '@/lib/shop/sections';
 import { listActiveCategories } from '@/server/services/catalog.queries';
 
@@ -17,7 +17,7 @@ export default async function CategoriesPage() {
       {categories.length === 0 ? (
         <div className="empty-state">
           <h2>Les catégories arrivent bientôt.</h2>
-          <Link className="btn" href="/boutique">
+          <Link className="btn" href={PUBLIC_ROUTES.shop}>
             Voir la boutique
           </Link>
         </div>

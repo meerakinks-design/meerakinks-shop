@@ -1,10 +1,41 @@
-base: livraison précédente (boutique-fichiers-mis-a-jour.zip, commit 700010a)
-archive: correctif-build-3-admin-api.zip
+base: boutique-complet.zip (vitrine photo des six soins)
+archive: boutique-landing-maj.zip
 
 [included]
-src/lib/admin-api.ts
+RAPPORT_MODIFICATIONS.md
+config/security-headers.mjs
+docs/VITRINE-PHOTOS.md
+next.config.mjs
+public/models/fluffy-kinks-jar.glb
+public/stage/hero2.webp
+src/app/(boutique)/categorie/[slug]/page.tsx
+src/app/(boutique)/categories/page.tsx
+src/app/(boutique)/layout.tsx
+src/app/(boutique)/page.tsx
+src/app/(boutique)/produit/[slug]/page.tsx
+src/app/sitemap.ts
+src/components/shop/LandingSections.tsx
+src/components/shop/ShopCatalog.tsx
+src/content/landing.ts
+src/lib/constants/routes.ts
+src/lib/shop/search.ts
+src/lib/stage/config.ts
+src/lib/stage/engine.ts
+src/server/services/catalog-cache.ts
+src/styles/showcase.css
+src/styles/stage.css
+src/styles/titles.css
+src/styles/ui.css
+tests/unit/csp.test.ts
+tests/unit/routes-weight-color.test.ts
+tests/unit/seo-indexation.test.ts
+tests/unit/shop-catalog.test.tsx
+tests/unit/shop-render.test.tsx
+tests/unit/spaghetti-render.test.tsx
 
 [deleted_not_packaged]
+src/app/(boutique)/boutique/page.tsx   (la boutique est dans la landing ; /boutique redirige vers /#boutique)
+public/models/elixir-winter-50ml.glb   (remplacé par public/models/fluffy-kinks-jar.glb)
 
 [after_unzip]
-npm run typecheck && npm test && npm run build
+supprimer les 2 fichiers ci-dessus, puis : npm run typecheck && npm test && npm run build

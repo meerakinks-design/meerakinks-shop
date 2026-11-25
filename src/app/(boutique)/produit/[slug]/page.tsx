@@ -10,7 +10,7 @@ import { ProductGallery } from '@/components/shop/ProductGallery';
 import { ProductPurchase } from '@/components/shop/ProductPurchase';
 import { ShopGrid } from '@/components/shop/ShopGrid';
 import Spaghetti from '@/components/shop/Spaghetti';
-import { categoryPath, productPath } from '@/lib/constants/routes';
+import { categoryPath, productPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { formatFcfa } from '@/lib/money';
 import { effectivePrice, hasPromotion, isOutOfStock } from '@/lib/shop/product-display';
 import { absoluteUrl, summarize } from '@/lib/shop/seo';
@@ -59,7 +59,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   const price = effectivePrice(product);
   const url = absoluteUrl(productPath(product.slug));
   const home = absoluteUrl('/');
-  const shop = absoluteUrl('/boutique');
+  const shop = absoluteUrl(PUBLIC_ROUTES.shop);
   const categoryUrl = product.category ? absoluteUrl(categoryPath(product.category.slug)) : null;
 
   const crumbs = [
@@ -72,7 +72,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
   return (
     <div className="container section product-page">
       <p className="product-back">
-        <Link href="/boutique">← Retour à la boutique</Link>
+        <Link href={PUBLIC_ROUTES.shop}>← Retour à la boutique</Link>
         {product.category && (
           <>
             {' · '}

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { JsonLd } from '@/components/shop/JsonLd';
 import { ShopGrid } from '@/components/shop/ShopGrid';
-import { categoryPath } from '@/lib/constants/routes';
+import { categoryPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { absoluteUrl, summarize } from '@/lib/shop/seo';
 import { getCategoryPage } from '@/server/services/catalog.queries';
 import { resolveCategorySlug } from '@/server/services/slug-redirects.service';
@@ -45,14 +45,14 @@ export default async function CategoryPage({ params }: { params: { slug: string 
   return (
     <div className="container section">
       <p>
-        <Link href="/boutique">← Retour à la boutique</Link>
+        <Link href={PUBLIC_ROUTES.shop}>← Retour à la boutique</Link>
       </p>
       <h1>{category.name}</h1>
       {category.description && <p className="lead">{category.description}</p>}
       {products.length === 0 ? (
         <div className="empty-state">
           <h2>Aucun produit dans cette catégorie pour le moment.</h2>
-          <Link className="btn" href="/boutique">
+          <Link className="btn" href={PUBLIC_ROUTES.shop}>
             Voir toute la boutique
           </Link>
         </div>

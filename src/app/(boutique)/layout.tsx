@@ -25,6 +25,7 @@ import '@/styles/spaghetti.css';
 import '@/styles/ui.css';
 import '@/styles/showcase.css';
 import '@/styles/stage.css';
+import '@/styles/titles.css';
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSettings();
@@ -46,6 +47,8 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
 
   return (
     <CartProvider>
+      {/* Modak (titres et grand titre du héros) : chargée tout de suite pour éviter le saut de police au premier affichage. */}
+      <link rel="preload" href="/fonts/modak-latin-400.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       <a className="skip-link" href="#contenu">
         Aller au contenu
       </a>

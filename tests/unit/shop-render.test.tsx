@@ -129,7 +129,7 @@ describe('en-tête et panier', () => {
   const html = wrap(<Header storeName="Awa Beauty" />);
   it('affiche le logo à gauche, le bouton Commander, le panier (nom accessible complet) et le bouton menu', () => {
     expect(html).toContain('Awa Beauty');
-    expect(html).toContain('href="/boutique"');
+    expect(html).toContain('href="/#boutique"');
     expect(html).toContain('href="#panier"');
     expect(html).toContain('href="#menu"');
     expect(html).toContain('aria-label="Panier : vide"');
@@ -160,7 +160,7 @@ describe('menu en modal', () => {
     const html = wrap(<MenuModal storeName="Awa Beauty" showCollections={false} showContact={false} socials={[]} />);
     expect(html).toContain('<dialog');
     expect(html).toContain('aria-label="Menu"');
-    expect(html).toContain('href="/boutique"');
+    expect(html).toContain('href="/#boutique"');
     expect(html).toContain('href="/a-propos"'); // « Notre histoire » est une page dédiée, plus un modal
     expect(html).toContain('href="#panier"');
     expect(html).toContain('aria-label="Fermer le menu"');
@@ -193,7 +193,7 @@ describe('sections de la landing', () => {
     expect(renderToStaticMarkup(<Hero showCollections iconSrc="/brand/favicon-icon.png" />)).toContain('href="/#collections"');
     const without = renderToStaticMarkup(<Hero showCollections={false} iconSrc="/brand/favicon-icon.png" />);
     expect(without).not.toContain('/#collections');
-    expect(without).toContain('href="/boutique"');
+    expect(without).toContain('href="/#boutique"');
   });
 
   it('Hero : titre en deux temps (slogan de la charte), badge qui tourne, et l’affiche des soins à droite', () => {
@@ -204,7 +204,8 @@ describe('sections de la landing', () => {
     expect(html).toContain('Un besoin, une couleur.'); // phrase de réassurance, sous les boutons
     expect(html).toContain('class="hero-badge"');
     expect(html).toContain('src="/stage/hero2.webp"');
-    expect(html).toContain('data-stage-anchor="hero"'); // repère de l’élixir 3D (ScrollStage)
+    expect(html).toContain('data-stage-anchor="hero"'); // repère du pot Fluffy Kinks 3D (ScrollStage)
+    expect(html).not.toContain('hero-lead'); // aucune description sous le titre du héros
     expect(html).not.toContain('hero-main');
   });
 
@@ -220,7 +221,7 @@ describe('sections de la landing', () => {
     if (layout.mode !== 'categories') throw new Error('mode attendu : categories');
     const html = renderToStaticMarkup(<Collections sections={layout.sections} hasOffers />);
     expect(html).toContain('href="/categorie/cat-a"');
-    expect(html).toContain('href="/boutique?filtre=offres"');
+    expect(html).toContain('href="/?filtre=offres#boutique"');
     expect(renderToStaticMarkup(<Collections sections={layout.sections} hasOffers={false} />)).not.toContain('filtre=offres');
   });
 

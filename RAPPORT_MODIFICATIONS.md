@@ -155,3 +155,52 @@ Le patch (11 fichiers) était basé sur le zip d'origine. Je l'ai fusionné avec
 - `npm run build` non lancé.
 
 **Fichiers modifiés** : `.env.example`, `public/fonts/` (+ `modak-latin-400.woff2`, `modak-OFL.txt`), `src/app/(boutique)/{layout,page}.tsx`, `src/app/(boutique)/a-propos/page.tsx`, `src/components/shop/{CurtainModal,Footer,LandingSections,MenuModal,NotFoundContent,OrderConfirmation}.tsx`, `src/content/landing.ts`, `src/lib/shop/socials.ts` (nouveau), `src/server/services/catalog.queries.ts`, `src/styles/{shop,tokens,ui}.css`, `tests/unit/{shop-render,spaghetti-render}.test.tsx`, nouveaux : `tests/unit/{no-eyebrow,curtain-replay,socials}.test(s)`.
+
+---
+
+# Mise à jour du 25 novembre 2026 : landing (hero, pot 3D, boutique, contact, marges, polices)
+
+## 15. Hero
+- `public/stage/hero2.webp` remplacée par la nouvelle photo (1086 × 1448, WebP, 253 Ko). Même nom de fichier : aucune référence à changer. `width`/`height` et `posterAlt` mis à jour.
+- Le paragraphe « Hydratation, nettoyage ou nutrition… Une routine plus claire commence ici. » est **retiré** (clé `LANDING.hero.text` supprimée, balise `<p class="lead hero-lead">` supprimée). La phrase de réassurance sous les boutons reste.
+- Le titre du hero est écrit en **Modak** (voir §20). La taille venait d'une règle `.hero h1` (shop.css) qui écrasait `--text-hero` : corrigé dans `titles.css`.
+
+## 16. Pot 3D Fluffy Kinks à la place de l'élixir
+- `public/models/fluffy-kinks-jar.glb` (fourni) remplace `elixir-winter-50ml.glb` (supprimé). `STAGE.models.elixir` devient `STAGE.models.jar` (`src/lib/stage/config.ts`, `engine.ts`).
+- Le fichier est compressé en **meshopt** (`EXT_meshopt_compression`) : `engine.ts` branche `MeshoptDecoder` sur le `GLTFLoader`. Sans cela, le modèle ne se charge pas.
+- **CSP** : `'wasm-unsafe-eval'` ajouté à `script-src` (`config/security-headers.mjs`) : le décodeur meshopt est du WebAssembly. Cela n'autorise ni `eval()` ni `new Function()`. Test ajouté dans `csp.test.ts`.
+- Orientation : l'étiquette du fichier regarde vers +X ; `frontYaw = -π/2` la tourne vers la caméra (déterminé en décodant les sommets et la texture du fichier).
+- Le repère du hero (`.stage-anchor-hero`) est posé sur le pot « Velvet » de la nouvelle affiche ; les repères de la section « guide » ont les proportions du pot (largeur / hauteur ≈ 0,9) au lieu de celles d'un flacon.
+
+## 17. La page boutique est dans la landing
+- Nouveau composant `ShopCatalog` (`src/components/shop/ShopCatalog.tsx`) : l'ancienne page `/boutique` (recherche, catégories, offres, tri, grille) devient la section `#boutique`, **juste après la section « guide »** (`Why`). Filtrage dans le navigateur (`filterShopProducts` dans `src/lib/shop/search.ts`) : la landing reste statique.
+- `PUBLIC_ROUTES.shop` vaut maintenant `/#boutique` (en-tête, menu, panier, fiches, catégories).
+- `/boutique` est redirigée définitivement (308) vers `/#boutique` dans `next.config.mjs`, avec sa requête (`/boutique?filtre=offres` → `/?filtre=offres#boutique`, relue par le catalogue). La page `src/app/(boutique)/boutique/page.tsx` est supprimée, `/boutique` quitte le sitemap.
+- Les sections « produits par catégorie » (cartes sticky) restent plus bas ; leur ancre devient `#par-categorie` (l'ancre `#boutique` est celle du catalogue).
+- Ordre de la landing : hero → bandeau → guide → **boutique** → collections → produits par catégorie → FAQ → **contact** → CTA.
+
+## 18. Contact avant le CTA
+- « Parlons de votre routine. » + texte à gauche, **fixes** (sticky ≥ 900 px) ; formulaire à droite, qui défile. Empilé sur téléphone. Placé avant le CTA.
+- Note du CTA : « …Écrivez-nous juste au-dessus. » (elle disait « en dessous »).
+
+## 19. Spray sous le fond du CTA
+- `.cta-card` passe à `position: relative; z-index: 31` : au-dessus du canvas 3D (30). Le spray glisse sous la carte du CTA.
+
+## 20. Marges et polices
+- `--gutter: clamp(1.25rem, 6.25vw, 8rem)` : ≈ 100 px de chaque côté à 1600 px (les repères rouges de la capture), 20 px mini sur téléphone. S'applique à `.container` : en-tête, sections, pied de page et toutes les pages.
+- Nouveau `src/styles/titles.css` (chargé en dernier) : **Modak**, la police du filigrane (`--font-logo`), pour le grand titre du hero et les titres de sections. Graisse 400 + `font-synthesis: none` (Modak n'a pas de gras). Préchargée dans le layout.
+
+## 21. Tests
+- Ajoutés : `tests/unit/shop-catalog.test.tsx` (filtre, tri, rendu du catalogue), cas `wasm-unsafe-eval` dans `csp.test.ts`.
+- Adaptés : `spaghetti-render`, `shop-render` (hero sans description, liens `/#boutique`), `seo-indexation` (plus de `/boutique` ni de sitemap `/boutique`), `routes-weight-color`.
+- **Non exécutés ici** : pas de réseau, donc pas de `npm install`. Vérifié : syntaxe de tous les fichiers modifiés (esbuild) et logique du filtre (exécutée sous Node). À lancer chez toi : `npm run typecheck && npm test && npm run build`.
+
+## 22. Fusion avec `boutique-complet.zip` (vitrine photo)
+- Base de la fusion : `boutique-complet.zip` (vitrine photo des six soins, jeu Cosmetic Smash retouché). Fusion à trois voies avec la version d'origine : seuls `layout.tsx`, `landing.ts` et `page.tsx` étaient touchés des deux côtés, plus `boutique/page.tsx` (modifiée par la vitrine, supprimée ici).
+- `src/app/(boutique)/page.tsx` : en mode vitrine (`SHOWCASE_ENABLED`), la section `#boutique` (ShowcaseGrid) est **juste après la section « guide »**. Hors vitrine, c'est `ShopCatalog`, puis les collections et `#par-categorie`. Le bouton « Voir toute la boutique » est retiré : il pointait vers `/boutique`, désormais cette même section.
+- `src/app/(boutique)/boutique/page.tsx` (et sa version `ShowcasePage`) : supprimée ; `/boutique` redirige vers `/#boutique`.
+- `src/app/(boutique)/layout.tsx` : `showcase.css` conservé, `titles.css` chargé après `stage.css`, préchargement de Modak.
+- `src/content/landing.ts` : les clés du jeu (`muteAction`, `unmuteAction`, `controls`) sont conservées ; hero sans description, nouvelle `posterAlt`, note du CTA corrigée.
+- `src/styles/showcase.css` : règles `.showcase-page` et `.showcase-more` retirées (plus de page `/boutique`, plus de bouton).
+- `docs/VITRINE-PHOTOS.md` : mis à jour (où ça s'affiche, passage au catalogue, fichiers touchés).
+- Non exécuté ici (pas de `node_modules`) : `npm ci && npm run typecheck && npm test && npm run build`.

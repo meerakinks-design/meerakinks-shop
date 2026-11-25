@@ -42,6 +42,11 @@ describe('Content-Security-Policy (production)', () => {
     expect(csp['connect-src']).toContain('blob:');
   });
 
+  it('autorise la compilation WebAssembly (décodeur meshopt du pot 3D) sans jamais autoriser eval', () => {
+    expect(csp['script-src']).toContain("'wasm-unsafe-eval'");
+    expect(csp['script-src']).not.toContain("'unsafe-eval'");
+  });
+
   it('couvre Vercel Web Analytics par la même origine (/_vercel/insights), sans ouvrir d’autre domaine', () => {
     expect(csp['script-src']).toContain("'self'");
     expect(csp['connect-src']).toContain("'self'");

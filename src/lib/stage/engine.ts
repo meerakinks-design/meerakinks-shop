@@ -50,9 +50,10 @@ function anchorY(a: Anchor, s: number): number {
 }
 
 export async function startStage(canvas: HTMLCanvasElement): Promise<() => void> {
-  const [THREE, { GLTFLoader }, { RoomEnvironment }, { gsap }, { ScrollTrigger }, { default: Lenis }] = await Promise.all([
+  const [THREE, { GLTFLoader }, { MeshoptDecoder }, { RoomEnvironment }, { gsap }, { ScrollTrigger }, { default: Lenis }] = await Promise.all([
     import('three'),
     import('three/examples/jsm/loaders/GLTFLoader.js'),
+    import('three/examples/jsm/libs/meshopt_decoder.module.js'), // le pot Fluffy Kinks est compressé (EXT_meshopt_compression)
     import('three/examples/jsm/environments/RoomEnvironment.js'),
     import('gsap'),
     import('gsap/ScrollTrigger'),
@@ -97,6 +98,7 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
 
   // ---------- Modèles ----------
   const loader = new GLTFLoader();
+  loader.setMeshoptDecoder(MeshoptDecoder);
   async function loadModel(url: string): Promise<Group> {
     const gltf = await loader.loadAsync(url);
     const model = gltf.scene;
@@ -119,7 +121,7 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
     scene.add(pivot);
     return pivot;
   }
-  let elixir: Group | null = null;
+  let jar: Group | null = null;
   let brume: Group | null = null;
   let disposed = false;
   const idle = (cb: () => void) => {
@@ -128,7 +130,7 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
     return w.requestIdleCallback ? w.requestIdleCallback(cb, { timeout: 1500 }) : window.setTimeout(cb, 300);
   };
   idle(() => {
-    loadModel(STAGE.models.elixir.url).then((m) => { if (!disposed) elixir = m; }).catch(() => undefined);
+    loadModel(STAGE.models.jar.url).then((m) => { if (!disposed) jar = m; }).catch(() => undefined);
     loadModel(STAGE.models.brume.url).then((m) => { if (!disposed) brume = m; }).catch(() => undefined);
   });
 
@@ -162,7 +164,7 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
     }
   }
 
-  function elixirPose(s: number): Pose | null {
+  function jarPose(s: number): Pose | null {
     if (!hero || !why) return null;
     if (s <= sWhyIn) {
       const f = clamp(s / sWhyIn);
@@ -216,11 +218,11 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
     lenis.raf(time * 1000);
     if (document.hidden) return;
     const s = window.scrollY;
-    const a = place(elixir, elixirPose(s), STAGE.models.elixir.frontYaw);
+    const a = place(jar, jarPose(s), STAGE.models.jar.frontYaw);
     const b = place(brume, brumePose(s), STAGE.models.brume.frontYaw);
     if (a || b || wasDrawn) renderer.render(scene, camera);
     wasDrawn = a || b;
-    if (!ready && (elixir || brume)) { ready = true; root.dataset.stage = 'on'; }
+    if (!ready && (jar || brume)) { ready = true; root.dataset.stage = 'on'; }
   };
   let wasDrawn = false;
   let ready = false;

@@ -82,13 +82,13 @@ describe('<Spaghetti /> — rendu serveur', () => {
 });
 
 describe('landing — l’effet est branché sur les titres, sans rien perdre du texte', () => {
-  it('Hero : titre composé à la main (graisse très forte + cursive) animé dès l’affichage ; la description reste un texte fixe', () => {
+  it('Hero : titre composé à la main (police du filigrane) animé dès l’affichage ; plus aucune description sous le titre', () => {
     const html = renderToStaticMarkup(<Hero showCollections iconSrc="/brand/favicon-icon.png" />);
     expect(html).toContain('id="hero-title"');
     expect(plain(html)).toContain(`${LANDING.hero.titleMain} ${LANDING.hero.titleScript}`);
     expect(plain(html)).toContain(LANDING.hero.title);
-    expect(plain(html)).toContain(LANDING.hero.text);
-    expect(html).toContain(`<p class="lead hero-lead">${LANDING.hero.text}</p>`); // description : pas d’effet élastique
+    expect(html).not.toContain('hero-lead'); // le paragraphe « Hydratation, nettoyage ou nutrition… » a été retiré du héros
+    expect(plain(html)).not.toContain('Hydratation, nettoyage ou nutrition');
   });
 
   it('une section garde son titre accessible (aria-labelledby → titre nommé) et son texte lisible', () => {

@@ -3,8 +3,8 @@
 Livré le 25 novembre 2026. Les six soins sont affichés avec leurs photos, dans une grille asymétrique inspirée de la référence Hello Hello. **Pas de prix, pas de fiche produit, pas de panier** : c'est l'étape suivante.
 
 ## Où ça s'affiche
-- `/boutique` : titre « Boutique » puis la grille (recherche, filtres et tri masqués : ils dépendent des prix et des catégories).
-- Landing, section `#boutique` : titre, texte, la même grille, bouton « Voir toute la boutique ».
+- Landing, section `#boutique` : titre, texte, puis la grille (recherche, filtres et tri masqués : ils dépendent des prix et des catégories). Elle est **juste après la section « guide »**.
+- `/boutique` n'est plus une page : elle est redirigée (308) vers `/#boutique` par `next.config.mjs`. Le bouton « Voir toute la boutique » de la landing est retiré (il aurait renvoyé à la même section).
 
 ## Les produits (`src/content/vitrine.ts`)
 | Soin | Type (étiquette) | Contenance | Photos |
@@ -27,11 +27,11 @@ Photos : `public/products/*.webp` (864 px de large, ~50 Ko chacune). Les noms, t
 Velvet, Fluffy Kinks et Elixir Wunter ont deux photos. Ordinateur : la deuxième apparaît au survol. Téléphone : un toucher bascule d'une photo à l'autre (deux petits points l'indiquent). Au clavier : le bouton « Voir l'autre photo de … ».
 
 ## Passer au catalogue de la base (étape détails et prix)
-Dans `src/content/vitrine.ts`, mettre `SHOWCASE_ENABLED` à `false`. `/boutique` et la landing reprennent alors le catalogue du back-office (cartes, panier, fiches, filtres, sections par catégorie) ; rien n'a été supprimé. Tant que la vitrine est active, la landing ne lit pas le catalogue et masque la section « Collections » (ses liens n'auraient plus de cible).
+Dans `src/content/vitrine.ts`, mettre `SHOWCASE_ENABLED` à `false`. La landing reprend alors le catalogue du back-office : la section `#boutique` devient le composant `ShopCatalog` (cartes, panier, recherche, catégories, offres, tri), suivi des sections par catégorie (`#par-categorie`). Tant que la vitrine est active, la landing ne lit pas le catalogue et masque la section « Collections » (ses liens n'auraient plus de cible).
 
 ## Fichiers touchés
 Nouveaux : `src/content/vitrine.ts`, `src/components/shop/ShowcaseGrid.tsx`, `src/components/shop/ShowcaseCard.tsx`, `src/styles/showcase.css`, `public/products/*.webp` (9), `tests/unit/showcase.test.tsx`, ce document.
-Modifiés : `src/app/(boutique)/boutique/page.tsx`, `src/app/(boutique)/page.tsx`, `src/app/(boutique)/layout.tsx` (import du CSS et lien « Collections » masqué).
+Modifiés : `src/app/(boutique)/page.tsx`, `src/app/(boutique)/layout.tsx` (import du CSS et lien « Collections » masqué). Supprimé : `src/app/(boutique)/boutique/page.tsx` (la boutique est dans la landing, voir `RAPPORT_MODIFICATIONS.md` §17).
 
 ## Contrôles
 - Rendu réel des composants dans Chromium (téléphone 390 px et ordinateur 1440 px) : grille, survol, toucher.

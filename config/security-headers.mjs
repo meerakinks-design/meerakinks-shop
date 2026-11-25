@@ -16,6 +16,8 @@
 //    du site). Ce n'est pas un bon échange ici : la politique reste utile pour tout le reste (origines des images,
 //    connexions, formulaires, cadres, <base>, <object>). 'unsafe-inline' (styles) : les couleurs de section sont
 //    posées en attribut style.
+//  - 'wasm-unsafe-eval' (scripts) : le pot Fluffy Kinks de la scène 3D est compressé en meshopt ; son décodeur est un petit module
+//    WebAssembly que le navigateur refuse de compiler sans ce mot-clé. Il n'autorise QUE WebAssembly, jamais eval() ni new Function().
 //  - `blob:` en connect-src : three.js (scène 3D de la landing) relit les textures embarquées dans les GLB via une URL
 //    blob: créée par le navigateur lui-même ; les GLB sont servis en local (`/models`, 'self').
 //  - Aucun joker (*) : chaque origine est nommée.
@@ -34,7 +36,7 @@ const VERCEL_ANALYTICS_DEBUG = 'https://va.vercel-scripts.com';
 export function buildCsp({ isDev = false, allowMapTiles = false } = {}) {
   const directives = {
     'default-src': ["'self'"],
-    'script-src': ["'self'", "'unsafe-inline'", ...(isDev ? ["'unsafe-eval'", VERCEL_ANALYTICS_DEBUG] : [])],
+    'script-src': ["'self'", "'unsafe-inline'", "'wasm-unsafe-eval'", ...(isDev ? ["'unsafe-eval'", VERCEL_ANALYTICS_DEBUG] : [])],
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': ["'self'", 'data:', 'blob:', CLOUDINARY_IMAGES, ...(allowMapTiles ? [OSM_TILES] : [])],
     'font-src': ["'self'", 'data:'],

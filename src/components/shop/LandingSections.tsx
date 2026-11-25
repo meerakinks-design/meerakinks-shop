@@ -24,8 +24,8 @@ import { summarize } from '@/lib/shop/seo';
 
 /**
  * Héros (référence My Frida + Bucks) : gros titre en deux temps (la fin passe en cursive), bouton pastille incliné,
- * badge circulaire qui tourne, disque orange derrière les produits qui flottent. Le titre joue l'effet élastique dès
- * l'affichage ; la description reste fixe. Aucun surtitre au-dessus des titres. Les produits viennent du catalogue ; sans photo, la tête aux
+ * badge circulaire qui tourne, disque orange derrière les produits qui flottent. Le titre (écrit dans la police du filigrane)
+ * joue l'effet élastique dès l'affichage. Aucun surtitre au-dessus des titres, aucune description sous le titre. Les produits viennent du catalogue ; sans photo, la tête aux
  * deux puffs de la marque tient la scène.
  */
 export function Hero({ showCollections, iconSrc }: { showCollections: boolean; products?: readonly ShopProduct[]; iconSrc: string }) {
@@ -37,7 +37,6 @@ export function Hero({ showCollections, iconSrc }: { showCollections: boolean; p
           <Spaghetti as="span" mode="chars" trigger="mount" className="hero-title-main">{hero.titleMain}</Spaghetti>{' '}
           <Spaghetti as="span" mode="chars" trigger="mount" className="hero-title-script">{hero.titleScript}</Spaghetti>
         </h1>
-        <p className="lead hero-lead">{hero.text}</p>
         <div className="hero-actions">
           <Link className="btn btn-pill" href={PUBLIC_ROUTES.shop}>
             {hero.primaryCta}
@@ -54,12 +53,12 @@ export function Hero({ showCollections, iconSrc }: { showCollections: boolean; p
         <div className="hero-stage">
           <div className="hero-poster">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="hero-poster-img" src="/stage/hero2.webp" alt={hero.posterAlt} width={1124} height={1399} />
+            <img className="hero-poster-img" src="/stage/hero2.webp" alt={hero.posterAlt} width={1086} height={1448} />
             {STAGE.heroCleanSrc && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img className="hero-poster-clean" src={STAGE.heroCleanSrc} alt="" aria-hidden="true" width={1124} height={1399} />
+              <img className="hero-poster-clean" src={STAGE.heroCleanSrc} alt="" aria-hidden="true" width={1086} height={1448} />
             )}
-            {/* Repère de l'élixir 3D : il sort de l'affiche et descend vers « Le soin en toute simplicité » (voir ScrollStage). */}
+            {/* Repère du pot Fluffy Kinks 3D : posé sur le pot Velvet de l'affiche, il en sort et descend vers la section « guide » (voir ScrollStage). */}
             <span className="stage-anchor stage-anchor-hero" data-stage-anchor="hero" aria-hidden="true" />
           </div>
           <svg className="hero-badge" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
@@ -118,7 +117,7 @@ export function Collections({ sections, hasOffers }: { sections: readonly Catego
             <li className="collection-card collection-offers">
               <h3>{copy.offersLabel}</h3>
               <p>{copy.offersText}</p>
-              <Link href="/boutique?filtre=offres">{copy.offersCta}</Link>
+              <Link href="/?filtre=offres#boutique">{copy.offersCta}</Link>
             </li>
           )}
         </ul>
@@ -336,7 +335,7 @@ export function Faq({ settings, delays, notes }: { settings: PublicSettings; del
               </p>
             )}
           </div>
-          {/* La brume prend le relais de l'élixir ici, puis rejoint la photo du CTA. */}
+          {/* La brume prend le relais du pot ici, puis glisse sous la carte du CTA. */}
           <div className="stage-slot" data-stage-slot="faq" aria-hidden="true">
             <span className="stage-anchor" data-stage-anchor="faq" />
           </div>
@@ -354,8 +353,9 @@ export function Faq({ settings, delays, notes }: { settings: PublicSettings; del
 }
 
 /**
- * Contact : le formulaire intelligent (envoi par Resend vers la vendeuse) et, en plus, seulement les coordonnées présentes
- * dans les paramètres. Sans formulaire (interrupteur) ni coordonnée, la section n'est pas affichée.
+ * Contact (avant le CTA) : à gauche le titre et le texte restent fixes (sticky sur ordinateur), à droite le formulaire intelligent
+ * (envoi par Resend vers la vendeuse) défile. Sur téléphone tout s'empile. Seules les coordonnées présentes dans les paramètres
+ * sont affichées. Sans formulaire (interrupteur) ni coordonnée, la section n'est pas affichée.
  */
 export function Contact({ settings }: { settings: PublicSettings }) {
   const copy = LANDING.contact;
@@ -369,30 +369,34 @@ export function Contact({ settings }: { settings: PublicSettings }) {
   const hasChannels = hasContactChannels({ ...settings, whatsappLink: whatsapp });
 
   return (
-    <section id="contact" className="section section-tinted" aria-labelledby="contact-title">
-      <div className="container page-narrow">
-        <Spaghetti as="h2" id="contact-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
-        <p className="lead">{copy.text}</p>
-        {hasChannels && (
-          <div className="hero-actions">
-            {whatsapp && (
-              <a className="btn" href={whatsapp} target="_blank" rel="noopener noreferrer">
-                {copy.cta}
-              </a>
-            )}
-            {settings.contactEmail && (
-              <a className="btn btn-quiet" href={`mailto:${settings.contactEmail}`}>
-                {settings.contactEmail}
-              </a>
-            )}
-            {socials.map((social) => (
-              <a key={social.label} className="btn btn-quiet" href={social.href} target="_blank" rel="noopener noreferrer">
-                {social.label}
-              </a>
-            ))}
-          </div>
-        )}
-        <ContactForm whatsappHref={whatsapp} />
+    <section id="contact" className="section section-tinted contact-section" aria-labelledby="contact-title">
+      <div className="container contact-split">
+        <div className="contact-intro">
+          <Spaghetti as="h2" id="contact-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
+          <p className="lead">{copy.text}</p>
+          {hasChannels && (
+            <div className="hero-actions">
+              {whatsapp && (
+                <a className="btn" href={whatsapp} target="_blank" rel="noopener noreferrer">
+                  {copy.cta}
+                </a>
+              )}
+              {settings.contactEmail && (
+                <a className="btn btn-quiet" href={`mailto:${settings.contactEmail}`}>
+                  {settings.contactEmail}
+                </a>
+              )}
+              {socials.map((social) => (
+                <a key={social.label} className="btn btn-quiet" href={social.href} target="_blank" rel="noopener noreferrer">
+                  {social.label}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="contact-formcol">
+          <ContactForm whatsappHref={whatsapp} />
+        </div>
       </div>
     </section>
   );
@@ -433,7 +437,7 @@ export function FinalCta() {
               {copy.primaryCta}
               <span aria-hidden="true">›</span>
             </Link>
-            <Link className="cta-link" href="/boutique?tri=nouveautes">
+            <Link className="cta-link" href="/?tri=nouveautes#boutique">
               {copy.secondaryCta}
             </Link>
             <p className="cta-note">{copy.note}</p>

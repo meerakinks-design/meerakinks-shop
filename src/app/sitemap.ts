@@ -6,7 +6,7 @@ import { listSitemapEntries } from '@/server/services/catalog.queries';
 export const revalidate = 3600;
 
 /**
- * Pages à indexer : accueil, boutique, catégories, produits publiés. Ni le back-office, ni la commande, ni les pages
+ * Pages à indexer : accueil (le catalogue en fait partie), catégories, produits publiés. Ni le back-office, ni la commande, ni les pages
  * légales provisoires (noindex tant qu'elles ne sont pas validées). Sans adresse de site configurée en production : vide.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -15,7 +15,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { products, categories } = await listSitemapEntries();
   return [
     { url: `${base}${PUBLIC_ROUTES.home}` },
-    { url: `${base}${PUBLIC_ROUTES.shop}` },
     { url: `${base}${PUBLIC_ROUTES.categories}` },
     { url: `${base}${PUBLIC_ROUTES.about}` },
     ...categories.map((category) => ({ url: `${base}${categoryPath(category.slug)}` })),
