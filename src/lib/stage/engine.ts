@@ -123,7 +123,8 @@ export async function startStage(canvas: HTMLCanvasElement): Promise<() => void>
   let brume: Group | null = null;
   let disposed = false;
   const idle = (cb: () => void) => {
-    const w = window as Window & { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number };
+    // Cast via `unknown` : lib.dom déclare déjà `requestIdleCallback`, mais Safari ne l'a pas.
+    const w = window as unknown as { requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number };
     return w.requestIdleCallback ? w.requestIdleCallback(cb, { timeout: 1500 }) : window.setTimeout(cb, 300);
   };
   idle(() => {
