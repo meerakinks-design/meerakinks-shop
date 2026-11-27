@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { JsonLd } from '@/components/shop/JsonLd';
 import { SEO } from '@/content/seo';
 import { ShopGrid } from '@/components/shop/ShopGrid';
-import { ShowcaseGrid } from '@/components/shop/ShowcaseGrid';
+import { ShowcaseGroups } from '@/components/shop/ShowcaseGroups';
 import { SHOWCASE_ENABLED } from '@/content/vitrine';
 import { hasShopFilters, parseShopParams, shopHref, type ShopSort } from '@/lib/shop/search';
 import { absoluteUrl } from '@/lib/shop/seo';
@@ -125,7 +125,7 @@ function ShowcasePage() {
     <div className="showcase-page">
       <div className="container">
         <h1>Boutique</h1>
-        <ShowcaseGrid />
+        <ShowcaseGroups />
       </div>
       {home && shop && (
         <JsonLd
