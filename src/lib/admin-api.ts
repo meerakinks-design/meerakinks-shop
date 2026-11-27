@@ -6,6 +6,7 @@ import type { DeliveryStatusValue } from '@/lib/constants/order-status';
 import type { CategoryFormInput } from '@/lib/validation/category.schema';
 import type { DeliveryNotesFormInput, DeliveryZoneFormInput } from '@/lib/validation/delivery-zone.schema';
 import type { ProductFormInput } from '@/lib/validation/product.schema';
+import type { StoreSettingsFormInput } from '@/lib/validation/settings.schema';
 import type { DeliveryChangeResult, FeeResult, PaymentResult } from '@/server/services/orders-admin.service';
 
 /** Ce que le navigateur envoie pour un paiement (la date et la note sont facultatives). */
@@ -50,7 +51,12 @@ export const adminApi = {
   deliveryNotes: {
     update: (input: DeliveryNotesFormInput) => putJson<Record<string, never>>(`${BASE}/delivery-notes`, input),
   },
+  // Paramètres de la boutique (écran /admin/parametres, propriétaire).
+  settings: {
+    update: (input: StoreSettingsFormInput) => putJson<{ changed: number }>(`${BASE}/settings`, input),
+  },
   orders: {
+    resendEmail: (id: string, emailId: string) => postJson<{ queued: true }>(`${ADMIN_ORDERS_API_PATH}/${encodeURIComponent(id)}/emails/${encodeURIComponent(emailId)}/resend`),
     changeStatus: (id: string, status: DeliveryStatusValue, note?: string) =>
       postJson<DeliveryChangeResult>(`${ADMIN_ORDERS_API_PATH}/${encodeURIComponent(id)}/status`, { status, ...(note ? { note } : {}) }),
     recordPayment: (id: string, input: PaymentFormInput) => postJson<PaymentResult>(`${ADMIN_ORDERS_API_PATH}/${encodeURIComponent(id)}/payments`, input),

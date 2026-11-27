@@ -1,7 +1,25 @@
 /* ---------- Vitrine photo (réf. Hello Hello) : les photos d'abord, texte discret dessous ----------
-   Téléphone : grille à 6 colonnes ; un enchaînement de 6 soins = deux photos côte à côte, une grande à droite,
+   Trois groupes : chaque soin, puis les duos, puis la gamme complète. Dans un groupe :
+   Téléphone : grille à 6 colonnes ; un enchaînement de 6 cartes = deux photos côte à côte, une grande à droite,
    deux côte à côte (la seconde plus basse), une grande à gauche. Ordinateur : 12 colonnes, trois photos par rangée.
-   Les couleurs viennent uniquement de la charte (marron pour le texte, orange pour le repère). */
+   Les couleurs viennent uniquement de la charte (marron pour le texte, orange pour le repère, jaune / orange / marron pour le code couleur).
+   La fiche produit a son propre fichier : fiche.css. */
+
+/* ---------- Légende du code couleur ---------- */
+.gamme-legend { list-style: none; margin: 0 0 clamp(2.5rem, 7vw, 4rem); padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2) var(--space-3); }
+.gamme-legend li { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 2.25rem; padding: 0 var(--space-3); border: 1px dashed color-mix(in srgb, var(--color-brown) 45%, transparent); border-radius: 999px; background: var(--color-surface); font-size: 0.8125rem; color: var(--color-brown); }
+@media (min-width: 700px) { .gamme-legend li { min-height: 2.5rem; padding: 0 var(--space-4); font-size: 0.9375rem; } }
+.gamme-legend strong { font-weight: 700; }
+/* Pastille de couleur : jaune, orange ou marron du dossier (variable --gamme posée par le composant). */
+.gamme-dot { flex: none; width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--gamme, var(--color-orange)); box-shadow: inset 0 0 0 1px rgb(127 63 32 / 0.28); }
+
+/* ---------- Groupes ---------- */
+.showcase-groups { display: grid; gap: clamp(3.5rem, 10vw, 6.5rem); }
+.showcase-group-head { display: grid; gap: var(--space-2); margin-bottom: clamp(1.5rem, 5vw, 2.5rem); }
+.showcase-group-head .showcase-group-title { margin: 0; max-width: none; text-align: left; font-family: var(--font-logo); font-weight: 400; font-synthesis: none; font-size: clamp(1.875rem, 7.5vw, 3.25rem); line-height: 1; letter-spacing: 0; color: var(--color-brown); }
+.showcase-group-head p { margin: 0; max-width: 40rem; text-align: left; font-size: clamp(1rem, 3.8vw, 1.1875rem); line-height: 1.4; color: var(--color-text-muted); }
+
+/* ---------- Grille ---------- */
 .showcase-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: clamp(1.75rem, 8vw, 2.75rem) var(--space-4); align-items: start; }
 .showcase-cell { min-width: 0; }
 
@@ -24,37 +42,28 @@
   .showcase-cell[data-slot='5'] { grid-column: 10 / span 3; --ratio: 3 / 4; margin-top: 0; }
 }
 
+/* Un groupe d'une seule carte (la gamme complète) : en grand, au centre (placé après les dispositions : il les remplace). */
+.showcase-grid[data-single='true'] .showcase-cell { grid-column: 1 / span 6; --ratio: 4 / 5; margin-top: 0; }
+@media (min-width: 900px) { .showcase-grid[data-single='true'] .showcase-cell { grid-column: 4 / span 6; } }
+
+/* ---------- Carte ---------- */
 .showcase-card { display: grid; gap: 0; }
 .showcase-media { position: relative; aspect-ratio: var(--ratio, 3 / 4); overflow: hidden; border-radius: var(--radius); background: var(--color-border); }
-.showcase-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; transition: opacity 0.35s ease, transform 0.6s ease; }
-.showcase-second { opacity: 0; }
-.showcase-media[data-second='true'] .showcase-second { opacity: 1; }
-.showcase-media[data-second='true'] > img:first-child { opacity: 0; }
+.showcase-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; }
 
-/* Le bouton recouvre la photo : un toucher bascule vers la deuxième photo (et revient). */
-.showcase-switch { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.showcase-switch:focus-visible { outline: 3px solid var(--color-focus); outline-offset: -3px; border-radius: var(--radius); }
+/* Pastille « Offre » sur la photo d'un duo ou de la gamme complète. */
+.showcase-offer { position: absolute; top: 0.75rem; left: 0.75rem; padding: 0.3rem 0.8rem; border-radius: 999px; background: var(--color-orange); color: var(--color-brown-deep); box-shadow: 0 0 0 2px var(--color-beige); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; line-height: 1.2; text-transform: uppercase; transform: rotate(-3deg); pointer-events: none; }
 
-/* Deux petits points indiquent qu'il y a une deuxième photo (téléphone seulement : à la souris, le survol suffit). */
-.showcase-dots { position: absolute; left: 50%; bottom: 0.6rem; display: flex; gap: 0.3rem; transform: translateX(-50%); padding: 0.25rem 0.4rem; border-radius: 999px; background: color-mix(in srgb, var(--color-brown) 45%, transparent); pointer-events: none; }
-.showcase-dots i { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--color-beige); opacity: 0.45; }
-.showcase-media[data-second='false'] .showcase-dots i:first-child, .showcase-media[data-second='true'] .showcase-dots i:last-child { opacity: 1; }
-
-@media (hover: hover) and (pointer: fine) {
-  .showcase-dots { display: none; }
-  /* À la souris, c'est le survol qui montre la deuxième photo ; le bouton reste utilisable au clavier. */
-  .showcase-switch { pointer-events: none; }
-  .showcase-media:hover .showcase-second { opacity: 1; }
-  .showcase-media:hover > img:first-child { opacity: 0; }
-  .showcase-media:hover img { transform: scale(1.03); }
-}
+/* Toute la carte mène à la fiche (où les photos défilent en slide). Aucun effet au survol ni au toucher sur la photo. */
+.showcase-link { display: grid; gap: 0; color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.showcase-link:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 4px; border-radius: var(--radius); }
+.showcase-link:hover .showcase-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
 
 .showcase-card .showcase-name { margin: var(--space-3) 0 0; font-size: clamp(1.25rem, 5.2vw, 1.625rem); font-weight: 600; line-height: 1.1; letter-spacing: -0.01em; color: var(--color-brown); text-align: left; max-width: none; }
 .showcase-card .showcase-kind { margin-top: var(--space-1); font-family: var(--font-brand); font-size: clamp(1.25rem, 5vw, 1.5rem); line-height: 1.1; color: var(--color-text-muted); }
+/* Sous-titre d'une offre = noms de produits (« SLIK + Brume ») : en écriture manuscrite les capitales deviennent illisibles, on garde la police du texte. */
+.showcase-card[data-offer='true'] .showcase-kind { font-family: var(--font-body); font-size: 0.9375rem; font-weight: 500; line-height: 1.3; }
 .showcase-card .showcase-size { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-brown); }
 .showcase-card .dot { width: 0.6rem; height: 0.6rem; }
 
-@media (prefers-reduced-motion: reduce) {
-  .showcase-media img { transition: none; }
-  .showcase-media:hover img { transform: none; }
-}
+@media (prefers-reduced-motion: reduce) { .showcase-offer { transform: none; } }

@@ -10,7 +10,6 @@ import { fill } from '@/lib/shop/template';
 import { hasContactChannels, hasContactSection } from '@/lib/shop/contact';
 import { whatsappLink } from '@/lib/shop/whatsapp';
 import { cloudinaryTransform } from '@/lib/cloudinary-url';
-import { STAGE } from '@/lib/stage/config';
 import type { CategorySection, ShopProduct } from '@/lib/shop/sections';
 import type { FocusProduct, PublicSettings } from '@/server/services/catalog.queries';
 import { JsonLd } from './JsonLd';
@@ -54,12 +53,6 @@ export function Hero({ showCollections, iconSrc }: { showCollections: boolean; p
           <div className="hero-poster">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className="hero-poster-img" src="/stage/hero2.webp" alt={hero.posterAlt} width={1086} height={1448} />
-            {STAGE.heroCleanSrc && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img className="hero-poster-clean" src={STAGE.heroCleanSrc} alt="" aria-hidden="true" width={1086} height={1448} />
-            )}
-            {/* Repère du pot Fluffy Kinks 3D : posé sur le pot Velvet de l'affiche, il en sort et descend vers la section « guide » (voir ScrollStage). */}
-            <span className="stage-anchor stage-anchor-hero" data-stage-anchor="hero" aria-hidden="true" />
           </div>
           <svg className="hero-badge" viewBox="0 0 200 200" aria-hidden="true" focusable="false">
             <defs>
@@ -75,9 +68,6 @@ export function Hero({ showCollections, iconSrc }: { showCollections: boolean; p
           </svg>
         </div>
       </div>
-      <svg className="hero-wave" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-        <path d="M0,70 C240,10 480,10 720,60 C960,110 1200,110 1440,50 L1440,120 L0,120 Z" />
-      </svg>
     </section>
   );
 }
@@ -205,11 +195,10 @@ export function Focus({ product }: { product: FocusProduct }) {
 export function Why({ storeName }: { storeName: string }) {
   const copy = LANDING.why;
   return (
-    <section id="pourquoi-nous" className="section section-brand" aria-labelledby="why-title">
+    <section id="pourquoi-nous" className="section" aria-labelledby="why-title">
       <div className="container">
         <Spaghetti as="h2" id="why-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.intro, { storeName })}</p>
-        <div className="stage-split">
         <ol className="why-steps" role="list">
           {copy.items.map((item, index) => (
             <li key={item.title} className="why-step" style={{ '--i': index } as CSSProperties}>
@@ -225,10 +214,6 @@ export function Why({ storeName }: { storeName: string }) {
             </li>
           ))}
         </ol>
-        <div className="stage-slot" data-stage-slot="why" aria-hidden="true">
-          <span className="stage-anchor" data-stage-anchor="why" />
-        </div>
-        </div>
       </div>
     </section>
   );
@@ -282,7 +267,7 @@ export function Instagram({ settings }: { settings: PublicSettings }) {
   if (INSTAGRAM_POSTS.length < MIN_INSTAGRAM_POSTS) return null; // sous 4 publications : section non affichée
   const copy = LANDING.instagram;
   return (
-    <section id="instagram" className="section section-tinted" aria-labelledby="instagram-title">
+    <section id="instagram" className="section" aria-labelledby="instagram-title">
       <div className="container">
         <Spaghetti as="h2" id="instagram-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{fill(copy.text, { storeName: settings.storeName })}</p>
@@ -317,7 +302,7 @@ export function Faq({ settings, delays, notes }: { settings: PublicSettings; del
       <div className="container">
         <Spaghetti as="h2" id="faq-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
         <p className="lead">{copy.text}</p>
-        <div className="stage-split">
+        <div>
           <div>
             <div className="faq-list">
               {items.map((item) => (
@@ -334,10 +319,6 @@ export function Faq({ settings, delays, notes }: { settings: PublicSettings; del
                 </a>
               </p>
             )}
-          </div>
-          {/* La brume prend le relais du pot ici, puis glisse sous la carte du CTA. */}
-          <div className="stage-slot" data-stage-slot="faq" aria-hidden="true">
-            <span className="stage-anchor" data-stage-anchor="faq" />
           </div>
         </div>
       </div>
@@ -369,7 +350,7 @@ export function Contact({ settings }: { settings: PublicSettings }) {
   const hasChannels = hasContactChannels({ ...settings, whatsappLink: whatsapp });
 
   return (
-    <section id="contact" className="section section-tinted contact-section" aria-labelledby="contact-title">
+    <section id="contact" className="section contact-section" aria-labelledby="contact-title">
       <div className="container contact-split">
         <div className="contact-intro">
           <Spaghetti as="h2" id="contact-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
@@ -404,7 +385,7 @@ export function Contact({ settings }: { settings: PublicSettings }) {
 
 /**
  * CTA final (réf. carte E-Carnet) : la photo de la femme qui tend le spray se fond en dégradé dans une carte brun chocolat,
- * puis titre, trois points, bouton et lien. Le spray 3D (brume) atterrit sur celui de la photo au défilement.
+ * puis titre, texte, bouton et lien. Le spray 3D (brume) atterrit sur celui de la photo au défilement.
  */
 export function FinalCta() {
   const copy = LANDING.finalCta;
@@ -415,24 +396,10 @@ export function FinalCta() {
           <div className="cta-photo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/stage/cta1.webp" alt={copy.photoAlt} width={1122} height={1402} loading="lazy" />
-            <span className="stage-anchor stage-anchor-cta" data-stage-anchor="cta" aria-hidden="true" />
           </div>
           <div className="cta-body">
             <Spaghetti as="h2" id="final-title" ghost={copy.titleGhost}>{copy.title}</Spaghetti>
             <p className="lead">{copy.text}</p>
-            <ul className="cta-checks" role="list">
-              {copy.checks.map((item) => (
-                <li key={item}>
-                  <span className="cta-check-ico" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" width="22" height="22" focusable="false">
-                      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                      <path d="m8.2 12.3 2.6 2.6 5-5.4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
             <Link className="cta-btn" href={PUBLIC_ROUTES.shop}>
               {copy.primaryCta}
               <span aria-hidden="true">›</span>
@@ -440,7 +407,6 @@ export function FinalCta() {
             <Link className="cta-link" href="/?tri=nouveautes#boutique">
               {copy.secondaryCta}
             </Link>
-            <p className="cta-note">{copy.note}</p>
           </div>
         </div>
       </div>

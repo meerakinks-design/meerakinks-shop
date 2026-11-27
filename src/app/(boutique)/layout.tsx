@@ -24,6 +24,7 @@ import '@/styles/smash.css';
 import '@/styles/spaghetti.css';
 import '@/styles/ui.css';
 import '@/styles/showcase.css';
+import '@/styles/fiche.css';
 import '@/styles/stage.css';
 import '@/styles/titles.css';
 
@@ -59,7 +60,7 @@ export default async function ShopLayout({ children }: { children: React.ReactNo
       <Footer settings={settings} showCollections={showCollections} accents={accents} />
       {/* Les modals (menu, panier, commande, confirmation) vivent dans le layout, entrent par la droite et partagent le même mécanisme. */}
       <MenuModal storeName={settings.storeName} showCollections={showCollections} showContact={showContact} socials={socials} />
-      <CartModal depositAmount={settings.depositAmount} />
+      <CartModal depositAmount={settings.depositAmount} storeName={settings.storeName} />
       {CHECKOUT_ENABLED && <CheckoutModal depositAmount={settings.depositAmount} zones={zones} deliveryNotes={delivery.notes} />}
       <ConfirmationModal depositAmount={settings.depositAmount} storeName={settings.storeName} deliveryNotes={delivery.notes} />
       <ModalRouteSync />

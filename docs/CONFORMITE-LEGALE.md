@@ -14,7 +14,7 @@ Légende : ✅ vérifié dans une source lue · ⚠️ source non officielle ou 
 | `/cgv` | `src/content/legal-pages.ts` (`cgvSections`) | acompte, règles de paiement (`livraison.ts`), délais et textes de livraison (écran Livraison) |
 | `/cgu` | `src/content/legal-pages.ts` (`cguSections`) | nom de la boutique |
 | `/mentions-legales` | `src/content/legal-pages.ts` (`legalNoticeSections`) | identité légale et adresse (paramètres), `legal-details.ts` |
-| `/politique-de-confidentialite` | `src/content/privacy.ts` | durées (`retention.ts`), mesure maison selon `NEXT_PUBLIC_HOME_ANALYTICS_ENABLED` |
+| `/politique-de-confidentialite` | `src/content/privacy.ts` | durées (`retention.ts`), mesure maison selon `NEXT_PUBLIC_HOME_ANALYTICS_ENABLED` (active sauf `=0`) |
 | `/cookies` | `src/content/cookies.ts` | noms et durées des cookies (constantes du code) |
 
 Règle du projet (RM-42) : une information absente n'est **pas affichée** et la page l'annonce sans texte à trous. Les tests
@@ -70,7 +70,7 @@ garantie de délai, retour ou remboursement inventés.
 - Aucun numéro de carte bancaire collecté. Paiement par Wave, hors du site.
 - Données de commande conservées 24 mois après la dernière commande, puis anonymisées (`CUSTOMER_RETENTION_MONTHS`).
 - Empreinte (pas la valeur) de l'IP et du téléphone pour limiter les abus, supprimée au plus tard après `RATE_LIMIT_FINGERPRINT_MAX_DAYS`.
-- Mesure d'audience maison (si `NEXT_PUBLIC_HOME_ANALYTICS_ENABLED=1`) : seulement après « Accepter » ; cookie `boutique_vid` 90 jours ; repère d'onglet `boutique_arrival` ; détail supprimé après 90 jours ; refus = effacement dans le navigateur **et** sur le serveur ; jamais lié à une commande ni à un client ; aucune IP ni user-agent conservés.
+- Mesure d'audience maison (active par défaut ; coupée seulement si `NEXT_PUBLIC_HOME_ANALYTICS_ENABLED=0`) : seulement après « Accepter » ; cookie `boutique_vid` 90 jours ; repère d'onglet `boutique_arrival` ; détail supprimé après 90 jours ; refus = effacement dans le navigateur **et** sur le serveur ; jamais lié à une commande ni à un client ; aucune IP ni user-agent conservés.
 - Alerte email « Nouvelle visite » : une par navigateur, plafonnée à 40 par jour, sans IP ni identité.
 - Vercel Web Analytics reste actif avec le même consentement.
 

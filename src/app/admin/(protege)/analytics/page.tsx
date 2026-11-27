@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { KpiTrends, type KpiItem } from '@/components/admin/charts/KpiTrends';
 import { UtmLinkBuilder } from '@/components/admin/UtmLinkBuilder';
 import { PERIOD_CHOICES, parsePeriod, type Counted } from '@/lib/analytics/aggregate';
 import { formatAbidjanDateTime, formatDuration } from '@/lib/analytics/classify';
@@ -17,16 +18,6 @@ export const dynamic = 'force-dynamic';
 type SearchParams = { jours?: string | string[]; visiteur?: string | string[] };
 
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
-
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
-  return (
-    <div className="card stat">
-      <p className="help-text">{label}</p>
-      <p className="stat-value">{value}</p>
-      {hint && <p className="help-text">{hint}</p>}
-    </div>
-  );
-}
 
 function Ranking({ title, rows, empty = 'Aucune donnée sur la période.' }: { title: string; rows: Counted[]; empty?: string }) {
   const max = Math.max(1, ...rows.map((row) => row.count));
@@ -110,7 +101,21 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Se
 
   const days = parsePeriod(searchParams.jours);
   const overview = await getAnalyticsOverview(days);
-  const maxDay = Math.max(1, ...overview.perDay.map((day) => day.count));
+  const kpis: KpiItem[] = [
+    { key: 'visitors', label: 'Visiteurs', value: String(overview.visitors), hint: `${overview.newVisitors} nouveaux · ${overview.returningVisitors} de retour`, series: overview.series.visitors, unit: 'count', chartTitle: 'Visiteurs par jour', valueName: 'Visiteurs', summary: 'none' },
+    { key: 'visits', label: 'Visites', value: String(overview.visits), series: overview.series.visits, unit: 'count', chartTitle: 'Visites par jour', valueName: 'Visites', summary: 'sum' },
+    { key: 'page-views', label: 'Pages vues', value: String(overview.pageViews), series: overview.series.pageViews, unit: 'count', chartTitle: 'Pages vues par jour', valueName: 'Pages vues', summary: 'sum' },
+    {
+      key: 'avg-duration',
+      label: 'Durée moyenne d’une visite',
+      value: overview.avgVisitSeconds === null ? '—' : formatDuration(overview.avgVisitSeconds),
+      series: overview.series.avgVisitSeconds,
+      unit: 'seconds',
+      chartTitle: 'Durée moyenne d’une visite, par jour',
+      valueName: 'Durée moyenne',
+      summary: 'none',
+    },
+  ];
 
   return (
     <main>
@@ -120,14 +125,14 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Se
 
       {!HOME_ANALYTICS_ENABLED && (
         <p className="card" role="status">
-          La mesure des visites est désactivée sur ce déploiement : rien n’est enregistré. Pour l’activer, définissez <code>NEXT_PUBLIC_HOME_ANALYTICS_ENABLED=1</code>, puis publiez à nouveau (la politique de cookies s’adapte toute seule).
+          La mesure des visites est coupée sur ce déploiement (<code>NEXT_PUBLIC_HOME_ANALYTICS_ENABLED=0</code>) : rien n’est enregistré. Retirez cette variable (ou donnez-lui une autre valeur que <code>0</code>), puis publiez à nouveau pour la rallumer ; la politique de cookies s’adapte toute seule.
         </p>
       )}
       <p className="help-text">
         Visites des personnes qui ont <strong>accepté</strong> les statistiques anonymes. Aucune adresse IP n’est conservée ; le détail est supprimé au bout de {ANALYTICS_DETAIL_RETENTION_DAYS} jours.
       </p>
 
-      <nav aria-label="Période" className="admin-nav">
+      <nav aria-label="Période" className="filter-links">
         {PERIOD_CHOICES.map((choice) => (
           <Link key={choice} href={`/admin/analytics?jours=${choice}`} aria-current={choice === days ? 'page' : undefined}>
             {choice} jours
@@ -135,21 +140,7 @@ export default async function AnalyticsPage({ searchParams }: { searchParams: Se
         ))}
       </nav>
 
-      <div className="stat-grid">
-        <Stat label="Visiteurs" value={String(overview.visitors)} hint={`${overview.newVisitors} nouveaux · ${overview.returningVisitors} de retour`} />
-        <Stat label="Visites" value={String(overview.visits)} />
-        <Stat label="Pages vues" value={String(overview.pageViews)} />
-        <Stat label="Durée moyenne d’une visite" value={overview.avgVisitSeconds === null ? '—' : formatDuration(overview.avgVisitSeconds)} />
-      </div>
-
-      <section className="card stack" aria-label="Visites par jour">
-        <h2>Visites par jour</h2>
-        <div className="day-chart" role="img" aria-label={`Visites par jour sur ${days} jours : ${overview.perDay.reduce((sum, day) => sum + day.count, 0)} au total`}>
-          {overview.perDay.map((day) => (
-            <span key={day.day} className="day-bar" title={`${day.day} : ${day.count}`} style={{ height: `${Math.max(2, Math.round((day.count / maxDay) * 100))}%` }} />
-          ))}
-        </div>
-      </section>
+      <KpiTrends ariaLabel="Indicateurs de la période" items={kpis} labelFirst />
 
       <div className="stat-grid">
         <Ranking title="Provenance" rows={overview.sources} />

@@ -1,0 +1,122 @@
+/* ---------- Fiche produit de la vitrine (/produit/<id>) ----------
+   Colonne d'info courte (étiquette, nom, sous-titre, prix, fiche express) à côté de la galerie ; le détail (mode d'emploi, précautions,
+   ingrédients, contenu des offres) est dessous, pleine largeur : la colonne collante de l'ordinateur ne dépasse ainsi jamais l'écran.
+   Couleurs et polices : uniquement celles de la charte (Modak pour les titres, Great Vibes pour le sous-titre, marron et orange). */
+
+.showcase-product .product-info { gap: var(--space-3); }
+
+/* Étiquette : couleur du soin ou type d'offre. */
+.fiche-tag { justify-self: center; display: inline-flex; align-items: center; gap: var(--space-2); min-height: 2.25rem; padding: 0 var(--space-4); border: 1px dashed color-mix(in srgb, var(--color-brown) 45%, transparent); border-radius: 999px; background: var(--color-surface); font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-brown); }
+@media (min-width: 900px) { .fiche-tag { justify-self: start; } }
+
+/* Le nom, dans la police des titres du site (Modak). */
+.showcase-product .fiche-title { font-family: var(--font-logo); font-weight: 400; font-synthesis: none; text-transform: none; letter-spacing: 0; font-size: clamp(2.75rem, 12vw, 4.75rem); line-height: 0.95; color: var(--color-brown); }
+.showcase-product .showcase-product-kind { font-family: var(--font-brand); font-size: clamp(1.5rem, 6vw, 2rem); line-height: 1.1; color: var(--color-text-muted); }
+.showcase-product .showcase-product-kind.is-plain { font-family: var(--font-body); font-size: clamp(1.0625rem, 4.2vw, 1.25rem); font-weight: 500; line-height: 1.3; }
+
+/* Ordinateur : toute la colonne d'info est alignée à gauche (téléphone : centrée). */
+@media (min-width: 900px) { .showcase-product .fiche-title, .showcase-product .showcase-product-kind, .showcase-product .fiche-soon { text-align: left; } }
+
+/* Prix : ancien prix barré d'un seul trait, prix réel en évidence, économie. */
+.fiche-price { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: var(--space-1) var(--space-3); margin: 0; }
+.fiche-price s { font-size: 1.125rem; color: var(--color-text-muted); text-decoration-line: line-through; text-decoration-thickness: 1px; }
+.fiche-price-now { font-size: clamp(2rem, 8vw, 2.5rem); font-weight: 800; line-height: 1; letter-spacing: -0.02em; color: var(--color-brown); }
+.fiche-saving { align-self: center; padding: 0.3rem 0.8rem; border-radius: 999px; background: var(--color-orange); color: var(--color-brown-deep); font-size: 0.8125rem; font-weight: 700; line-height: 1.2; transform: rotate(-2deg); }
+.fiche-price.is-compact { justify-content: flex-start; }
+.fiche-price.is-compact s { font-size: 1rem; }
+.fiche-price.is-compact .fiche-price-now { font-size: 1.5rem; }
+@media (min-width: 900px) { .fiche-price { justify-content: flex-start; } }
+
+.showcase-product .fiche-soon { font-size: 0.9375rem; line-height: 1.45; color: var(--color-text-muted); }
+.fiche-soon a { color: var(--color-brown); font-weight: 600; text-underline-offset: 0.2em; white-space: nowrap; }
+
+/* Fiche express : les lignes du tableau du dossier. */
+.fiche-facts { margin: 0; display: grid; border: 2px solid var(--color-brown); border-radius: 14px; background: var(--color-surface); text-align: left; overflow: hidden; }
+.fiche-facts > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--space-3); padding: 0.75rem var(--space-4); }
+.fiche-facts > div + div { border-top: 1px dashed color-mix(in srgb, var(--color-brown) 40%, transparent); }
+.fiche-facts dt { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-brown); }
+.fiche-facts dd { margin: 0; line-height: 1.4; }
+
+/* Texte de présentation. */
+.fiche-about { max-width: 46rem; margin: clamp(2rem, 6vw, 3.5rem) auto 0; display: grid; gap: var(--space-3); text-align: left; }
+.fiche-about p { margin: 0; font-size: var(--text-desc); line-height: 1.5; }
+
+/* ---------- Détail sous la fiche ---------- */
+.fiche-sheet { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); margin-top: clamp(2.5rem, 7vw, 4.5rem); }
+.fiche-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+@media (min-width: 900px) { .fiche-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); } }
+/* Un bloc de la grille ne s'élargit jamais au contenu de son tableau : c'est le tableau qui défile dans son cadre. */
+.fiche-sheet > *, .fiche-grid > * { min-width: 0; }
+.fiche-card { padding: var(--space-6); border: 2px solid var(--color-brown); border-radius: 1.25rem; background: var(--color-surface); text-align: left; }
+.fiche-card h2, .fiche-heading { margin: 0 0 var(--space-4); font-family: var(--font-logo); font-weight: 400; font-synthesis: none; font-size: clamp(1.625rem, 6.5vw, 2.25rem); line-height: 1; letter-spacing: 0; text-transform: none; color: var(--color-brown); text-align: left; }
+.fiche-card p, .fiche-card li { font-size: 1rem; line-height: 1.5; }
+
+/* Mode d'emploi : étapes numérotées. */
+.fiche-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); counter-reset: fiche-step; }
+.fiche-steps li { position: relative; min-height: 2rem; padding: 0.2rem 0 0 2.75rem; counter-increment: fiche-step; }
+.fiche-steps li::before { content: counter(fiche-step); position: absolute; left: 0; top: 0; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--color-orange); color: var(--color-brown-deep); font-weight: 800; }
+
+/* Précautions : puces terracotta. */
+.fiche-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.fiche-list li { position: relative; padding-left: 1.25rem; }
+.fiche-list li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--color-terracotta); }
+
+/* Ingrédients : repliable (ouvert au départ). */
+.fiche-inci { border: 2px solid var(--color-brown); border-radius: 1.25rem; background: var(--color-surface); text-align: left; }
+.fiche-inci summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: var(--tap-target); padding: var(--space-3) var(--space-6); cursor: pointer; list-style: none; font-family: var(--font-logo); font-size: clamp(1.375rem, 5.5vw, 1.75rem); line-height: 1; color: var(--color-brown); }
+.fiche-inci summary::-webkit-details-marker { display: none; }
+.fiche-inci summary::after { content: '+'; flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; border: 2px solid var(--color-brown); border-radius: 50%; font-family: var(--font-body, inherit); font-size: 1.25rem; font-weight: 700; line-height: 1; }
+.fiche-inci[open] summary::after { content: '–'; }
+.fiche-inci summary:focus-visible { outline: 3px solid var(--color-focus); outline-offset: -3px; border-radius: 1.25rem; }
+.fiche-inci p { margin: 0; padding: 0 var(--space-6); font-size: 0.9375rem; line-height: 1.6; overflow-wrap: anywhere; }
+.fiche-inci .fiche-hint { padding-block: var(--space-2) var(--space-6); }
+.fiche-hint { margin: var(--space-3) 0 0; font-size: 0.875rem; color: var(--color-text-muted); text-align: left; }
+
+/* Mentions de l'étiquette : conservation, fabrication. Empilées sur téléphone (l'adresse e-mail ne se coupe jamais), côte à côte ensuite. */
+.fiche-label { margin: 0; display: grid; gap: var(--space-3) var(--space-8, 3rem); padding: var(--space-4) var(--space-6); border: 1px dashed color-mix(in srgb, var(--color-brown) 45%, transparent); border-radius: 1.25rem; text-align: left; }
+.fiche-label > div { display: grid; gap: 0.15rem; }
+.fiche-label dt { font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-brown); }
+.fiche-label dd { margin: 0; font-size: 0.9375rem; line-height: 1.45; }
+.fiche-label a { color: var(--color-brown); text-underline-offset: 0.2em; white-space: nowrap; }
+@media (min-width: 700px) { .fiche-label { grid-auto-flow: column; justify-content: start; } }
+
+/* Produits réunis dans une offre, et offres liées : cartes horizontales (vignette + texte), entièrement cliquables. */
+.fiche-contents, .fiche-offer-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-4); }
+@media (min-width: 700px) { .fiche-contents, .fiche-offer-list { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1100px) { .fiche-contents[data-count='6'] { grid-template-columns: repeat(3, 1fr); } }
+.fiche-content, .fiche-offer-card { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--space-4); align-items: center; height: 100%; padding: var(--space-3); border: 2px solid var(--color-brown); border-radius: 1.25rem; background: var(--color-surface); color: inherit; text-decoration: none; text-align: left; -webkit-tap-highlight-color: transparent; }
+.fiche-offer-card { grid-template-columns: 7.5rem 1fr; }
+.fiche-content:hover, .fiche-offer-card:hover { background: color-mix(in srgb, var(--color-peach) 35%, var(--color-surface)); }
+.fiche-content:focus-visible, .fiche-offer-card:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+.fiche-content img, .fiche-offer-card img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 0.875rem; background: var(--color-border); }
+.fiche-content-body { display: grid; gap: var(--space-1); min-width: 0; }
+.fiche-content-name { font-size: 1.1875rem; font-weight: 700; line-height: 1.15; color: var(--color-brown); }
+.fiche-content-kind { font-family: var(--font-brand); font-size: 1.375rem; line-height: 1.1; color: var(--color-text-muted); }
+.fiche-offer-card .fiche-content-kind { font-family: var(--font-body); font-size: 0.9375rem; font-weight: 500; line-height: 1.3; }
+.fiche-content-meta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-brown); }
+.fiche-cta { margin-top: var(--space-1); font-size: 0.9375rem; font-weight: 700; color: var(--color-brown); text-decoration: underline; text-underline-offset: 0.2em; }
+.fiche-offers { margin-top: clamp(2.5rem, 7vw, 4.5rem); }
+
+/* Matrice des précautions (offres) : défile dans son cadre sur petit écran, jamais la page. */
+.fiche-common { margin: 0 0 var(--space-3); }
+.fiche-table-wrap { position: relative; overflow-x: auto; border-radius: 0.75rem; } /* position : contient les textes « visually-hidden » (absolus) des cellules, sinon ils élargissent la page */
+.fiche-table-wrap:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.fiche-table { width: 100%; min-width: 34rem; border-collapse: collapse; font-size: 0.9375rem; }
+.fiche-table th, .fiche-table td { padding: 0.6rem var(--space-3); border-bottom: 1px dashed color-mix(in srgb, var(--color-brown) 40%, transparent); text-align: center; }
+.fiche-table thead th { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-brown); }
+.fiche-table tbody th { text-align: left; font-weight: 700; color: var(--color-brown); white-space: nowrap; }
+.fiche-table td { color: var(--color-text-muted); }
+.fiche-table td[data-on='true'] { color: var(--color-brown); font-weight: 800; }
+.fiche-table tbody tr:last-child th, .fiche-table tbody tr:last-child td { border-bottom: 0; }
+
+@media (max-width: 520px) {
+  .fiche-content, .fiche-offer-card { grid-template-columns: 5.25rem 1fr; gap: var(--space-3); }
+  .fiche-facts > div { grid-template-columns: 6.25rem 1fr; }
+  /* Matrice des précautions : les cinq colonnes tiennent dans la largeur du téléphone (pas de défilement horizontal). */
+  .fiche-card:has(.fiche-table) { padding-inline: var(--space-3); }
+  .fiche-table { min-width: 0; table-layout: fixed; font-size: 0.875rem; }
+  .fiche-table th, .fiche-table td { padding: 0.55rem 0.15rem; }
+  .fiche-table thead th { font-size: 0.625rem; letter-spacing: 0.02em; overflow-wrap: anywhere; }
+  .fiche-table thead th:first-child, .fiche-table tbody th { width: 31%; }
+  .fiche-table tbody th { white-space: normal; padding-left: 0.25rem; }
+}

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { DeliveryFeeForm, InternalNoteForm } from '@/components/admin/OrderSideForms';
 import { OrderActions } from '@/components/admin/OrderActions';
+import { OrderEmails, type OrderEmailView } from '@/components/admin/OrderEmails';
 import { DeliveryBadge, PaymentBadge } from '@/components/admin/OrderBadges';
 import { PaymentPanel, type PaymentLineView } from '@/components/admin/PaymentPanel';
 import { formatDateTime } from '@/lib/admin-format';
@@ -48,6 +49,17 @@ export default async function OrderDetailPage({ params }: { params: { id: string
     voidedAt: payment.voidedAt?.toISOString() ?? null,
     voidReason: payment.voidReason,
     recordedBy: payment.recordedBy?.name ?? null,
+  }));
+
+  const emailViews: OrderEmailView[] = order.emails.map((email) => ({
+    id: email.id,
+    type: email.type,
+    toEmail: email.toEmail,
+    status: email.status,
+    attempts: email.attempts,
+    lastError: email.lastError,
+    sentAt: email.sentAt?.toISOString() ?? null,
+    createdAt: email.createdAt.toISOString(),
   }));
 
   const { customer } = order;
@@ -218,6 +230,11 @@ export default async function OrderDetailPage({ params }: { params: { id: string
                 </a>
               </p>
             )}
+          </section>
+
+          <section className="card detail-card" aria-labelledby="emails-title">
+            <h2 id="emails-title">Emails automatiques</h2>
+            <OrderEmails orderId={order.id} emails={emailViews} />
           </section>
         </div>
       </div>

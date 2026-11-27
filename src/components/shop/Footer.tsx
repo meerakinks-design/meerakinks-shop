@@ -34,8 +34,6 @@ export function Footer({ settings, showCollections, accents = [] }: { settings: 
 
   return (
     <footer className="site-footer">
-      <div className="footer-scallop" aria-hidden="true" />
-
       {/* Partie 1 */}
       <div className="container footer-top">
         <section className="footer-brand" aria-label={storeName}>

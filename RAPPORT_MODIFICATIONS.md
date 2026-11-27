@@ -204,3 +204,45 @@ Le patch (11 fichiers) était basé sur le zip d'origine. Je l'ai fusionné avec
 - `src/styles/showcase.css` : règles `.showcase-page` et `.showcase-more` retirées (plus de page `/boutique`, plus de bouton).
 - `docs/VITRINE-PHOTOS.md` : mis à jour (où ça s'affiche, passage au catalogue, fichiers touchés).
 - Non exécuté ici (pas de `node_modules`) : `npm ci && npm run typecheck && npm test && npm run build`.
+
+## 23. Slide produit, héros image 2, fin de la scène 3D
+- **Cartes de la boutique** : plus de deuxième image au survol ni au toucher (`ShowcaseCard` n'est plus un composant client). Chaque carte est un lien vers `/produit/<id>`. **Fiche produit** : `ShowcaseProductView` (galerie en slide existante, nom, type, contenance, pas de prix). Voir `docs/VITRINE-PHOTOS.md`.
+- **Ordre** : Fluffy Kinks, Slik, Mousse Kinky, Velvet, Elixir Wunter, Brume.
+- **Héros** : `public/stage/hero2.webp` = image 2 (Mousse Kinky + Fluffy Kinks sur les cheveux), image fixe.
+- **Scène 3D retirée** (la cliente n'aime pas les effets GLB) : plus de pot Fluffy/Velvet ni de spray Brume qui défilent, plus de zigzag. Supprimés : `src/components/shop/ScrollStage.tsx`, `src/lib/stage/config.ts`, `src/lib/stage/engine.ts`, `public/models/*.glb`. `page.tsx` ne monte plus `<ScrollStage />` ; `LandingSections.tsx` n'a plus aucun repère `data-stage-*` (héros, « guide », FAQ, CTA) ni de colonne vide à côté des cartes et de la FAQ. Le CTA garde sa photo actuelle (`cta1.webp`), fixe. Conséquence : plus de défilement lissé (Lenis) ni d'animation GSAP des trois points du CTA (ils s'affichent directement).
+- **Section « guide »** : les cartes qui se chevauchent (sticky empilées) du téléphone s'appliquent aussi sur ordinateur, dans une colonne centrée de 46 rem (`#pourquoi-nous .why-steps` dans `stage.css`).
+- Laissé tel quel : `config/security-headers.mjs` (`'wasm-unsafe-eval'`, testé par `csp.test.ts`) ; `package.json` : `three` et `lenis` ne servent plus (à retirer si rien d'autre ne les utilise). `docs/MERGE-SCROLL3D_V0_11.md` décrit une scène qui n'existe plus.
+- Vérifié : rendu réel des composants + vrai CSS dans Chromium (1440 px et 390 px). `showcase.test.tsx` : 12 passés (lanceur provisoire). **À lancer chez toi : `npm run typecheck && npm test && npm run build`.**
+- **Non fait** : GLB de marque dans le loader et dans le jeu (pots à 20 points, fond qui prend la couleur du pot coupé). Ton zip contient un jeu « retouché » que je n'ai pas : envoie-moi `src/lib/smash/`, `SmashGame.tsx`, `IntroLoader.tsx`, `smash.css` si tu veux que je les branche (à confirmer vu que la cliente n'aime pas les effets GLB).
+
+## 24. Retouches du 25 novembre 2026 (menu, panier, CTA, fonds, festons)
+
+**Logo à gauche (menu et panier).** `CurtainModal` accepte `logoSrc` / `logoLabel` : le logo de la marque (le même que l'en-tête du site) tient la gauche de l'en-tête du modal, le ✕ reste à droite. Le titre reste dans le HTML (nom accessible), masqué à l'écran (`visually-hidden`). Le logo n'est pas un lien, pour que le focus reste sur ✕ à l'ouverture (comportement d'avant, voir la régression des rideaux). `brandTitle` et le titre en cursive sont retirés (plus aucun usage). Commande et confirmation gardent leur titre. Fichiers : `CurtainModal.tsx`, `MenuModal.tsx`, `CartModal.tsx`, `(boutique)/layout.tsx` (passe `storeName` au panier), `ui.css`.
+
+**Panier inspiré de la capture Bucks Sauce.** Une icône corbeille (zone tactile 44 px) sur chaque produit remplace le lien texte « Retirer » (`aria-label` « Retirer {produit} du panier ») ; quantité dans une boîte à bordure marron avec grands boutons « − 1 + » ; barre du bas sombre (`--color-brown-deep`) avec le grand bouton beige « Passer commande » ; barre de défilement fine marron. Libellés inchangés : « Sous-total » reste « Sous-total » car la livraison n'est pas encore comptée. Fichiers : `CartModal.tsx`, `shop.css`.
+
+**CTA final.** Les trois points (« Des soins classés par besoin »…) et la note (« Une question avant de commander ? »…) sont retirés : composant, textes de `landing.ts`, styles de `stage.css` et l'animation GSAP qui les ciblait dans `lib/stage/engine.ts`.
+
+**Un seul fond, du héros au CTA.** La vague orange sous le héros est retirée (le héros reprend un peu de marge basse) ; la section « guide » n'est plus un aplat orange ; Instagram et Contact ne sont plus teintés ; le bandeau défilant n'a plus d'aplat (il garde deux filets en pointillés) ; la carte « message envoyé » du contact reçoit un contour pointillé pour rester visible sur le fond uni. Les sections « catégories » (inactives tant que `SHOWCASE_ENABLED` vaut `true`) gardent la couleur de leur besoin.
+
+**Festons retirés.** Pied de page de la vitrine (`footer-scallop`), barre du haut du back-office (`.admin-topbar::after`) et bord du menu latéral du back-office (`admin-side-edge`, élément et styles ; la grille place maintenant `.admin-body` explicitement en colonne 2).
+
+**Tests.** Nouveau `tests/unit/modal-logo-cart-landing.test.tsx`. Non exécuté ici (pas de `node_modules`, pas de réseau) ; vérifié : syntaxe de tous les fichiers modifiés et rendu visuel sur maquette avec les vrais fichiers CSS. À lancer chez toi : `npm run typecheck && npm test && npm run build`.
+
+## 25. Catalogue Meëra Kinks : produits, duos, gamme complète, et fusion des quatre livraisons (26 novembre 2026)
+
+**Ce qui est livré**
+- **Boutique (landing, `#boutique`)** : légende des couleurs, puis trois groupes : *Nos soins* (6), *Nos duos* (3), *La gamme complète* (1, en grand et centrée). Pastille « Offre » sur les duos et la gamme. Toujours pas de prix sur les cartes. Ordre des soins conservé : Fluffy Kinks, SLIK, Mousse Kinky, Velvet, Elixir Wunter, Brume.
+- **Fiches `/produit/<id>`** (dix, prérendues) : photos en slide, couleur ou offre, nom en Modak, sous-titre, **prix** (soin : un prix ; offre : ancien prix barré d'un trait, prix réel, « Économie : … FCFA », règle du dossier), fiche express ; mode d'emploi numéroté, précautions, ingrédients (INCI) repliables, PAO et fabrication ; offres : produits réunis (liens) et matrice des précautions ; offres liées sur chaque fiche. « Commande bientôt disponible. » : la commande reste fermée.
+- **Données** : `src/content/catalogue.ts` (dossier v1.1, rien d'inventé), `src/lib/shop/catalogue.ts` (prix des offres calculés, précautions, regroupement, lignes de base), `prisma/seed-catalogue.ts` (`npm run db:seed:catalogue`), photos de `public/products/` (6 nouvelles : duos et gamme, WebP). Détail et mode d'emploi : `docs/CATALOGUE-PRODUITS.md`.
+- **Tests** : `catalogue.test.ts` (conformité au dossier : prix, économies, étapes, ingrédients, matrice des précautions, photos, validité pour le formulaire du back-office, plan du seed), `showcase.test.tsx` réécrit (groupes, prix, fiches). Aucun changement des tests de commandes.
+
+**Fusions** (à trois voies, fichier par fichier ; aucune livraison n'est écrasée en bloc)
+- *landing-maj* puis *landing-maj3* : appliquées dans l'ordre. maj3 a retiré la scène 3D (`ScrollStage`, `lib/stage/*`, GLB).
+- *retouches-25nov* (construite sur la ligne qui avait encore la scène 3D) : menu, panier, logo, CTA, fonds, festons repris. Sa modification de `lib/stage/engine.ts` est sans objet (fichier supprimé par maj3) ; le test `modal-logo-cart-landing` vérifie maintenant que ce fichier n'existe plus.
+- *5-update* (back-office) : repris tel quel, sauf deux points. (1) Son `admin.css` et `AdminShell.tsx` réintroduisaient le **feston du menu latéral** que la retouche du 25 novembre avait retiré (et que son test vérifie) : il est retiré à nouveau. (2) `package.json` : `recharts` ajouté, `three`/`lenis`/`@types/three` restent retirés.
+- **`package-lock.json`** : celui de la livraison d'origine était désynchronisé (`npm ci` échouait : `three`, `lenis`, `@types/three` absents). Il est régénéré ; `npm ci --dry-run` passe.
+
+**Vérifié ici** : `npm run typecheck` propre ; `npm test` : 1 195 réussis, 38 échecs identiques à ceux d'avant mon travail (`orders.service` 34, `cookie-ui` 2, `customer-data.service` 1, `orders-admin.service` 1) ; `next build` réussi (dix fiches prérendues) ; rendu Chromium 390 et 1 440 px de la boutique et des fiches (soin, duo, gamme) : pas de débordement, pas d'image cassée, pas d'erreur console.
+**Non vérifié** : le seed contre une vraie base ; les courbes Recharts du back-office (non lancées) ; `npm run e2e:visual` ; `npm run lint` (le projet n'a pas de configuration ESLint : `next lint` pose une question interactive).
+

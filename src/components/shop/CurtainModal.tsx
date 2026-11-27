@@ -14,8 +14,10 @@ interface CurtainModalProps {
   ariaLabel?: string;
   /** Texte du bouton de fermeture (lecteurs d'écran). */
   closeLabel?: string;
-  /** Titre en cursive de la marque (menu) plutôt qu'en capitales (panier, commande). */
-  brandTitle?: boolean;
+  /** Logo de la marque affiché à GAUCHE de l'en-tête (menu, panier) à la place du titre ; le titre reste dans le HTML, masqué à l'écran. */
+  logoSrc?: string;
+  /** Nom de la marque : texte alternatif du logo. Le logo n'est pas un lien : le focus reste sur ✕ à l'ouverture. */
+  logoLabel?: string;
   /** Fermer en retirant l'ancre sur place (sans reculer dans l'historique) : utilisé par la confirmation de commande. */
   dismissInPlace?: boolean;
   className?: string;
@@ -33,7 +35,7 @@ interface CurtainModalProps {
  * C'est un <dialog> natif porté par l'ancre : focus piégé, fond inerte, Échap et bouton Retour du téléphone.
  * Le contenu reste dans le HTML même fermé. Mouvement réduit : ouverture et fermeture instantanées.
  */
-export function CurtainModal({ hash, title, ariaLabel, closeLabel = 'Fermer', brandTitle = false, dismissInPlace = false, className = '', children }: CurtainModalProps) {
+export function CurtainModal({ hash, title, ariaLabel, closeLabel = 'Fermer', logoSrc, logoLabel, dismissInPlace = false, className = '', children }: CurtainModalProps) {
   const modal = useModal(hash);
   const { isOpen } = modal;
   const close = dismissInPlace ? modal.dismiss : modal.close;
@@ -110,7 +112,13 @@ export function CurtainModal({ hash, title, ariaLabel, closeLabel = 'Fermer', br
       <div className="curtain-layer curtain-layer-2" aria-hidden="true" />
       <div className="curtain-panel">
         <header className="curtain-head">
-          <h2 id={titleId} className={`curtain-title${brandTitle ? ' is-brand' : ''}`}>
+          {logoSrc && (
+            <span className="curtain-logo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoSrc} alt={logoLabel ?? ''} width={133} height={52} />
+            </span>
+          )}
+          <h2 id={titleId} className={`curtain-title${logoSrc ? ' visually-hidden' : ''}`}>
             {title}
           </h2>
           <button type="button" className="curtain-close" onClick={close} aria-label={closeLabel}>

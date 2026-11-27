@@ -2,12 +2,12 @@
    Chargé uniquement par app/admin/layout.tsx ; TOUTES les règles sont préfixées par .admin-root pour ne jamais déborder sur la boutique.
 
    Reprises de la vitrine : Poppins gras à titres serrés, Great Vibes en signature, boutons orange à texte marron,
-   rideaux de couleur du menu, festons du pied de page, séparateurs en pointillés, cartes aux grands arrondis.
+   rideaux de couleur du menu, séparateurs en pointillés, cartes aux grands arrondis.
    Règle de contraste de la charte : le petit texte se pose sur du beige/crème ou du marron, jamais sur de l'orange.
 
    Mise en page :
-   - ≥ 64rem (ordinateur) : menu latéral marron à gauche, contenu large à droite.
-   - < 64rem (téléphone, tablette) : barre du haut (logo + compte) et barre de navigation flottante en bas.
+   - ≥ 56,25 rem / 900 px (ordinateur) : barre latérale marron à gauche (repliable en rail d'icônes, façon E-Carnet), contenu large à droite.
+   - < 56,25 rem (téléphone, tablette) : en-tête identique à celui de la landing et barre de navigation flottante en bas (une rangée).
    Chaque conteneur flex/grid porte min-width: 0 : aucun contenu ne doit jamais provoquer de défilement horizontal. */
 
 .admin-root {
@@ -36,21 +36,34 @@
 .admin-skip { position: absolute; left: var(--space-4); top: -4rem; z-index: 100; padding: var(--space-3) var(--space-4); border-radius: var(--radius); background: var(--color-brown); color: var(--color-beige); }
 .admin-skip:focus { top: var(--space-3); }
 
-/* ============================ Coque : menu latéral + contenu ============================ */
+/* ============================ Coque : barre latérale + contenu ============================ */
 .admin-root .admin-app { display: block; min-height: 100dvh; }
+.admin-root .admin-app.is-rail { --a-side-w: 4.75rem; }
 .admin-root .admin-body { display: block; min-width: 0; }
-.admin-root .admin-content { width: 100%; max-width: 78rem; margin-inline: auto; padding: clamp(1.25rem, 3vw, 2rem) var(--a-gutter) calc(var(--a-tabbar-h) + 2.5rem + env(safe-area-inset-bottom)); outline: none; }
+.admin-root .admin-content { width: 100%; max-width: 78rem; margin-inline: auto; padding: clamp(0.5rem, 1.5vw, 1rem) var(--a-gutter) calc(var(--a-tabbar-h) + 2.5rem + env(safe-area-inset-bottom)); outline: none; }
 .admin-root .admin-content > main { display: block; }
 
-/* Barre du haut (téléphone, tablette) : bandeau marron + festons qui retombent, comme le pied de page de la vitrine à l'envers */
-.admin-root .admin-topbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 3.75rem; padding: 0.5rem var(--a-gutter); background: var(--color-brown); color: var(--color-beige); }
-.admin-root .admin-topbar::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 0.9rem; pointer-events: none; background: radial-gradient(circle at 50% 0, var(--color-brown) 0 0.84rem, transparent 0.88rem) 0 0 / 1.8rem 0.9rem repeat-x; }
-.admin-root .admin-brand { display: inline-flex; align-items: center; min-height: 2.75rem; text-decoration: none; }
-.admin-root .admin-brand img { display: block; width: auto; height: 2.1rem; }
-.admin-root .admin-account-btn { display: inline-grid; flex: none; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; border: 2px solid var(--color-beige); border-radius: 50%; background: transparent; color: var(--color-beige); font: inherit; font-size: 1.125rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
-.admin-root .admin-account-btn:hover, .admin-root .admin-account-btn:focus-visible { background: var(--color-beige); color: var(--color-brown); }
+/* En-tête : le MÊME que celui de la landing (logo à gauche · bouton orange · bouton carré à bordure marron), sur le beige de la page.
+   Fond beige plein (la landing n'en a pas) : en défilant, le contenu ne passe pas sous le logo. Au repos, il est identique. */
+.admin-root .admin-header { position: sticky; top: 0; z-index: 30; background: var(--color-beige); }
+.admin-root .admin-header-inner { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; width: 100%; max-width: 78rem; min-height: 4.25rem; margin-inline: auto; padding: 0.25rem var(--a-gutter); }
+.admin-root .admin-header-brand { display: inline-flex; align-items: center; min-height: 2.75rem; text-decoration: none; }
+.admin-root .admin-header-brand img { display: block; width: auto; height: clamp(2.5rem, 7vw, 3.25rem); aspect-ratio: 1600 / 624; object-fit: contain; }
+.admin-root .admin-header-actions { display: flex; align-items: center; gap: var(--space-2); }
+.admin-root .admin-header-shop { display: inline-flex; align-items: center; justify-content: center; min-height: 3rem; padding: 0 1.1rem; border-radius: 12px; background: var(--color-orange); color: var(--color-brown); font-size: 1.1875rem; font-weight: 800; text-decoration: none; white-space: nowrap; transition: background-color 0.12s ease; }
+.admin-root .admin-header-shop:hover { background: var(--color-gold-orange); }
+.admin-root .admin-account-btn { display: inline-grid; flex: none; place-items: center; width: 3rem; height: 3rem; padding: 0; border: 2px solid var(--color-brown); border-radius: 12px; background: var(--color-beige); color: var(--color-brown); font: inherit; font-size: 1.125rem; font-weight: 800; text-transform: uppercase; cursor: pointer; }
+.admin-root .admin-account-btn:hover, .admin-root .admin-account-btn:focus-visible { background: var(--color-brown); color: var(--color-beige); }
+/* Petits téléphones : l'en-tête tient dans 360 px ; sous 336 px, « Boutique » quitte l'en-tête (le menu du compte la propose). */
+@media (max-width: 25rem) {
+  .admin-root .admin-header-inner { gap: 0.25rem; }
+  .admin-root .admin-header-actions { gap: 0.375rem; }
+  .admin-root .admin-header-shop { min-height: 2.75rem; padding: 0 0.8rem; font-size: 1rem; }
+  .admin-root .admin-account-btn { width: 2.75rem; height: 2.75rem; }
+}
+@media (max-width: 21rem) { .admin-root .admin-header-shop { display: none; } }
 
-/* Menu latéral (ordinateur) */
+/* Barre latérale : masquée sous 900 px */
 .admin-root .admin-side { display: none; }
 
 /* ============================ Navigation ============================ */
@@ -58,16 +71,23 @@
 .admin-root .admin-nav ul { list-style: none; margin: 0; padding: 0; }
 .admin-root .admin-nav a { text-decoration: none; }
 .admin-root .admin-nav-icon { display: block; flex: none; width: 1.5rem; height: 1.5rem; }
+.admin-root .admin-nav-group { display: block; }
 
-/* Barre du bas (téléphone) : flottante, 5 sections, la section ouverte passe en beige */
+/* Barre du bas (téléphone, tablette) : flottante, UNE seule rangée ; la section ouverte passe en beige.
+   Sous 36 rem (téléphone) : icônes seules, le nom complet reste lu par les lecteurs d'écran et visible au toucher prolongé (title). */
 .admin-root .admin-nav-tabs { position: fixed; left: 0.5rem; right: 0.5rem; bottom: calc(0.625rem + env(safe-area-inset-bottom)); z-index: 30; padding: 0.3rem; border-radius: 1.5rem; background: var(--color-brown); box-shadow: 0 0.75rem 2rem rgb(127 63 32 / 0.4); }
-.admin-root .admin-nav-tabs ul { display: grid; grid-template-columns: repeat(5, minmax(min-content, 1fr)); gap: 0.15rem; }
+.admin-root .admin-nav-tabs ul { display: grid; grid-template-columns: repeat(var(--tabs-count, 5), minmax(0, 1fr)); gap: 0.15rem; }
 .admin-root .admin-nav-tabs a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.15rem; min-height: 3.5rem; padding: 0.35rem 0.05rem; border-radius: 1.1rem; color: var(--color-beige); font-size: 0.6875rem; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; text-align: center; }
 .admin-root .admin-nav-tabs a span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-root .admin-nav-tabs a[aria-current='page'] { background: var(--color-beige); color: var(--color-brown); }
 .admin-root .admin-nav-tabs a:not([aria-current='page']):active { background: rgb(248 238 220 / 0.16); }
+@media (max-width: 35.999rem) {
+  .admin-root .admin-nav-tabs { --a-tabbar-h: 4.25rem; }
+  .admin-root .admin-nav-tabs a { min-height: 3.1rem; }
+  .admin-root .admin-nav-tabs a span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 
-/* Compte : liens + déconnexion (menu latéral et rideau du téléphone) */
+/* Compte : liens + déconnexion (menu de la barre latérale et rideau du téléphone) */
 .admin-root .admin-account { display: grid; gap: var(--space-3); }
 .admin-root .admin-account-name { margin: 0; font-size: 1.0625rem; font-weight: 800; overflow-wrap: anywhere; }
 .admin-root .admin-account-role { display: block; font-size: 0.8125rem; font-weight: 500; opacity: 0.8; }
@@ -75,35 +95,68 @@
 .admin-root .admin-account-links a { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 2.75rem; border-radius: 0.75rem; text-decoration: none; font-weight: 600; }
 .admin-root .admin-account .btn { width: 100%; }
 
-/* ============================ Ordinateur : menu latéral ============================ */
-@media (min-width: 64rem) {
-  .admin-root .admin-app { display: grid; grid-template-columns: var(--a-side-w) minmax(0, 1fr); align-items: start; }
-  .admin-root .admin-topbar, .admin-root .admin-nav-tabs { display: none; }
-  .admin-root .admin-content { padding-bottom: 4rem; padding-top: 2.25rem; }
+/* ============================ Ordinateur (≥ 900 px) : barre latérale façon E-Carnet ============================
+   Largeur dépliée 17,5 rem ; repliée en rail d'icônes de 4,75 rem (bouton en haut, choix mémorisé). Le compte est en bas et ouvre un menu. */
+@media (min-width: 56.25rem) {
+  .admin-root .admin-app { display: grid; grid-template-columns: var(--a-side-w) minmax(0, 1fr); align-items: start; transition: grid-template-columns 0.18s ease; }
+  .admin-root .admin-nav-tabs, .admin-root .admin-header-brand, .admin-root .admin-header .admin-account-btn { display: none; }
+  .admin-root .admin-header-inner { justify-content: flex-end; min-height: 4.25rem; }
+  .admin-root .admin-header-shop { min-height: 3.25rem; padding-inline: 1.5rem; }
+  .admin-root .admin-content { padding-top: 0.25rem; padding-bottom: 4rem; }
 
-  .admin-root .admin-side { position: sticky; top: 0; z-index: 20; display: flex; flex-direction: column; gap: var(--space-6); height: 100vh; height: 100dvh; padding: 1.75rem 1.25rem 1.25rem 1.25rem; overflow-y: auto; background: var(--color-brown); color: var(--color-beige); }
-  /* Bord festonné vers le contenu : demi-cercles marron qui dépassent à droite */
-  .admin-root .admin-side-edge { position: sticky; top: 0; z-index: 20; grid-column: 1; grid-row: 1; width: 1.45rem; height: 100dvh; margin-left: calc(var(--a-side-w) - 0.05rem); pointer-events: none; background: radial-gradient(circle at 0 50%, var(--color-brown) 0 1.38rem, transparent 1.42rem) 0 0 / 1.45rem 2.8rem repeat-y; }
-  .admin-root .admin-side-edge + .admin-body { grid-column: 2; grid-row: 1; }
-  .admin-root .admin-side { grid-column: 1; grid-row: 1; }
+  .admin-root .admin-side { position: sticky; top: 0; z-index: 40; grid-column: 1; grid-row: 1; display: flex; flex-direction: column; gap: var(--space-3); height: 100vh; height: 100dvh; padding: 1.25rem 0.85rem 1rem; background: var(--color-brown); color: var(--color-beige); }
+  /* Le corps du back-office occupe la colonne de droite (sans bord festonné : retiré le 25 novembre). */
+  .admin-root .admin-body { grid-column: 2; grid-row: 1; }
 
-  .admin-root .admin-side .admin-brand { display: grid; gap: 0.1rem; justify-items: start; padding: 0 0.5rem; }
-  .admin-root .admin-side .admin-brand img { height: 3.6rem; }
-  .admin-root .admin-side-tag { margin-top: 0.3rem; font-family: var(--font-brand); font-size: 1.75rem; line-height: 1; color: var(--color-peach); }
+  .admin-root .admin-side-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-2); }
+  .admin-root .admin-side .admin-brand { display: grid; gap: 0.1rem; justify-items: start; min-width: 0; padding: 0 0.35rem; }
+  .admin-root .admin-side .admin-brand-full { display: block; width: auto; height: 3.1rem; }
+  .admin-root .admin-side .admin-brand-mark { display: none; width: 2.5rem; height: 2.5rem; padding: 0.2rem; border-radius: 0.75rem; background: var(--color-beige); object-fit: contain; }
+  .admin-root .admin-side-tag { margin-top: 0.15rem; font-family: var(--font-brand); font-size: 1.6rem; line-height: 1; color: var(--color-peach); }
+  .admin-root .admin-side-toggle { display: inline-grid; flex: none; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0; border: 0; border-radius: 0.7rem; background: transparent; color: var(--color-beige); cursor: pointer; }
+  .admin-root .admin-side-toggle:hover { background: rgb(248 238 220 / 0.14); }
 
-  .admin-root .admin-nav-side ul { display: grid; gap: 0.25rem; }
-  .admin-root .admin-nav-side a { display: flex; align-items: center; gap: 0.85rem; min-height: 3rem; padding: 0 0.9rem; border-radius: 0.85rem; color: var(--color-beige); font-size: 1rem; font-weight: 700; transition: background-color 0.15s ease; }
+  .admin-root .admin-side-scroll { flex: 1 1 auto; min-height: 0; margin-inline: -0.35rem; padding-inline: 0.35rem; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgb(248 238 220 / 0.3) transparent; }
+  .admin-root .admin-nav-side ul { display: grid; gap: 0.15rem; }
+  .admin-root .admin-nav-group { padding: 1.1rem 0.9rem 0.35rem; color: var(--color-peach); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+  .admin-root .admin-nav-side li:first-child .admin-nav-group { padding-top: 0.35rem; }
+  .admin-root .admin-nav-side a { display: flex; align-items: center; gap: 0.85rem; min-height: 2.9rem; padding: 0 0.9rem; border-radius: 0.85rem; color: var(--color-beige); font-size: 1rem; font-weight: 700; transition: background-color 0.15s ease; }
   .admin-root .admin-nav-side a:hover { background: rgb(248 238 220 / 0.14); }
   .admin-root .admin-nav-side a[aria-current='page'] { background: var(--color-beige); color: var(--color-brown); }
   .admin-root .admin-nav-side a[aria-current='page'] .admin-nav-icon { color: var(--color-terracotta); }
 
-  .admin-root .admin-side-foot { margin-top: auto; padding-top: var(--space-4); border-top: 1.5px dashed rgb(248 238 220 / 0.35); }
-  .admin-root .admin-side .admin-account-links a { padding: 0 0.6rem; color: var(--color-beige); font-size: 0.9375rem; }
-  .admin-root .admin-side .admin-account-links a:hover { background: rgb(248 238 220 / 0.14); }
-  .admin-root .admin-side .btn-quiet { border-color: var(--color-beige); color: var(--color-beige); }
-  .admin-root .admin-side .btn-quiet:hover { background: var(--color-beige); color: var(--color-brown); }
+  /* Compte en bas : une ligne (pastille, nom, rôle) qui ouvre un menu au-dessus d'elle */
+  .admin-root .admin-side-foot { position: relative; flex: none; padding-top: var(--space-3); border-top: 1.5px dashed rgb(248 238 220 / 0.35); }
+  .admin-root .admin-acct-trigger { display: flex; align-items: center; gap: 0.7rem; width: 100%; min-height: 3.25rem; padding: 0.4rem 0.5rem; border: 0; border-radius: 0.85rem; background: transparent; color: var(--color-beige); font: inherit; text-align: left; cursor: pointer; }
+  .admin-root .admin-acct-trigger:hover, .admin-root .admin-acct-trigger[aria-expanded='true'] { background: rgb(248 238 220 / 0.14); }
+  .admin-root .admin-acct-avatar { display: inline-grid; flex: none; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--color-beige); color: var(--color-brown); font-weight: 800; text-transform: uppercase; }
+  .admin-root .admin-acct-copy { display: grid; flex: 1 1 auto; min-width: 0; line-height: 1.2; }
+  .admin-root .admin-acct-copy strong { overflow: hidden; font-size: 0.9375rem; text-overflow: ellipsis; white-space: nowrap; }
+  .admin-root .admin-acct-copy small { font-size: 0.78rem; opacity: 0.8; }
+  .admin-root .admin-acct-chevron { flex: none; transition: transform 0.15s ease; }
+  .admin-root .admin-acct-trigger[aria-expanded='true'] .admin-acct-chevron { transform: rotate(180deg); }
+  .admin-root .admin-acct-pop { position: absolute; z-index: 60; left: 0; right: 0; bottom: calc(100% + 0.5rem); display: none; padding: 1rem 1.1rem 1.1rem; border: 1px solid var(--a-line); border-radius: 1.1rem; background: var(--color-beige); color: var(--color-brown); box-shadow: 0 1.25rem 2.5rem -0.75rem rgb(74 34 16 / 0.55); }
+  .admin-root .admin-acct-pop[data-open='true'] { display: block; }
+  .admin-root .admin-acct-pop .admin-account-links a { padding: 0 0.6rem; color: var(--color-brown); font-size: 0.9375rem; }
+  .admin-root .admin-acct-pop .admin-account-links a:hover { background: rgb(127 63 32 / 0.1); }
+
+  /* Rail : icônes seules, le logo devient la pastille de la marque, le menu du compte s'ouvre vers la droite */
+  .admin-root .admin-app.is-rail .admin-side { padding-inline: 0.65rem; }
+  .admin-root .admin-app.is-rail .admin-side-head { flex-direction: column; align-items: center; gap: var(--space-2); }
+  .admin-root .admin-app.is-rail .admin-side .admin-brand { padding: 0; justify-items: center; }
+  .admin-root .admin-app.is-rail .admin-brand-full, .admin-root .admin-app.is-rail .admin-side-tag { display: none; }
+  .admin-root .admin-app.is-rail .admin-side .admin-brand-mark { display: block; }
+  .admin-root .admin-app.is-rail .admin-nav-group { height: 1px; margin: 0.65rem 0.6rem; padding: 0; overflow: hidden; background: rgb(248 238 220 / 0.28); font-size: 0; }
+  .admin-root .admin-app.is-rail .admin-nav-side li:first-child .admin-nav-group { display: none; }
+  .admin-root .admin-app.is-rail .admin-nav-side a { justify-content: center; padding: 0; }
+  .admin-root .admin-app.is-rail .admin-nav-side a span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .admin-root .admin-app.is-rail .admin-acct-trigger { justify-content: center; padding: 0.4rem 0; }
+  .admin-root .admin-app.is-rail .admin-acct-copy, .admin-root .admin-app.is-rail .admin-acct-chevron { display: none; }
+  .admin-root .admin-app.is-rail .admin-acct-pop { left: calc(100% + 1rem); right: auto; bottom: 0; width: 16.5rem; }
 }
-@media (max-width: 63.999rem) { .admin-root .admin-side-edge { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .admin-root .admin-app { transition: none; }
+}
 
 /* ============================ Rideau du compte (téléphone) : même mécanisme que le menu de la vitrine ============================ */
 .admin-root .admin-sheet { --sheet-w: min(22rem, calc(100% - 1.5rem)); width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; overflow: hidden; color: var(--color-brown); }
@@ -438,3 +491,43 @@
 .admin-root .journey { display: grid; gap: var(--space-2); padding-left: var(--space-5); }
 .admin-root .journey li { display: grid; gap: var(--space-1); }
 .admin-root .utm-link { overflow-wrap: anywhere; }
+
+/* ============================ Courbes des indicateurs (Recharts) ============================ */
+.admin-root .stat-grid + .chart-card { margin-top: calc(var(--space-3) - var(--space-8)); margin-bottom: var(--space-8); }
+/* Plus spécifique que « .admin-content > main > .card » (cartes de formulaire limitées à 40 rem) : la courbe prend toute la largeur. */
+.admin-root .admin-content > main > .chart-card { max-width: none; }
+.admin-root .stat-btn { width: 100%; padding: 1rem 1.1rem; font: inherit; color: inherit; text-align: left; cursor: pointer; transition: transform 0.15s ease, border-color 0.15s ease; }
+.admin-root .stat-btn > span, .admin-root .stat-btn > strong { display: block; }
+.admin-root .stat-btn:hover { transform: translateY(-2px); border-color: var(--color-brown); }
+.admin-root .stat-btn.is-selected { border: 2px solid var(--color-brown); padding: calc(1rem - 1px) calc(1.1rem - 1px); }
+.admin-root .stat-cue { position: relative; align-self: end; margin-top: 0.15rem; font-size: 0.75rem; font-weight: 700; color: var(--a-muted); }
+.admin-root .stat-btn.is-selected .stat-cue { color: var(--color-terracotta); }
+.admin-root .stat-btn:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 2px; }
+.admin-root .chart-card { padding-bottom: clamp(0.75rem, 2vw, 1.25rem); }
+.admin-root .chart-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); margin-bottom: var(--space-3); }
+.admin-root .chart-head h2 { margin: 0; font-size: 1.125rem; }
+.admin-root .range-toggle { display: inline-flex; gap: 0.25rem; padding: 0.2rem; border: 1.5px solid var(--a-line-strong); border-radius: 999px; background: var(--color-beige); }
+.admin-root .range-toggle button { min-width: 3.25rem; min-height: 2.5rem; padding: 0 0.9rem; border: 0; border-radius: 999px; background: transparent; color: var(--color-brown); font: inherit; font-size: 0.9375rem; font-weight: 700; cursor: pointer; }
+.admin-root .range-toggle button[aria-pressed='true'] { background: var(--color-brown); color: var(--color-beige); }
+.admin-root .chart { margin: 0; }
+.admin-root .chart-box { width: 100%; min-width: 0; }
+.admin-root .chart-box .recharts-wrapper, .admin-root .chart-box svg { max-width: 100%; }
+.admin-root .chart-tip { padding: 0.5rem 0.75rem; border: 1px solid var(--a-line-strong); border-radius: 0.75rem; background: var(--a-surface); box-shadow: var(--a-shadow); color: var(--color-brown); font-size: 0.875rem; }
+.admin-root .chart-tip p { margin: 0; }
+.admin-root .chart-tip p:first-child { color: var(--a-muted); font-size: 0.8125rem; }
+
+/* « Rien à traiter » : pastille orange avec une coche */
+.admin-root .empty-state--done::before { background: var(--color-orange) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F8EEDC' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5.5 12.5 4.2 4.2 8.8-9.4'/%3E%3C/svg%3E") center / 62% no-repeat; }
+
+/* ============================ Paramètres de la boutique, emails d'une commande ============================ */
+.admin-root .settings-form { display: grid; gap: var(--space-6); max-width: 46rem; }
+.admin-root .settings-group { display: grid; gap: var(--space-3); }
+.admin-root .settings-group h2 { margin: 0; }
+.admin-root .settings-group > .help-text { margin: 0; }
+.admin-root .settings-grid { display: grid; gap: var(--space-3); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 40rem) { .admin-root .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-4); } }
+.admin-root .email-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.admin-root .email-row { display: grid; gap: 0.35rem; padding-top: var(--space-3); border-top: 1px solid var(--a-line); }
+.admin-root .email-row:first-child { padding-top: 0; border-top: 0; }
+.admin-root .email-row-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.admin-root .email-row .help-text { margin: 0; overflow-wrap: anywhere; }

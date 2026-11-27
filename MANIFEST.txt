@@ -1,41 +1,13 @@
-base: boutique-complet.zip (vitrine photo des six soins)
-archive: boutique-landing-maj.zip
+livraison: boutique-complet-merge.zip — projet complet du 26 novembre 2026
+fusion de: boutique-landing-maj.zip, boutique-landing-maj3.zip, boutique-retouches-25nov.zip, boutique-5-update.zip
+          + catalogue Meëra Kinks (dossier produit v1.1) : boutique en trois groupes, fiches avec prix, seed
+base: boutique-complet.zip
 
-[included]
-RAPPORT_MODIFICATIONS.md
-config/security-headers.mjs
-docs/VITRINE-PHOTOS.md
-next.config.mjs
-public/models/fluffy-kinks-jar.glb
-public/stage/hero2.webp
-src/app/(boutique)/categorie/[slug]/page.tsx
-src/app/(boutique)/categories/page.tsx
-src/app/(boutique)/layout.tsx
-src/app/(boutique)/page.tsx
-src/app/(boutique)/produit/[slug]/page.tsx
-src/app/sitemap.ts
-src/components/shop/LandingSections.tsx
-src/components/shop/ShopCatalog.tsx
-src/content/landing.ts
-src/lib/constants/routes.ts
-src/lib/shop/search.ts
-src/lib/stage/config.ts
-src/lib/stage/engine.ts
-src/server/services/catalog-cache.ts
-src/styles/showcase.css
-src/styles/stage.css
-src/styles/titles.css
-src/styles/ui.css
-tests/unit/csp.test.ts
-tests/unit/routes-weight-color.test.ts
-tests/unit/seo-indexation.test.ts
-tests/unit/shop-catalog.test.tsx
-tests/unit/shop-render.test.tsx
-tests/unit/spaghetti-render.test.tsx
-
-[deleted_not_packaged]
-src/app/(boutique)/boutique/page.tsx   (la boutique est dans la landing ; /boutique redirige vers /#boutique)
-public/models/elixir-winter-50ml.glb   (remplacé par public/models/fluffy-kinks-jar.glb)
+[contenu]
+Projet complet, prêt à remplacer le dossier du projet. Exclus par sécurité : node_modules, .next, .git, .env et tout fichier .env.* (sauf .env.example).
 
 [after_unzip]
-supprimer les 2 fichiers ci-dessus, puis : npm run typecheck && npm test && npm run build
+npm ci
+npm run typecheck && npm test && npm run build
+Lire docs/CATALOGUE-PRODUITS.md (prix, règles d'affichage, seed, passage à la base) et RAPPORT_MODIFICATIONS.md §25 (fusions).
+Résultat attendu aujourd'hui : typecheck propre ; 38 tests en échec déjà présents avant (orders.service 34, cookie-ui 2, customer-data.service 1, orders-admin.service 1).

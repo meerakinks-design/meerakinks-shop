@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { cld } from '@/lib/cloudinary-static';
 import { MODAL_HASHES, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import type { SocialLink } from '@/lib/shop/socials';
 import { useCart } from './CartProvider';
@@ -18,7 +19,7 @@ interface MenuModalProps {
 
 /**
  * Menu en modal : même mécanisme que le panier, la commande et la confirmation (CurtainModal) : deux rideaux de
- * couleur glissent depuis la droite, puis le panneau beige ; les liens montent un à un. Le panneau reste collé à droite
+ * couleur glissent depuis la droite, puis le panneau beige ; le logo de la marque est à gauche de l'en-tête, les liens montent un à un. Le panneau reste collé à droite
  * sur ordinateur, et occupe tout l'écran sur téléphone. Au pied du menu : les icônes WhatsApp, Instagram, TikTok et Facebook.
  */
 export function MenuModal({ storeName, showCollections, showContact, socials }: MenuModalProps) {
@@ -28,7 +29,7 @@ export function MenuModal({ storeName, showCollections, showContact, socials }: 
   const linkProps = { onClick: close };
 
   return (
-    <CurtainModal hash={MODAL_HASHES.menu} title={storeName} brandTitle ariaLabel="Menu" closeLabel="Fermer le menu" className="menu-dialog">
+    <CurtainModal hash={MODAL_HASHES.menu} title={storeName} logoSrc={cld('/brand/logo-meera-kinks.png', { width: 400 })} logoLabel={storeName} ariaLabel="Menu" closeLabel="Fermer le menu" className="menu-dialog">
       <nav aria-label="Menu principal">
         <ul className="menu-list">
           <li className="menu-item-wrap">

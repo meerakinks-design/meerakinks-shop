@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
 /**
  * Navigation du back-office. Deux présentations du même menu (la feuille de style en affiche une seule selon l'écran) :
- * - « side » : menu latéral marron, ordinateur ;
- * - « tabs » : barre flottante en bas, téléphone et tablette.
+ * - « side » : barre latérale (ordinateur, ≥ 900 px), entrées regroupées sous de petits titres, repliable en rail d'icônes ;
+ * - « tabs » : barre flottante en bas (téléphone et tablette) : une seule rangée, icônes seules sur petit écran.
  */
 type Variant = 'side' | 'tabs';
 
@@ -68,6 +68,12 @@ const ICONS: Record<string, ReactNode> = {
       <path d="M21 20H3" />
     </svg>
   ),
+  settings: (
+    <svg {...ICON_PROPS}>
+      <circle cx="12" cy="12" r="3.1" />
+      <path d="M12 3.2v2.1M12 18.7v2.1M3.2 12h2.1M18.7 12h2.1M5.8 5.8l1.5 1.5M16.7 16.7l1.5 1.5M18.2 5.8l-1.5 1.5M7.3 16.7l-1.5 1.5" />
+    </svg>
+  ),
   categories: (
     <svg {...ICON_PROPS}>
       <path d="m12 3.5 8.5 4.6-8.5 4.6-8.5-4.6L12 3.5Z" />
@@ -77,28 +83,38 @@ const ICONS: Record<string, ReactNode> = {
   ),
 };
 
+/** `group` : petit titre affiché au-dessus de la première entrée de chaque groupe dans la barre latérale. */
 const ITEMS = [
-  { href: '/admin', label: 'Tableau de bord', short: 'Accueil', exact: true, icon: 'dashboard', ownerOnly: false },
-  { href: '/admin/commandes', label: 'Commandes', short: 'Commandes', exact: false, icon: 'orders', ownerOnly: false },
-  { href: '/admin/clients', label: 'Clients', short: 'Clients', exact: false, icon: 'customers', ownerOnly: false },
-  { href: '/admin/produits', label: 'Produits', short: 'Produits', exact: false, icon: 'products', ownerOnly: false },
-  { href: '/admin/categories', label: 'Catégories', short: 'Catégories', exact: false, icon: 'categories', ownerOnly: false },
-  // Zones, frais et délais : réglages de la boutique, réservés à la propriétaire (comme les paramètres).
-  { href: '/admin/livraison', label: 'Livraison', short: 'Livraison', exact: false, icon: 'delivery', ownerOnly: true },
+  { href: '/admin', label: 'Tableau de bord', short: 'Accueil', exact: true, icon: 'dashboard', ownerOnly: false, group: 'Ventes' },
+  { href: '/admin/commandes', label: 'Commandes', short: 'Commandes', exact: false, icon: 'orders', ownerOnly: false, group: 'Ventes' },
+  { href: '/admin/clients', label: 'Clients', short: 'Clients', exact: false, icon: 'customers', ownerOnly: false, group: 'Ventes' },
+  { href: '/admin/produits', label: 'Produits', short: 'Produits', exact: false, icon: 'products', ownerOnly: false, group: 'Catalogue' },
+  { href: '/admin/categories', label: 'Catégories', short: 'Catégories', exact: false, icon: 'categories', ownerOnly: false, group: 'Catalogue' },
+  // Zones, frais, délais et paramètres : réglages de la boutique, réservés à la propriétaire.
+  { href: '/admin/livraison', label: 'Livraison', short: 'Livraison', exact: false, icon: 'delivery', ownerOnly: true, group: 'Boutique' },
+  { href: '/admin/parametres', label: 'Paramètres', short: 'Réglages', exact: false, icon: 'settings', ownerOnly: true, group: 'Boutique' },
   // Statistiques de visites : réservées à la propriétaire (cahier §7.6).
-  { href: '/admin/analytics', label: 'Analytics', short: 'Stats', exact: false, icon: 'analytics', ownerOnly: true },
+  { href: '/admin/analytics', label: 'Analytics', short: 'Stats', exact: false, icon: 'analytics', ownerOnly: true, group: 'Boutique' },
 ] as const;
 
 export function AdminNav({ variant = 'side', isOwner = false }: { variant?: Variant; isOwner?: boolean }) {
   const pathname = usePathname();
+  const items = ITEMS.filter((item) => isOwner || !item.ownerOnly);
   return (
     <nav aria-label="Navigation du back-office" className={`admin-nav admin-nav-${variant}`}>
-      <ul>
-        {ITEMS.filter((item) => isOwner || !item.ownerOnly).map((item) => {
+      <ul style={variant === 'tabs' ? ({ '--tabs-count': items.length } as CSSProperties) : undefined}>
+        {items.map((item, index) => {
           const isCurrent = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+          const startsGroup = variant === 'side' && items[index - 1]?.group !== item.group;
           return (
             <li key={item.href}>
-              <Link href={item.href} aria-current={isCurrent ? 'page' : undefined}>
+              {startsGroup && (
+                <span className="admin-nav-group" aria-hidden="true">
+                  {item.group}
+                </span>
+              )}
+              {/* Sur petit écran la barre du bas n'affiche que les icônes : le nom complet reste lu et visible au survol. */}
+              <Link href={item.href} aria-current={isCurrent ? 'page' : undefined} aria-label={item.label} title={item.label}>
                 {ICONS[item.icon]}
                 <span>{variant === 'tabs' ? item.short : item.label}</span>
               </Link>

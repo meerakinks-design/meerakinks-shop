@@ -1,3 +1,5 @@
+> **Obsolète** : la scène 3D scroll (pot et spray GLB) a été retirée (voir `RAPPORT_MODIFICATIONS.md` §23). Ce document est conservé pour mémoire.
+
 # Fusion : scène scroll 3D + marges + v0.11
 
 Base : `boutique_complete_v2` (votre version). La v0.11 a été construite sur une base plus ancienne (anciens modals, `firstName/lastName`,

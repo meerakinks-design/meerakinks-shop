@@ -4,7 +4,7 @@ import { HttpError } from '@/server/http';
 // Le service tourne ici contre une base SIMULÉE (aucun PostgreSQL requis) : on vérifie la logique — transitions
 // permises, retour du stock, recalcul du statut de paiement, garde contre les modifications simultanées, journal.
 // Le comportement réel de PostgreSQL se vérifie avec la liste « à tester à la main » du README.
-const { tx, prismaMock, sendOrderEmailsNow } = vi.hoisted(() => {
+const { tx, prismaMock, sendOrderEmailsNow, requeueEmail } = vi.hoisted(() => {
   const tx = {
     order: { findUnique: vi.fn(), updateMany: vi.fn() },
     orderItem: { findMany: vi.fn() },
@@ -21,11 +21,13 @@ const { tx, prismaMock, sendOrderEmailsNow } = vi.hoisted(() => {
     order: { count: vi.fn(), findMany: vi.fn(), updateMany: vi.fn(), findUnique: vi.fn() },
     payment: { findMany: vi.fn() },
     customer: { count: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
+    emailNotification: { findFirst: vi.fn() },
+    adminAuditLog: { create: vi.fn() },
   };
-  return { tx, prismaMock, sendOrderEmailsNow: vi.fn() };
+  return { tx, prismaMock, sendOrderEmailsNow: vi.fn(), requeueEmail: vi.fn() };
 });
 vi.mock('@/server/db', () => ({ prisma: prismaMock }));
-vi.mock('@/server/services/notifications.service', () => ({ sendOrderEmailsNow }));
+vi.mock('@/server/services/notifications.service', () => ({ sendOrderEmailsNow, requeueEmail }));
 vi.mock('@/server/logger', () => ({ logInfo: vi.fn(), logError: vi.fn() }));
 
 const service = await import('@/server/services/orders-admin.service');
@@ -378,5 +380,80 @@ describe('getAdminDashboard', () => {
     expect(dashboard.truncated).toBe(false);
     // Le « jour » commence à minuit UTC : Abidjan est à UTC+0.
     expect(prismaMock.order.count).toHaveBeenCalledWith({ where: { createdAt: { gte: new Date('2026-11-22T00:00:00Z') } } });
+  });
+});
+
+describe('getAdminDashboard : courbes des indicateurs', () => {
+  const NOW = new Date('2026-11-22T15:00:00Z');
+
+  it('lit les paiements depuis le plus ancien du début de mois et du début des 30 jours, puis dessine les trois séries', async () => {
+    prismaMock.order.findMany.mockResolvedValue([
+      { id: 'o1', reference: 'CMD-AAAAAAAA', createdAt: new Date('2026-11-21T10:00:00Z'), deliveryStatus: 'PENDING', paymentStatus: 'DEPOSIT_DUE', total: 17000, customer: { fullName: 'Awa Koné' }, payments: [] },
+    ]);
+    prismaMock.order.count.mockResolvedValue(1);
+    prismaMock.payment.findMany.mockResolvedValue([
+      { kind: 'DEPOSIT', amount: 2000, voidedAt: null, receivedAt: new Date('2026-11-22T09:00:00Z') },
+      { kind: 'FULL', amount: 5000, voidedAt: null, receivedAt: new Date('2026-11-10T09:00:00Z') },
+      { kind: 'FULL', amount: 4000, voidedAt: null, receivedAt: new Date('2026-10-30T09:00:00Z') },
+    ]);
+
+    const { series, collectedMonth, collectedToday } = await service.getAdminDashboard(NOW);
+
+    // 30 jours glissants : le 24 octobre est avant le 1er novembre, c'est lui qui borne la lecture des paiements.
+    expect(prismaMock.payment.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { voidedAt: null, receivedAt: { gte: new Date('2026-10-24T00:00:00Z') } } }));
+    // Les chiffres des tuiles ne changent pas : le paiement du 30 octobre n'entre pas dans « ce mois-ci ».
+    expect(collectedToday).toBe(2000);
+    expect(collectedMonth).toBe(7000);
+
+    expect(series.orders).toHaveLength(30);
+    expect(series.orders.find((point) => point.day === '2026-11-21')?.value).toBe(1);
+    expect(series.collected).toHaveLength(30);
+    expect(series.collected.find((point) => point.day === '2026-10-30')?.value).toBe(4000);
+    expect(series.collected.find((point) => point.day === '2026-11-22')?.value).toBe(2000);
+    // Cumul du mois : tous les jours de novembre, la courbe s'arrête à aujourd'hui.
+    expect(series.monthCollected).toHaveLength(30);
+    expect(series.monthCollected.find((point) => point.day === '2026-11-22')?.value).toBe(7000);
+    expect(series.monthCollected.find((point) => point.day === '2026-11-23')?.value).toBeNull();
+  });
+});
+
+describe('resendOrderEmail (bouton « Renvoyer »)', () => {
+  const failed = (overrides: Record<string, unknown> = {}) => ({ id: 'mail_1', type: 'ORDER_RECEIVED_CUSTOMER', status: 'FAILED', order: { reference: 'CMD-7K3M9QXP' }, ...overrides });
+
+  beforeEach(() => {
+    prismaMock.emailNotification.findFirst.mockResolvedValue(failed());
+    prismaMock.adminAuditLog.create.mockResolvedValue({ id: 'a1' });
+    requeueEmail.mockResolvedValue(true);
+  });
+
+  it('relance un email abandonné, tente tout de suite l’envoi et journalise le geste', async () => {
+    await expect(service.resendOrderEmail({ orderId: 'ord_1', emailId: 'mail_1', admin: ADMIN })).resolves.toEqual({ queued: true });
+    expect(prismaMock.emailNotification.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'mail_1', orderId: 'ord_1' } }));
+    expect(requeueEmail).toHaveBeenCalledWith('mail_1');
+    expect(prismaMock.adminAuditLog.create).toHaveBeenCalledWith(expect.objectContaining({ data: expect.objectContaining({ action: 'EMAIL_REQUEUED', adminUserId: 'admin_1', details: { reference: 'CMD-7K3M9QXP', type: 'ORDER_RECEIVED_CUSTOMER' } }) }));
+    expect(sendOrderEmailsNow).toHaveBeenCalledWith('CMD-7K3M9QXP');
+  });
+
+  it('refuse un email qui n’est pas en échec : rien n’est relancé', async () => {
+    prismaMock.emailNotification.findFirst.mockResolvedValue(failed({ status: 'SENT' }));
+    const error = await rejection(service.resendOrderEmail({ orderId: 'ord_1', emailId: 'mail_1', admin: ADMIN }));
+    expect(error.status).toBe(409);
+    expect(requeueEmail).not.toHaveBeenCalled();
+    expect(sendOrderEmailsNow).not.toHaveBeenCalled();
+  });
+
+  it('404 si l’email n’appartient pas à cette commande', async () => {
+    prismaMock.emailNotification.findFirst.mockResolvedValue(null);
+    const error = await rejection(service.resendOrderEmail({ orderId: 'ord_1', emailId: 'mail_x', admin: ADMIN }));
+    expect(error.status).toBe(404);
+    expect(requeueEmail).not.toHaveBeenCalled();
+  });
+
+  it('409 à réessayer si l’email vient d’être relancé ailleurs', async () => {
+    requeueEmail.mockResolvedValue(false);
+    const error = await rejection(service.resendOrderEmail({ orderId: 'ord_1', emailId: 'mail_1', admin: ADMIN }));
+    expect(error.status).toBe(409);
+    expect(prismaMock.adminAuditLog.create).not.toHaveBeenCalled();
+    expect(sendOrderEmailsNow).not.toHaveBeenCalled();
   });
 });

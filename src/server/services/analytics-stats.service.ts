@@ -1,4 +1,5 @@
-import { average, buildFunnel, countByDay, dayKeys, periodStart, tally, type Counted, type FunnelStep } from '@/lib/analytics/aggregate';
+import { averagePerDay, distinctPerDay, countPerDay, type SeriesPoint } from '@/lib/admin-series';
+import { average, buildFunnel, dayKeys, periodStart, tally, type Counted, type FunnelStep } from '@/lib/analytics/aggregate';
 import { TARGET_LABELS, isTrackTarget } from '@/lib/analytics/events';
 import { formatGeo, sourceLabel } from '@/lib/analytics/classify';
 import { prisma } from '@/server/db';
@@ -32,7 +33,8 @@ export interface AnalyticsOverview {
   visits: number;
   pageViews: number;
   avgVisitSeconds: number | null;
-  perDay: { day: string; count: number }[];
+  /** Courbes des quatre indicateurs, un point par jour de la période. */
+  series: { visitors: SeriesPoint[]; visits: SeriesPoint[]; pageViews: SeriesPoint[]; avgVisitSeconds: SeriesPoint[] };
   sources: Counted[];
   countries: Counted[];
   cities: Counted[];
@@ -55,10 +57,11 @@ export async function getAnalyticsOverview(days: number, now: Date = new Date(),
   const since = periodStart(now, days);
   const inPeriod = { gte: since };
 
-  const [visitEvents, sessions, pageViews, pageGroups, clickGroups, recent, ...funnelRows] = await Promise.all([
-    db.visitorEvent.findMany({ where: { type: 'visit_start', occurredAt: inPeriod }, select: { occurredAt: true, target: true, durationSeconds: true }, take: ROW_LIMIT }),
+  const [visitEvents, sessions, pageViews, pageViewDates, pageGroups, clickGroups, recent, ...funnelRows] = await Promise.all([
+    db.visitorEvent.findMany({ where: { type: 'visit_start', occurredAt: inPeriod }, select: { sessionId: true, occurredAt: true, target: true, durationSeconds: true }, take: ROW_LIMIT }),
     db.visitorSession.findMany({ where: { lastSeenAt: inPeriod }, select: { firstSeenAt: true, country: true, region: true, city: true, device: true, browser: true }, take: ROW_LIMIT }),
     db.visitorEvent.count({ where: { type: 'page_view', occurredAt: inPeriod } }),
+    db.visitorEvent.findMany({ where: { type: 'page_view', occurredAt: inPeriod }, select: { occurredAt: true }, take: ROW_LIMIT }),
     db.visitorEvent.groupBy({ by: ['path'], where: { type: 'page_view', occurredAt: inPeriod }, _count: { _all: true }, orderBy: { _count: { path: 'desc' } }, take: 10 }),
     db.visitorEvent.groupBy({ by: ['target'], where: { type: 'click', occurredAt: inPeriod }, _count: { _all: true }, orderBy: { _count: { target: 'desc' } }, take: 12 }),
     db.visitorSession.findMany({
@@ -71,6 +74,7 @@ export async function getAnalyticsOverview(days: number, now: Date = new Date(),
 
   const newVisitors = sessions.filter((session) => session.firstSeenAt >= since).length;
   const durations = visitEvents.map((event) => event.durationSeconds ?? 0);
+  const keys = dayKeys(since, days);
 
   return {
     days,
@@ -81,7 +85,12 @@ export async function getAnalyticsOverview(days: number, now: Date = new Date(),
     visits: visitEvents.length,
     pageViews,
     avgVisitSeconds: average(durations),
-    perDay: countByDay(visitEvents.map((event) => event.occurredAt), dayKeys(since, days)),
+    series: {
+      visitors: distinctPerDay(visitEvents.map((event) => ({ at: event.occurredAt, id: event.sessionId })), keys),
+      visits: countPerDay(visitEvents.map((event) => event.occurredAt), keys),
+      pageViews: countPerDay(pageViewDates.map((event) => event.occurredAt), keys),
+      avgVisitSeconds: averagePerDay(visitEvents.map((event) => ({ at: event.occurredAt, value: event.durationSeconds ?? 0 })), keys),
+    },
     sources: tally(visitEvents.map((event) => (event.target ? sourceLabel(event.target) : null)), { fallback: 'Accès direct' }),
     countries: tally(sessions.map((session) => session.country), { fallback: 'Pays inconnu', limit: 10 }),
     cities: tally(sessions.map((session) => (session.city ? [session.city, session.country].filter(Boolean).join(', ') : null)), { fallback: 'Ville inconnue', limit: 10 }),

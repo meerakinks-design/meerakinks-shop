@@ -3,15 +3,19 @@ import Link from 'next/link';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { paymentReminder } from '@/content/livraison';
 import { PRODUCT_TEXT } from '@/content/product-page';
+import { CATALOGUE } from '@/content/catalogue';
+import { SHOWCASE_ENABLED } from '@/content/vitrine';
 import { SEO } from '@/content/seo';
 import { JsonLd } from '@/components/shop/JsonLd';
 import { ProductBadges } from '@/components/shop/ProductBadges';
 import { ProductGallery } from '@/components/shop/ProductGallery';
 import { ProductPurchase } from '@/components/shop/ProductPurchase';
 import { ShopGrid } from '@/components/shop/ShopGrid';
+import { ShowcaseProductView } from '@/components/shop/ShowcaseProductView';
 import Spaghetti from '@/components/shop/Spaghetti';
 import { categoryPath, productPath, PUBLIC_ROUTES } from '@/lib/constants/routes';
 import { formatFcfa } from '@/lib/money';
+import { findEntry, imagePath } from '@/lib/shop/catalogue';
 import { effectivePrice, hasPromotion, isOutOfStock } from '@/lib/shop/product-display';
 import { absoluteUrl, summarize } from '@/lib/shop/seo';
 import { formatWeight } from '@/lib/weight';
@@ -21,7 +25,8 @@ import { resolveProductSlug } from '@/server/services/slug-redirects.service';
 export const revalidate = 3600;
 export const dynamicParams = true;
 export function generateStaticParams() {
-  return [];
+  // Vitrine : les dix fiches (six soins, trois duos, gamme complète) sont prérendues ; sinon les fiches du catalogue se génèrent à la première visite.
+  return SHOWCASE_ENABLED ? CATALOGUE.map((entry) => ({ slug: entry.slug })) : [];
 }
 
 /** Un ancien slug redirige (308, permanent) vers le slug actuel ; brouillon, archivé ou inconnu : 404. */
@@ -35,6 +40,17 @@ async function loadProduct(slug: string) {
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  if (SHOWCASE_ENABLED) {
+    const entry = findEntry(params.slug);
+    if (!entry) return {};
+    const [first] = entry.images;
+    return {
+      title: entry.seoTitle,
+      description: entry.metaDescription,
+      alternates: { canonical: productPath(entry.slug) },
+      openGraph: { title: entry.seoTitle, images: [{ url: imagePath(first), alt: first.alt }] },
+    };
+  }
   const resolution = await resolveProductSlug(params.slug);
   if (resolution.kind !== 'found') return {};
   const product = await getProductPage(resolution.id);
@@ -50,6 +66,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
+  if (SHOWCASE_ENABLED) {
+    // Vitrine : la fiche vient de src/content/catalogue.ts (aucune lecture de la base) ; un autre identifiant n'existe pas.
+    const entry = findEntry(params.slug);
+    if (!entry) notFound();
+    return <ShowcaseProductView entry={entry} />;
+  }
   const product = await loadProduct(params.slug);
   const [settings, related] = await Promise.all([
     getPublicSettings(),

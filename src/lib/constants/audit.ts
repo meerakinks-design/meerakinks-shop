@@ -10,6 +10,8 @@ export const AUDIT_ACTIONS = [
   'ORDER_PAYMENT_RECORDED', // encaissement ou remboursement saisi (details : référence, type, mode, montant)
   'ORDER_PAYMENT_VOIDED', // paiement annulé pour erreur de saisie (details : référence, type, montant)
   'ORDER_FEE_SET', // frais de livraison fixés par la vendeuse (details : référence, frais, total)
+  'SETTINGS_UPDATED', // paramètres de la boutique modifiés (details : noms des champs changés, jamais leurs valeurs)
+  'EMAIL_REQUEUED', // email abandonné relancé depuis la fiche commande (details : référence, type)
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

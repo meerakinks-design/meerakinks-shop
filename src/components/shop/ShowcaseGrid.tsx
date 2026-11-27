@@ -1,24 +1,27 @@
-import { SHOWCASE_PRODUCTS, type ShowcaseProduct } from '@/content/vitrine';
+import type { ShowcaseCardData } from '@/lib/shop/catalogue';
 import { ShowcaseCard } from './ShowcaseCard';
 
 /** Nombre de dispositions différentes : la grille répète le même enchaînement tous les six soins (voir showcase.css). */
 export const SHOWCASE_SLOTS = 6;
 
 interface ShowcaseGridProps {
-  products?: readonly ShowcaseProduct[];
+  cards: readonly ShowcaseCardData[];
+  /** Nombre de premières photos chargées tout de suite (au-dessus de la ligne de flottaison). */
+  priorityCount?: number;
 }
 
 /**
- * Grille de la boutique, façon Hello Hello : deux colonnes sur téléphone avec des photos de tailles différentes, alignées
- * à gauche ou à droite et légèrement décalées en hauteur. La disposition dépend seulement de la place du soin dans la liste :
- * elle est identique à chaque chargement (aucune erreur d'hydratation).
+ * Grille d'un groupe, façon Hello Hello : deux colonnes sur téléphone avec des photos de tailles différentes, alignées
+ * à gauche ou à droite et légèrement décalées en hauteur. La disposition dépend seulement de la place de la carte dans le groupe :
+ * elle est identique à chaque chargement (aucune erreur d'hydratation). Un groupe d'une seule carte (la gamme complète) est
+ * présenté en grand, au centre.
  */
-export function ShowcaseGrid({ products = SHOWCASE_PRODUCTS }: ShowcaseGridProps) {
+export function ShowcaseGrid({ cards, priorityCount = 0 }: ShowcaseGridProps) {
   return (
-    <ul className="showcase-grid">
-      {products.map((product, index) => (
-        <li key={product.id} className="showcase-cell" data-slot={index % SHOWCASE_SLOTS}>
-          <ShowcaseCard product={product} slot={index % SHOWCASE_SLOTS} priority={index < 2} />
+    <ul className="showcase-grid" data-single={cards.length === 1 ? 'true' : 'false'}>
+      {cards.map((card, index) => (
+        <li key={card.slug} className="showcase-cell" data-slot={index % SHOWCASE_SLOTS}>
+          <ShowcaseCard card={card} slot={index % SHOWCASE_SLOTS} priority={index < priorityCount} />
         </li>
       ))}
     </ul>

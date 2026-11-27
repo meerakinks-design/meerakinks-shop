@@ -3,10 +3,9 @@ import { JsonLd } from '@/components/shop/JsonLd';
 import { CategorySections } from '@/components/shop/CategorySections';
 import { ShopCatalog } from '@/components/shop/ShopCatalog';
 import { ShopGrid } from '@/components/shop/ShopGrid';
-import { ShowcaseGrid } from '@/components/shop/ShowcaseGrid';
+import { ShowcaseGroups } from '@/components/shop/ShowcaseGroups';
 import Spaghetti from '@/components/shop/Spaghetti';
 import { Collections, Contact, Faq, FinalCta, Hero, Marquee, Why } from '@/components/shop/LandingSections';
-import { ScrollStage } from '@/components/shop/ScrollStage';
 import { LANDING } from '@/content/landing';
 import { SEO } from '@/content/seo';
 import { SHOWCASE_ENABLED } from '@/content/vitrine';
@@ -40,12 +39,12 @@ export default async function HomePage() {
           (l'ancienne page /boutique, déplacée ici : vitrine photo tant que SHOWCASE_ENABLED, sinon catalogue avec recherche, catégories,
           offres, tri) → collections par besoin → produits par catégorie → FAQ (la brume prend le relais) → contact (titre fixe à gauche,
           formulaire à droite) → CTA (la brume glisse sous sa carte). Avis et témoignages retirés pour l'instant. */}
-      <ScrollStage />
       <Hero showCollections={layout.mode === 'categories'} iconSrc={cld('/brand/favicon-icon.png')} />
       <Marquee />
       <Why storeName={settings.storeName} />
 
-      {/* Vitrine photo : les soins en grille asymétrique (réf. Hello Hello), sans prix pour l'instant. /boutique renvoie ici (#boutique). */}
+      {/* Vitrine photo : chaque soin, puis les duos, puis la gamme complète, en grille asymétrique (réf. Hello Hello). Pas de prix sur les cartes : ils sont sur
+          les fiches /produit/<id>. /boutique renvoie ici (#boutique). */}
       {SHOWCASE_ENABLED && (
         <section id="boutique" className="shop-section" aria-label={LANDING.shop.title}>
           <div className="container section">
@@ -53,7 +52,7 @@ export default async function HomePage() {
               <Spaghetti as="h2" ghost={LANDING.shop.titleGhost}>{LANDING.shop.title}</Spaghetti>
               <p className="lead">{LANDING.shop.text}</p>
             </div>
-            <ShowcaseGrid />
+            <ShowcaseGroups />
           </div>
         </section>
       )}

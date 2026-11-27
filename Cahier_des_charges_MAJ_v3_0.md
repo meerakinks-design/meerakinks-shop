@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Version** | 3.0 (remplace la v2.9) — état réel du code **boutique-3** : boutique-1 + variantes (v0.10) + **lot v0.11 (traitement des commandes)** + **refonte du 23 novembre** (modals « rideaux », pied de page, À propos, contact, nom complet), relu dans le code le 23 novembre 2026 |
+| **Version** | 3.0 + **mise à jour du 25 novembre 2026** (relue dans le code **boutique-4**, voir « État réel au 25 novembre » ci-dessous ; le reste du document date du 23 novembre) · base : 3.0 (remplace la v2.9) — état réel du code **boutique-3** : boutique-1 + variantes (v0.10) + **lot v0.11 (traitement des commandes)** + **refonte du 23 novembre** (modals « rideaux », pied de page, À propos, contact, nom complet), relu dans le code le 23 novembre 2026 |
 | **Date** | 23 novembre 2026 (v2.9 : 22 novembre ; v2.8 : 21 novembre ; v2.6 : 19 novembre) |
 | **Projet** | Boutique en ligne de la marque **Meëra Kinks** (soins capillaires pour cheveux crépus, d'après la charte v1.2 ; périmètre exact du catalogue à confirmer, question 29), commandes enregistrées sur le site, récapitulatif transmis à la vendeuse via WhatsApp, gestion depuis un back-office |
 | **Réalisation** | AKATech Studio (Aka), Abidjan |
@@ -15,6 +15,8 @@
 > **Ce que ce document est.** C'est la référence du projet : ce qui est décidé, ce qui est déjà construit, les règles que le code doit respecter, et ce qui reste ouvert. Toute décision nouvelle s'ajoute au registre du §2 et au journal du §17.
 > **Ce qu'il n'est pas.** Un avis juridique ou fiscal. Les pages légales et la nature du reçu (§3, §14) doivent être validées par la cliente et, si besoin, par un professionnel.
 
+> **État réel au 25 novembre 2026 (relu dans le code de `boutique-4.zip` : le code fait foi, ce qui suit corrige les 🔶 plus bas).** ✅ **Déjà dans le code** alors que ce document les donne « à construire » : **écran Livraison** (zones, frais, délais indicatifs, textes ; `/admin/livraison` et `/api/v1/admin/delivery-*`, propriétaire), **analytique maison complète** (routes `/api/v1/track`, `/track/arrival`, `/track/forget`, traqueur `AnalyticsTracker`, bannière de consentement, écran `/admin/analytics`, alerte « Nouvelle visite » par la boîte d'envoi, effacement à 90 jours), **traînée de coupe, son et pots 3D du jeu** (`src/lib/smash/trail.ts`, `audio.ts`, `glb.ts`, `gl3d.ts` ; les fichiers GLB ne sont pas dans le zip). ✅ **Ajouté le 25 novembre** : **écran Paramètres** (`/admin/parametres`, propriétaire : nom, coordonnées, WhatsApp, email d'alerte, acompte, Wave, texte de paiement, réseaux ; journalisé), **bouton « Renvoyer »** sur la fiche commande (`POST /api/v1/admin/orders/[id]/emails/[emailId]/resend`, email abandonné seulement, journalisé), **courbes des indicateurs avec Recharts** (tableau de bord et Analytics), **barre latérale repliable sur ordinateur** (≥ 900 px, façon E-Carnet) et **en-tête du back-office identique à celui de la landing**. **L'analytique maison est ACTIVE par défaut** (seule la valeur `NEXT_PUBLIC_HOME_ANALYTICS_ENABLED=0` la coupe). 🔶 **Reste vraiment à faire** : essai sur une vraie base (Neon), vrai Resend, `npm install` + `typecheck` + `npm test` + `build` (jamais relancés ici : pas de réseau), assistant IA, carte des visiteurs (Leaflet), fichiers vectoriels et image de partage, textes à valider par la cliente. **Décision à prendre** : un compte « Équipe » ne voit ni Livraison, ni Paramètres, ni Analytics (propriétaire seulement).
+>
 > **Nouveautés de la v3.0 (23 novembre 2026).** **1. Un seul mécanisme de modal** (D-36, §4.4) : menu, panier, commande et **confirmation** s'ouvrent **par la droite** (deux rideaux de couleur, puis le panneau, puis les liens qui montent un à un) ; sur téléphone, une bande du site reste visible à gauche. La confirmation de commande est un modal (`#confirmation`) ; la page `/commande/confirmation` reste pour un lien direct. **« Notre histoire » n'est plus un modal** : c'est la page **`/a-propos`** (D-38) ; une page minimale `/credits` s'ajoute. **2. Pied de page refait en trois parties** (D-37, §4.8, référence Skarlett) : logo, signature et icônes de contact · informations (légal, crédits, à propos) · navigation ; **mini-jeu pleine largeur, carré sur téléphone** ; **filigrane « MEËRA KINKS » écrit en texte** et crédit « Créé par AKATech Studio » avec logo au survol (logo fourni, lien `https://akatech.vercel.app/` confirmé). **3. Effet élastique** (D-39) : titres et surtitres de toutes les sections, **descriptions fixes**. **4. Formulaire de contact « intelligent »** relié à **Resend** (D-40, RM-62, §6.5). **5. Commande : champ « Nom complet » et case « J'ai vérifié les informations de ma commande »** (D-41, RM-60, RM-61) ; colonne `Customer.fullName` (migration `20261123000000_customer_full_name`, reprise des données, reçus anciens relus : RM-63). **6. Textes du document v1.0** appliqués à la landing, la FAQ (9 questions), le panier, la commande, les erreurs et le SEO (D-42). **7. Lot v0.11 fusionné** (traitement des commandes, paiements, clients, tableau « à traiter aujourd'hui », identifiants d'environnement : D-34, D-35) et adapté au nom complet. **Contrôles du 23 nov.** : rendu serveur des composants et captures Chromium (menu, panier, confirmation, footer, héros, contact) ; **une vingtaine de fichiers de tests lancés avec un exécuteur de remplacement, tous verts** ; la route de contact a été exercée avec un faux service ; **`npm test`, `tsc` et `next build` restent à lancer** (aucune dépendance installée dans l'environnement de travail), ainsi que les tests qui simulent Prisma ou des bibliothèques absentes (PDF, Excel).
 >
 > **Nouveautés de la v2.9 (22 novembre 2026).** **1. Variantes de produit livrées dans le code** (D-24, RM-43 à RM-46, étape 9 bis) : formulaire d'options du back-office, feuille de choix sur les cartes et la fiche, lignes « produit + option » dans le panier, le devis et la commande, prix « à partir de », données structurées par option ; `ProductVariant` et le libellé d'option facultatif sont dans le schéma (§9). **2. Habillage Meëra Kinks, pied de page avec le jeu et jeu au slash relus dans le code** : logos, polices et favicon sont là ; le moteur du jeu coupe les pots en deux moitiés (§4.6 à §4.8). **3. Sécurité, export Excel/CSV, consentement, conservation et SEO** (lot v0.8.1) sont présents (§10). **4. Toujours à construire : l'exploitation des commandes dans le back-office, l'écran Paramètres, les zones de livraison éditables, l'analytique maison, l'assistant IA et le déploiement** (§16 bis). **5. Les chiffres de tests de ce document viennent du dernier essai réel (818, avant la fusion des variantes) ; ils sont à relancer.**
@@ -610,11 +612,11 @@ Sur téléphone, listes en **cartes** plutôt qu'en tableaux : la vendeuse sera 
 | Produits | Liste (Tous · Publiés · Brouillons · Archivés), recherche par nom ou référence, création, modification, suppression, photos, **variantes** (D-24) | ✅ (variantes comprises) |
 | Catégories | Nom, description, couleur de section, ordre, archivage, suppression | ✅ |
 | Tableau de bord | **« À traiter aujourd'hui »** (commandes en attente, acomptes attendus, emails en échec, produits épuisés), nombre de commandes par statut, chiffre d'affaires (paiements enregistrés), dernières commandes, produits les plus commandés. Aujourd'hui : page d'accueil provisoire | ✅ code v0.11 · 🔶 essai sur une vraie base |
-| Commandes | Liste avec recherche (référence, téléphone, nom), filtres et tri ; détail : client, adresse, lignes figées, sous-total, frais, total, acompte attendu/reçu, reste à payer, statuts, notes internes, historique, paiements, reçu en PDF, bouton « Ouvrir WhatsApp », **bouton « Renvoyer » sur chaque email (P-46)**, **export Excel et CSV (D-25, P-55)** | ✅ code v0.11 (liste, filtres, détail, statuts, paiements, frais, note, annulation, reçu PDF, **export Excel et CSV**) · 🔶 bouton « Renvoyer » (P-46) · 🔶 essai sur une vraie base |
+| Commandes | Liste avec recherche (référence, téléphone, nom), filtres et tri ; détail : client, adresse, lignes figées, sous-total, frais, total, acompte attendu/reçu, reste à payer, statuts, notes internes, historique, paiements, reçu en PDF, bouton « Ouvrir WhatsApp », **bouton « Renvoyer » sur chaque email (P-46)**, **export Excel et CSV (D-25, P-55)** | ✅ code v0.11 (liste, filtres, détail, statuts, paiements, frais, note, annulation, reçu PDF, **export Excel et CSV**) · ✅ bouton « Renvoyer » (P-46, 25 nov.) · 🔶 essai sur une vraie base |
 | Clients | Nom, téléphone, email, historique des commandes, première et dernière commande ; accès restreint | ✅ code v0.11 (liste, fiche, historique) · 🔶 essai sur une vraie base |
-| Analytics | Voir §7.6 | 🔶 |
-| Livraison | Communes d'Abidjan, villes de l'intérieur, pays ; frais fixes ou « à confirmer » ; **délais indicatifs en heures, minimum et maximum (P-56)** | 🔶 (délais en base, ni écran ni affichage) |
-| Paramètres | Nom de la boutique, numéro WhatsApp de la vendeuse, email de notification, acompte, numéro Wave, informations du reçu | 🔶 |
+| Analytics | Voir §7.6 | ✅ code (volume, provenance, géographie, pages, clics, durée, parcours, **courbes Recharts**) · 🔶 essai sur une vraie base |
+| Livraison | Communes d'Abidjan, villes de l'intérieur, pays ; frais fixes ou « à confirmer » ; **délais indicatifs en heures, minimum et maximum (P-56)** | ✅ code (écran Livraison, délais affichés sur la vitrine) · 🔶 essai sur une vraie base |
+| Paramètres | Nom de la boutique, numéro WhatsApp de la vendeuse, email de notification, acompte, numéro Wave, informations du reçu, réseaux | ✅ code (25 nov. : `/admin/parametres`, propriétaire) · 🔶 essai sur une vraie base |
 
 ### 7.4 Fiche produit (back-office) ✅
 | Champ | Règle |
@@ -643,7 +645,7 @@ Chaque envoi est une ligne d'historique (type, destinataire, statut, tentatives,
 
 **Réalisé en v0.7** : la ligne d'envoi naît dans la transaction de la commande ; juste après, le serveur tente l'envoi (4 s au plus) ; le cron `GET /api/cron/send-emails` reprend les échecs (6 tentatives, puis abandon avec l'erreur lisible). Chaque ligne est réservée par une mise à jour conditionnelle : aucun double envoi concurrent. Sans clé Resend ni expéditeur valide, rien n'est envoyé ni modifié. L'écran des commandes affichera ces lignes et proposera « Renvoyer » (étape 10), par la route dédiée de P-46. L'email de changement de statut a son gabarit, pas encore son déclencheur.
 
-### 7.6 Analytique visiteurs (D-17, P-43, P-44) 🔶 étape 10
+### 7.6 Analytique visiteurs (D-17, P-43, P-44) ✅ code, active par défaut (25 nov.) · 🔶 essai sur une vraie base
 
 **Principe.** Savoir d'où viennent les visiteurs, ce qu'ils touchent et combien de temps ils restent, **sans stocker d'adresse IP** et **avec consentement**. Inspirée de l'analytique du site AKATech Studio (pays, ville, boutons, durée, carte, lien balisé), adaptée aux règles de ce cahier.
 
@@ -694,7 +696,7 @@ Chaque envoi est une ligne d'historique (type, destinataire, statut, tentatives,
 | Validation | zod | Tous les champs, côté serveur |
 | Tests | Vitest | 224 tests |
 | Animations | GSAP / ScrollTrigger / SplitText (effet « spaghetti », D-18 : **réalisé sans GSAP, en CSS pur, en v0.9**), Lenis, Framer Motion, Canvas 2D | Compléments (§4.5) |
-| Analytique | Tables Prisma + `POST /api/v1/track` ; **Recharts** (graphiques) ; **Leaflet** + OpenStreetMap (carte) ; **Vercel Web Analytics** (`@vercel/analytics`, D-22, P-57) | 🔶 étape 10 — nouvelles dépendances (D-17, D-22) |
+| Analytique | Tables Prisma + `POST /api/v1/track` ; **Recharts** (graphiques : ✅ ajouté le 25 nov., `recharts ^2.15` dans `package.json` ; **à installer avec `npm install`**) ; **Leaflet** + OpenStreetMap (carte) ; **Vercel Web Analytics** (`@vercel/analytics`, D-22, P-57) | 🔶 étape 10 — nouvelles dépendances (D-17, D-22) |
 | Export | CSV (aucune dépendance) et Excel (`exceljs` 🟡) | 🔶 étape 10 (D-25, P-55) |
 
 **Modules activés** : authentification admin, Resend, Cloudinary, Vercel Cron, anti-abus en base.
@@ -728,9 +730,10 @@ Format de réponse unique : `{ ok: true, data }` ou `{ ok: false, error: { code,
 | GET | `/api/v1/admin/orders/export` | admin (propriétaire) | ✅ (D-25, P-55) |
 | — | zones, paramètres, clients (admin) | admin | 🔶 |
 | GET | `/api/cron/send-emails` | secret `CRON_SECRET` (`Bearer`) ; fermée sans secret | ✅ v0.7 |
-| POST | `/api/v1/admin/notifications/[id]/resend` | admin | 🔶 (P-46, bouton « Renvoyer ») |
-| POST | `/api/v1/track/arrival` | public (limité, consentement exigé) | 🔶 (P-45, alerte « Nouvelle visite ») |
-| POST | `/api/v1/track` | public (limité, consentement exigé) | 🔶 (D-17) |
+| POST | `/api/v1/admin/orders/[id]/emails/[emailId]/resend` | admin | ✅ (P-46, bouton « Renvoyer », 25 nov.) |
+| PUT | `/api/v1/admin/settings` | propriétaire | ✅ (25 nov., écran Paramètres) |
+| POST | `/api/v1/track/arrival` | public (limité, consentement exigé) | ✅ (P-45, alerte « Nouvelle visite ») |
+| POST | `/api/v1/track` | public (limité, consentement exigé) | ✅ (D-17) |
 | GET | `/api/v1/admin/stats` · `/stats/visitor/[visitorId]` | admin (propriétaire) | 🔶 (D-17) |
 | POST | `/api/v1/assistant` (flux continu) · `/assistant/feedback` · `/assistant/end` | public (limité, interrupteur) | 🔶 (P-47, étape 15) |
 
@@ -800,7 +803,7 @@ model ProductVariant {
 // DeliveryZone  : + deliveryMinHours Int?  + deliveryMaxHours Int?   (P-56)
 ```
 
-### 9 bis. Tables d'analytique (étape 10) ✅ tables dans le schéma (`VisitorSession`, `VisitorEvent`) · 🔶 aucune route ni écran ne les utilise
+### 9 bis. Tables d'analytique (étape 10) ✅ tables dans le schéma (`VisitorSession`, `VisitorEvent`) · ✅ routes `/api/v1/track*` et écran `/admin/analytics` les utilisent (relu le 25 nov.)
 | Table | Champs essentiels |
 |---|---|
 | `Visitor` | Identifiant aléatoire (cookie du navigateur, **posé seulement après consentement**), première et dernière visite, nombre de visites |
@@ -1321,3 +1324,4 @@ Les réponses ci-dessus constituent le retour de la cliente. Elles ne remplacent
 5. **Réseaux sociaux — réponses F1 :** la cliente a fourni des noms de comptes, pas des URL complètes. Les liens directs Instagram, TikTok et Facebook restent à obtenir ou à vérifier.
 6. **Catalogue et contenus — réponses A1 à A6 et documents annoncés :** le catalogue annoncé comprend 180 produits et 6 catégories. Les variantes, promotions, photos, prix et descriptions devront être contrôlés à réception des fichiers ; les pourcentages de promotion ne sont pas encore disponibles.
 7. **Annulation — réponse B4 :** la cliente indique que l'acompte est retourné et que le produit revient en stock. Les modalités opérationnelles du remboursement et les conditions d'annulation restent à préciser avant de les automatiser.
+| **Code 0.12 (25 nov. 2026)** | Mise à jour de `boutique-4` : **écran Paramètres** (propriétaire, journalisé), **bouton « Renvoyer »** sur les emails abandonnés d'une commande, **courbes des indicateurs avec Recharts** (tableau de bord : commandes par jour, encaissé par jour, cumul du mois ; Analytics : visiteurs, visites, pages vues, durée), **barre latérale repliable** sur ordinateur (≥ 900 px) et barre du bas sur une seule rangée au téléphone, **en-tête du back-office identique à celui de la landing**, coche dans l'état « Rien à traiter », **analytique maison active par défaut**. Le cahier est relu dans le code (encart « État réel au 25 novembre ») |

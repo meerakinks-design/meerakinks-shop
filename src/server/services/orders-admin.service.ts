@@ -11,13 +11,15 @@ import { canTransitionDelivery, DELIVERY_STATUS_LABELS, type DeliveryStatusValue
 import type { OrderListQuery, DeliveryFeeInput, PaymentInput } from '@/lib/validation/order-admin.schema';
 import { formatFcfa } from '@/lib/money';
 import { PAYMENT_KIND_LABELS } from '@/lib/constants/payment';
+import { periodStart } from '@/lib/analytics/aggregate';
+import { DASHBOARD_SERIES_DAYS, collectedPerDay, lastDayKeys, monthCumulative, countPerDay, type SeriesPoint } from '@/lib/admin-series';
 import { computeTotal } from '@/lib/shop/order-amounts';
 import { checkNewPayment, collectedSince, derivePaymentStatus, groupOrdersByTodo, planStockRestoration, refundDue, type OrderTodo } from '@/lib/shop/order-admin';
 import { netPaid, type PaymentLine } from '@/lib/shop/payments';
 import { prisma } from '@/server/db';
 import { HttpError } from '@/server/http';
-import { auditEntry } from '@/server/services/audit.service';
-import { sendOrderEmailsNow } from '@/server/services/notifications.service';
+import { auditEntry, recordAudit } from '@/server/services/audit.service';
+import { requeueEmail, sendOrderEmailsNow } from '@/server/services/notifications.service';
 import { parseReceiptData } from '@/server/services/receipt.service';
 
 type Tx = Prisma.TransactionClient;
@@ -337,12 +339,27 @@ const DETAIL_SELECT = {
   },
   history: { select: { id: true, kind: true, previousValue: true, newValue: true, note: true, createdAt: true, changedBy: { select: { name: true } } }, orderBy: { createdAt: 'asc' } },
   receipt: { select: { number: true } },
+  emails: { select: { id: true, type: true, toEmail: true, status: true, attempts: true, lastError: true, sentAt: true, createdAt: true }, orderBy: { createdAt: 'asc' } },
 } satisfies Prisma.OrderSelect;
 
 export type AdminOrderDetail = Prisma.OrderGetPayload<{ select: typeof DETAIL_SELECT }>;
 
 export async function getAdminOrder(id: string): Promise<AdminOrderDetail | null> {
   return prisma.order.findUnique({ where: { id }, select: DETAIL_SELECT });
+}
+
+/**
+ * Bouton « Renvoyer » : relance un email ABANDONNÉ (6 tentatives échouées) de cette commande. La ligne repasse en attente, une
+ * tentative a lieu tout de suite (jamais bloquante) et le cron reprend le reste. Seul un email en échec peut être relancé.
+ */
+export async function resendOrderEmail(input: { orderId: string; emailId: string; admin: AdminActor }): Promise<{ queued: true }> {
+  const email = await prisma.emailNotification.findFirst({ where: { id: input.emailId, orderId: input.orderId }, select: { id: true, type: true, status: true, order: { select: { reference: true } } } });
+  if (!email?.order) throw new HttpError(404, 'NOT_FOUND', 'Cet email est introuvable.');
+  if (email.status !== 'FAILED') throw new HttpError(409, 'CONFLICT', 'Cet email n’est pas en échec : il n’y a rien à renvoyer.');
+  if (!(await requeueEmail(email.id))) throw new HttpError(409, 'CONFLICT', 'Cet email vient d’être relancé ailleurs. Recharge la page pour voir son état.', { retryable: true });
+  await recordAudit({ action: 'EMAIL_REQUEUED', adminUserId: input.admin.id, details: { reference: email.order.reference, type: email.type } });
+  await sendOrderEmailsNow(email.order.reference);
+  return { queued: true };
 }
 
 // ---------------------------------------------------------------------------
@@ -370,9 +387,13 @@ export interface AdminDashboard {
   collectedMonth: number;
   /** Au-delà de la limite lue, certaines commandes à traiter ne sont pas listées. */
   truncated: boolean;
+  /** Courbes des indicateurs : commandes reçues et encaissé par jour (30 derniers jours), cumul de l'encaissé du mois. */
+  series: { orders: SeriesPoint[]; collected: SeriesPoint[]; monthCollected: SeriesPoint[] };
 }
 
 const DASHBOARD_LIMIT = 300;
+/** Lignes lues au plus pour dessiner les courbes (une commande = une date : la lecture reste légère). */
+const SERIES_ROW_LIMIT = 20_000;
 
 /** Début du jour et du mois en UTC : Abidjan est à UTC+0, toute l'année. */
 const startOfUtcDay = (now: Date) => new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
@@ -382,7 +403,12 @@ export async function getAdminDashboard(now: Date = new Date()): Promise<AdminDa
   const dayStart = startOfUtcDay(now);
   const monthStart = startOfUtcMonth(now);
 
-  const [candidates, ordersToday, monthPayments] = await Promise.all([
+  const seriesKeys = lastDayKeys(now, DASHBOARD_SERIES_DAYS);
+  const seriesStart = periodStart(now, DASHBOARD_SERIES_DAYS);
+  // Les paiements servent au jour, au mois ET à la courbe des 30 jours : on lit depuis le plus ancien des deux débuts.
+  const paymentsFrom = seriesStart < monthStart ? seriesStart : monthStart;
+
+  const [candidates, ordersToday, recentPayments, recentOrders] = await Promise.all([
     prisma.order.findMany({
       where: {
         OR: [
@@ -397,7 +423,8 @@ export async function getAdminDashboard(now: Date = new Date()): Promise<AdminDa
       take: DASHBOARD_LIMIT + 1,
     }),
     prisma.order.count({ where: { createdAt: { gte: dayStart } } }),
-    prisma.payment.findMany({ where: { voidedAt: null, receivedAt: { gte: monthStart } }, select: { kind: true, amount: true, voidedAt: true, receivedAt: true } }),
+    prisma.payment.findMany({ where: { voidedAt: null, receivedAt: { gte: paymentsFrom } }, select: { kind: true, amount: true, voidedAt: true, receivedAt: true } }),
+    prisma.order.findMany({ where: { createdAt: { gte: seriesStart } }, select: { createdAt: true }, take: SERIES_ROW_LIMIT }),
   ]);
 
   const truncated = candidates.length > DASHBOARD_LIMIT;
@@ -418,9 +445,14 @@ export async function getAdminDashboard(now: Date = new Date()): Promise<AdminDa
     toProcess: new Set(groups.flatMap((group) => group.orders.map((order) => order.id))).size,
     groups,
     ordersToday,
-    collectedToday: collectedSince(monthPayments, dayStart),
-    collectedMonth: collectedSince(monthPayments, monthStart),
+    collectedToday: collectedSince(recentPayments, dayStart),
+    collectedMonth: collectedSince(recentPayments, monthStart),
     truncated,
+    series: {
+      orders: countPerDay(recentOrders.map((order) => order.createdAt), seriesKeys),
+      collected: collectedPerDay(recentPayments, seriesKeys),
+      monthCollected: monthCumulative(recentPayments, now),
+    },
   };
 }
 

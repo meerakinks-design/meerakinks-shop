@@ -204,7 +204,7 @@ describe('sections de la landing', () => {
     expect(html).toContain('Un besoin, une couleur.'); // phrase de réassurance, sous les boutons
     expect(html).toContain('class="hero-badge"');
     expect(html).toContain('src="/stage/hero2.webp"');
-    expect(html).toContain('data-stage-anchor="hero"'); // repère du pot Fluffy Kinks 3D (ScrollStage)
+    expect(html).not.toContain('data-stage-anchor'); // plus de scène 3D : l'affiche est une image fixe
     expect(html).not.toContain('hero-lead'); // aucune description sous le titre du héros
     expect(html).not.toContain('hero-main');
   });

@@ -11,7 +11,7 @@ export const LANDING = {
     titleMain: 'Vos kinks méritent le meilleur de',
     titleScript: 'votre routine.',
     badge: 'Embrassez vos kinks',
-    posterAlt: 'Une femme au volumineux afro sourit en tenant un pochon orange au-dessus de sa tête, avec Mousse Kinky, Slik et Velvet, trois soins Meëra Kinks.',
+    posterAlt: 'Une femme au volumineux afro sourit en tenant un pochon orange au-dessus de sa tête, avec Mousse Kinky et Fluffy Kinks, des soins Meëra Kinks, posés sur ses cheveux.',
     primaryCta: 'Découvrir les soins',
     secondaryCta: 'Trouver mon essentiel',
     reassurance: 'Un besoin, une couleur. Des soins à découvrir simplement.',
@@ -142,8 +142,6 @@ export const LANDING = {
     primaryCta: 'Explorer les soins',
     secondaryCta: 'Voir les nouveautés',
     photoAlt: 'Une femme tend le spray Brume Meëra Kinks devant son afro.',
-    checks: ['Des soins classés par besoin', 'Des informations claires sur chaque produit', 'Votre commande confirmée sur WhatsApp'],
-    note: 'Une question avant de commander ? Écrivez-nous juste au-dessus.',
   },
   smash: {
     // Textes validés (textes v1.0, §2.16).

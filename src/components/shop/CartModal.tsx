@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { cld } from '@/lib/cloudinary-static';
 import { PUBLIC_ROUTES, MODAL_HASHES, productPath } from '@/lib/constants/routes';
 import { CHECKOUT_ENABLED } from '@/lib/constants/features';
 import { cloudinaryThumbnail } from '@/lib/cloudinary-url';
@@ -18,13 +19,30 @@ const STATUS_NOTES: Partial<Record<QuoteLine['status'], string>> = {
   out_of_stock: 'Ce produit n’est pas disponible pour le moment.',
 };
 
-export function CartModal({ depositAmount }: { depositAmount: number }) {
+/** Corbeille (même trait que les autres icônes de la boutique) : retire la ligne du panier. */
+function TrashIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+      <path d="M4 7h16" />
+      <path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7" />
+      <path d="M6.5 7l.9 11.3A2 2 0 0 0 9.4 20h5.2a2 2 0 0 0 2-1.7L17.5 7" />
+      <path d="M10 11v5M14 11v5" />
+    </svg>
+  );
+}
+
+/**
+ * Panier (réf. Bucks Sauce) : logo à gauche et ✕ à droite ; chaque ligne = photo arrondie, nom en gras, quantité dans une boîte
+ * « − 1 + » et prix à droite, séparées par des pointillés ; une corbeille retire la ligne. Pied : livraison, sous-total, puis une barre
+ * sombre portant le grand bouton « Passer commande ».
+ */
+export function CartModal({ depositAmount, storeName }: { depositAmount: number; storeName?: string }) {
   const { cart, quote, quoteIsCurrent, quoteStatus, setQuantity, remove, retryQuote } = useCart();
   const { close } = useModal(MODAL_HASHES.cart);
   const isEmpty = cart.lines.length === 0;
 
   return (
-    <CurtainModal hash={MODAL_HASHES.cart} title="Votre panier" closeLabel="Fermer le panier" className="modal-cart">
+    <CurtainModal hash={MODAL_HASHES.cart} title="Votre panier" logoSrc={cld('/brand/logo-meera-kinks.png', { width: 400 })} logoLabel={storeName} closeLabel="Fermer le panier" className="modal-cart">
       {isEmpty ? (
         <div className="empty-state" data-rise="">
           <p>Votre panier attend ses premiers essentiels.</p>
@@ -64,13 +82,18 @@ export function CartModal({ depositAmount }: { depositAmount: number }) {
                       <span className="img-placeholder cart-thumb" aria-hidden="true" />
                     )}
                     <div className="cart-line-info">
-                      {line.slug ? (
-                        <Link href={productPath(line.slug)} onClick={close}>
-                          {line.name}
-                        </Link>
-                      ) : (
-                        <span className="cart-line-name">{line.name}</span>
-                      )}
+                      <div className="cart-line-head">
+                        {line.slug ? (
+                          <Link href={productPath(line.slug)} onClick={close}>
+                            {line.name}
+                          </Link>
+                        ) : (
+                          <span className="cart-line-name">{line.name}</span>
+                        )}
+                        <button type="button" className="cart-trash" onClick={() => remove(line.productId)} aria-label={`Retirer ${line.name} du panier`}>
+                          <TrashIcon />
+                        </button>
+                      </div>
                       {!unavailable && <span className="cart-line-meta">{formatFcfa(line.unitPrice)} l’unité</span>}
                       {note && (
                         <span className="field-error" role="status">
@@ -88,9 +111,6 @@ export function CartModal({ depositAmount }: { depositAmount: number }) {
                           </p>
                         )}
                       </div>
-                      <button type="button" className="link-button cart-remove" onClick={() => remove(line.productId)}>
-                        Retirer
-                      </button>
                     </div>
                   </li>
                 );
